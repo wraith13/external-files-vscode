@@ -1,0 +1,244 @@
+{
+    "name": "external-files-vscode",
+    "displayName": "Unsaved Files",
+    "description": "Easy access to external files for vscode.",
+    "icon": "images/unsavedhex.128.png",
+    "version": "2.1.4",
+    "publisher": "wraith13",
+    "license": "SEE LICENSE IN LICENSE_1_0.txt",
+    "engines": {
+        "vscode": "^1.61.0"
+    },
+    "bugs": {
+        "url": "https://github.com/wraith13/unsaved-files-vscode/issues"
+    },
+    "homepage": "https://github.com/wraith13/unsaved-files-vscode/blob/master/README.md",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/wraith13/unsaved-files-vscode.git"
+    },
+    "categories": [
+        "Other"
+    ],
+    "keywords": [
+        "external",
+        "untitled",
+        "files",
+        "documents"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./out/extension.js",
+    "browser": "./out/extension.js",
+    "contributes": {
+        "views": {
+            "explorer": [
+                {
+                    "id": "unsaved-files",
+                    "name": "%unsaved-files-vscode.title%",
+                    "when": "showUnsavedFilesViewOnexplorer"
+                }
+            ]
+        },
+        "menus": {
+            "view/item/context": [
+                {
+                    "command": "unsaved-files.revealFileInFinder",
+                    "when": "viewItem != untitled && isMac"
+                },
+                {
+                    "command": "unsaved-files.revealFileInExplorer",
+                    "when": "viewItem != untitled && !isMac && !isWeb"
+                },
+                {
+                    "command": "unsaved-files.copyFilePath",
+                    "when": "viewItem != untitled"
+                },
+                {
+                    "command": "unsaved-files.copyRelativeFilePath",
+                    "when": "viewItem != untitled"
+                },
+                {
+                    "command": "unsaved-files.compareFileWith"
+                },
+                {
+                    "command": "unsaved-files.compareWithClipboard"
+                },
+                {
+                    "command": "unsaved-files.compareWithSaved",
+                    "when": "viewItem != untitled"
+                },
+                {
+                    "command": "unsaved-files.showActiveFileInExplorer",
+                    "when": "viewItem != untitled"
+                }
+            ],
+            "commandPalette": [
+                {
+                    "command": "unsaved-files.revealFileInFinder",
+                    "when": "false"
+                },
+                {
+                    "command": "unsaved-files.revealFileInExplorer",
+                    "when": "false"
+                },
+                {
+                    "command": "unsaved-files.copyFilePath",
+                    "when": "false"
+                },
+                {
+                    "command": "unsaved-files.copyRelativeFilePath",
+                    "when": "false"
+                },
+                {
+                    "command": "unsaved-files.compareFileWith",
+                    "when": "false"
+                },
+                {
+                    "command": "unsaved-files.compareWithClipboard",
+                    "when": "false"
+                },
+                {
+                    "command": "unsaved-files.compareWithSaved",
+                    "when": "false"
+                },
+                {
+                    "command": "unsaved-files.showActiveFileInExplorer",
+                    "when": "false"
+                }
+            ]
+        },
+        "commands": [
+            {
+                "command": "unsaved-files.show",
+                "title": "%unsaved-files-vscode.show.title%",
+                "category": "%unsaved-files-vscode.title%"
+            },
+            {
+                "command": "unsaved-files.showNext",
+                "title": "%unsaved-files-vscode.showNext.title%",
+                "category": "%unsaved-files-vscode.title%"
+            },
+            {
+                "command": "unsaved-files.showPrevious",
+                "title": "%unsaved-files-vscode.showPrevious.title%",
+                "category": "%unsaved-files-vscode.title%"
+            },
+            {
+                "command": "unsaved-files.showView",
+                "title": "%unsaved-files-vscode.showView.title%",
+                "category": "%unsaved-files-vscode.title%"
+            },
+            {
+                "command": "unsaved-files.hideView",
+                "title": "%unsaved-files-vscode.hideView.title%",
+                "category": "%unsaved-files-vscode.title%"
+            },
+            {
+                "command": "unsaved-files.revealFileInFinder",
+                "title": "%unsaved-files-vscode.revealFileInFinder.title%",
+                "category": "file"
+            },
+            {
+                "command": "unsaved-files.revealFileInExplorer",
+                "title": "%unsaved-files-vscode.revealFileInExplorer.title%",
+                "category": "file"
+            },
+            {
+                "command": "unsaved-files.copyFilePath",
+                "title": "%unsaved-files-vscode.copyFilePath.title%",
+                "category": "file"
+            },
+            {
+                "command": "unsaved-files.copyRelativeFilePath",
+                "title": "%unsaved-files-vscode.copyRelativeFilePath.title%",
+                "category": "file"
+            },
+            {
+                "command": "unsaved-files.compareFileWith",
+                "title": "%unsaved-files-vscode.compareFileWith.title%",
+                "category": "file"
+            },
+            {
+                "command": "unsaved-files.compareWithClipboard",
+                "title": "%unsaved-files-vscode.compareWithClipboard.title%",
+                "category": "file"
+            },
+            {
+                "command": "unsaved-files.compareWithSaved",
+                "title": "%unsaved-files-vscode.compareWithSaved.title%",
+                "category": "file"
+            },
+            {
+                "command": "unsaved-files.showActiveFileInExplorer",
+                "title": "%unsaved-files-vscode.showActiveFileInExplorer.title%",
+                "category": "file"
+            }
+        ],
+        "configuration": [
+            {
+                "title": "%unsaved-files-vscode.title%",
+                "properties": {
+                    "unsaved-files.statusBar.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "%unsaved-files.statusBar.enabled.description%",
+                        "scope": "window"
+                    },
+                    "unsaved-files.statusBar.noUnsavedFilesStatusLabel": {
+                        "type": "string",
+                        "default": "$(check)",
+                        "description": "%unsaved-files.statusBar.noUnsavedFilesStatusLabel.description%",
+                        "scope": "window"
+                    },
+                    "unsaved-files.statusBar.anyUnsavedFilesStatusLabel": {
+                        "type": "string",
+                        "default": "$(primitive-dot)",
+                        "description": "%unsaved-files.statusBar.anyUnsavedFilesStatusLabel.description%",
+                        "scope": "window"
+                    },
+                    "unsaved-files.statusBar.label": {
+                        "type": "string",
+                        "default": "%unsaved-files.statusBar.label.default%",
+                        "description": "%unsaved-files.statusBar.label.description%",
+                        "scope": "window"
+                    },
+                    "unsaved-files.viewOnExplorer.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "%unsaved-files.viewOnExplorer.enabled.description%",
+                        "scope": "window"
+                    }
+                }
+            }
+        ]
+    },
+    "scripts": {
+        "pretest": "npm run compile-web",
+        "vscode:prepublish": "npm run package-web",
+        "compile-web": "webpack",
+        "watch-web": "webpack --watch",
+        "package-web": "webpack --mode production --devtool hidden-source-map",
+        "lint": "eslint src --ext ts",
+        "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
+    },
+    "dependencies": {
+        "@wraith13/vscel": "^0.0.52"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.61.0",
+        "@types/webpack-env": "^1.16.2",
+        "@typescript-eslint/eslint-plugin": "^4.31.1",
+        "@typescript-eslint/parser": "^4.31.1",
+        "@vscode/test-web": "^0.0.13",
+        "assert": "^2.0.0",
+        "eslint": "^7.32.0",
+        "glob": "^7.2.0",
+        "process": "^0.11.10",
+        "ts-loader": "^9.2.5",
+        "typescript": "^4.4.3",
+        "webpack": "^5.52.1",
+        "webpack-cli": "^4.8.0"
+    }
+}
