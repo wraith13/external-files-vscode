@@ -1,6 +1,6 @@
 {
     "name": "external-files-vscode",
-    "displayName": "Unsaved Files",
+    "displayName": "External Files",
     "description": "Easy access to external files for vscode.",
     "icon": "images/unsavedhex.128.png",
     "version": "2.1.4",
@@ -10,12 +10,12 @@
         "vscode": "^1.61.0"
     },
     "bugs": {
-        "url": "https://github.com/wraith13/unsaved-files-vscode/issues"
+        "url": "https://github.com/wraith13/external-files-vscode/issues"
     },
-    "homepage": "https://github.com/wraith13/unsaved-files-vscode/blob/master/README.md",
+    "homepage": "https://github.com/wraith13/external-files-vscode/blob/master/README.md",
     "repository": {
         "type": "git",
-        "url": "https://github.com/wraith13/unsaved-files-vscode.git"
+        "url": "https://github.com/wraith13/external-files-vscode.git"
     },
     "categories": [
         "Other"
@@ -35,179 +35,170 @@
         "views": {
             "explorer": [
                 {
-                    "id": "unsaved-files",
-                    "name": "%unsaved-files-vscode.title%",
-                    "when": "showUnsavedFilesViewOnexplorer"
+                    "id": "external-files",
+                    "name": "%external-files-vscode.title%",
+                    "when": "showUnsavedFilesViewOnexplorer",
+                    "icon": ""
                 }
             ]
         },
         "menus": {
             "view/item/context": [
                 {
-                    "command": "unsaved-files.revealFileInFinder",
+                    "command": "external-files.revealFileInFinder",
                     "when": "viewItem != untitled && isMac"
                 },
                 {
-                    "command": "unsaved-files.revealFileInExplorer",
+                    "command": "external-files.revealFileInExplorer",
                     "when": "viewItem != untitled && !isMac && !isWeb"
                 },
                 {
-                    "command": "unsaved-files.copyFilePath",
+                    "command": "external-files.copyFilePath",
                     "when": "viewItem != untitled"
                 },
                 {
-                    "command": "unsaved-files.copyRelativeFilePath",
+                    "command": "external-files.copyRelativeFilePath",
                     "when": "viewItem != untitled"
                 },
                 {
-                    "command": "unsaved-files.compareFileWith"
+                    "command": "external-files.compareFileWith"
                 },
                 {
-                    "command": "unsaved-files.compareWithClipboard"
+                    "command": "external-files.compareWithClipboard"
                 },
                 {
-                    "command": "unsaved-files.compareWithSaved",
+                    "command": "external-files.compareWithSaved",
                     "when": "viewItem != untitled"
                 },
                 {
-                    "command": "unsaved-files.showActiveFileInExplorer",
+                    "command": "external-files.showActiveFileInExplorer",
                     "when": "viewItem != untitled"
                 }
             ],
             "commandPalette": [
                 {
-                    "command": "unsaved-files.revealFileInFinder",
+                    "command": "external-files.revealFileInFinder",
                     "when": "false"
                 },
                 {
-                    "command": "unsaved-files.revealFileInExplorer",
+                    "command": "external-files.revealFileInExplorer",
                     "when": "false"
                 },
                 {
-                    "command": "unsaved-files.copyFilePath",
+                    "command": "external-files.copyFilePath",
                     "when": "false"
                 },
                 {
-                    "command": "unsaved-files.copyRelativeFilePath",
+                    "command": "external-files.copyRelativeFilePath",
                     "when": "false"
                 },
                 {
-                    "command": "unsaved-files.compareFileWith",
+                    "command": "external-files.compareFileWith",
                     "when": "false"
                 },
                 {
-                    "command": "unsaved-files.compareWithClipboard",
+                    "command": "external-files.compareWithClipboard",
                     "when": "false"
                 },
                 {
-                    "command": "unsaved-files.compareWithSaved",
+                    "command": "external-files.compareWithSaved",
                     "when": "false"
                 },
                 {
-                    "command": "unsaved-files.showActiveFileInExplorer",
+                    "command": "external-files.showActiveFileInExplorer",
                     "when": "false"
                 }
             ]
         },
         "commands": [
             {
-                "command": "unsaved-files.show",
-                "title": "%unsaved-files-vscode.show.title%",
-                "category": "%unsaved-files-vscode.title%"
+                "command": "external-files.show",
+                "title": "%external-files-vscode.show.title%",
+                "category": "%external-files-vscode.title%"
             },
             {
-                "command": "unsaved-files.showNext",
-                "title": "%unsaved-files-vscode.showNext.title%",
-                "category": "%unsaved-files-vscode.title%"
+                "command": "external-files.showView",
+                "title": "%external-files-vscode.showView.title%",
+                "category": "%external-files-vscode.title%"
             },
             {
-                "command": "unsaved-files.showPrevious",
-                "title": "%unsaved-files-vscode.showPrevious.title%",
-                "category": "%unsaved-files-vscode.title%"
+                "command": "external-files.hideView",
+                "title": "%external-files-vscode.hideView.title%",
+                "category": "%external-files-vscode.title%"
             },
             {
-                "command": "unsaved-files.showView",
-                "title": "%unsaved-files-vscode.showView.title%",
-                "category": "%unsaved-files-vscode.title%"
-            },
-            {
-                "command": "unsaved-files.hideView",
-                "title": "%unsaved-files-vscode.hideView.title%",
-                "category": "%unsaved-files-vscode.title%"
-            },
-            {
-                "command": "unsaved-files.revealFileInFinder",
-                "title": "%unsaved-files-vscode.revealFileInFinder.title%",
+                "command": "external-files.revealFileInFinder",
+                "title": "%external-files-vscode.revealFileInFinder.title%",
                 "category": "file"
             },
             {
-                "command": "unsaved-files.revealFileInExplorer",
-                "title": "%unsaved-files-vscode.revealFileInExplorer.title%",
+                "command": "external-files.revealFileInExplorer",
+                "title": "%external-files-vscode.revealFileInExplorer.title%",
                 "category": "file"
             },
             {
-                "command": "unsaved-files.copyFilePath",
-                "title": "%unsaved-files-vscode.copyFilePath.title%",
+                "command": "external-files.copyFilePath",
+                "title": "%external-files-vscode.copyFilePath.title%",
                 "category": "file"
             },
             {
-                "command": "unsaved-files.copyRelativeFilePath",
-                "title": "%unsaved-files-vscode.copyRelativeFilePath.title%",
+                "command": "external-files.copyRelativeFilePath",
+                "title": "%external-files-vscode.copyRelativeFilePath.title%",
                 "category": "file"
             },
             {
-                "command": "unsaved-files.compareFileWith",
-                "title": "%unsaved-files-vscode.compareFileWith.title%",
+                "command": "external-files.compareFileWith",
+                "title": "%external-files-vscode.compareFileWith.title%",
                 "category": "file"
             },
             {
-                "command": "unsaved-files.compareWithClipboard",
-                "title": "%unsaved-files-vscode.compareWithClipboard.title%",
+                "command": "external-files.compareWithClipboard",
+                "title": "%external-files-vscode.compareWithClipboard.title%",
                 "category": "file"
             },
             {
-                "command": "unsaved-files.compareWithSaved",
-                "title": "%unsaved-files-vscode.compareWithSaved.title%",
+                "command": "external-files.compareWithSaved",
+                "title": "%external-files-vscode.compareWithSaved.title%",
                 "category": "file"
             },
             {
-                "command": "unsaved-files.showActiveFileInExplorer",
-                "title": "%unsaved-files-vscode.showActiveFileInExplorer.title%",
+                "command": "external-files.showActiveFileInExplorer",
+                "title": "%external-files-vscode.showActiveFileInExplorer.title%",
                 "category": "file"
             }
         ],
         "configuration": [
             {
-                "title": "%unsaved-files-vscode.title%",
+                "title": "%external-files-vscode.title%",
                 "properties": {
-                    "unsaved-files.statusBar.enabled": {
+                    "external-files.statusBar.enabled": {
                         "type": "boolean",
                         "default": true,
-                        "description": "%unsaved-files.statusBar.enabled.description%",
+                        "description": "%external-files.statusBar.enabled.description%",
                         "scope": "window"
                     },
-                    "unsaved-files.statusBar.noUnsavedFilesStatusLabel": {
+                    "external-files.statusBar.noUnsavedFilesStatusLabel": {
                         "type": "string",
                         "default": "$(check)",
-                        "description": "%unsaved-files.statusBar.noUnsavedFilesStatusLabel.description%",
+                        "description": "%external-files.statusBar.noUnsavedFilesStatusLabel.description%",
                         "scope": "window"
                     },
-                    "unsaved-files.statusBar.anyUnsavedFilesStatusLabel": {
+                    "external-files.statusBar.anyUnsavedFilesStatusLabel": {
                         "type": "string",
                         "default": "$(primitive-dot)",
-                        "description": "%unsaved-files.statusBar.anyUnsavedFilesStatusLabel.description%",
+                        "description": "%external-files.statusBar.anyUnsavedFilesStatusLabel.description%",
                         "scope": "window"
                     },
-                    "unsaved-files.statusBar.label": {
+                    "external-files.statusBar.label": {
                         "type": "string",
-                        "default": "%unsaved-files.statusBar.label.default%",
-                        "description": "%unsaved-files.statusBar.label.description%",
+                        "default": "%external-files.statusBar.label.default%",
+                        "description": "%external-files.statusBar.label.description%",
                         "scope": "window"
                     },
-                    "unsaved-files.viewOnExplorer.enabled": {
+                    "external-files.viewOnExplorer.enabled": {
                         "type": "boolean",
                         "default": true,
-                        "description": "%unsaved-files.viewOnExplorer.enabled.description%",
+                        "description": "%external-files.viewOnExplorer.enabled.description%",
                         "scope": "window"
                     }
                 }

@@ -1,18 +1,18 @@
 # External Files README
 
+> [!WARNING]
+> **This extension is currently under development.**
+
 Easy access to external files for vscode.
 
 ## Features
 
 * show external files from command pallete
-* show external files from status bar
 * show external files from view on explorer
 
 ![screen shot: View on Explorer](./images/screenshot3.png)
 
 ![screen shot: Show](./images/screenshot.png)
-
-![screen shot: Show Next/Previous](./images/screenshot2.png)
 
 > This extension only shows external files, does not save nor close.
 
@@ -35,8 +35,6 @@ Enjoy!
 ## Commands
 
 * `External Files: Show` : show external files
-* `External Files: Show Next` show next unsaved file
-* `External Files: Show Previous` show previous unsaved file
 * `External Files: Show View` show view on explorer
 * `External Files: Hide View` hide view on explorer
 

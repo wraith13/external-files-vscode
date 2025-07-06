@@ -6,15 +6,10 @@ import localeEn from "../package.nls.json";
 import localeJa from "../package.nls.ja.json";
 export type LocaleKeyType = keyof typeof localeEn;
 const locale = vscel.locale.make(localeEn, { "ja": localeJa });
-export module UnsavedFiles
+export namespace ExternalFiles
 {
-    const applicationKey = "unsaved-files";
+    const applicationKey = "external-files";
     let unsavedDocuments : vscode.TextDocument[] = [];
-    let nextUnsavedDocument : vscode.TextDocument | null = null;
-    let previousUnsavedDocument : vscode.TextDocument | null = null;
-    let unsavedFilesLabel : vscode.StatusBarItem;
-    let nextLabel : vscode.StatusBarItem;
-    let previousLabel : vscode.StatusBarItem;
     class UnsavedFilesProvider implements vscode.TreeDataProvider<vscode.TreeItem>
     {
         private onDidChangeTreeDataEventEmitter = new vscode.EventEmitter<vscode.TreeItem | undefined>();
@@ -60,19 +55,12 @@ export module UnsavedFiles
         update = () => this.onDidChangeTreeDataEventEmitter.fire(undefined);
     }
     let unsavedFilesProvider = new UnsavedFilesProvider();
-    export module Config
+    export namespace Config
     {
         const root = vscel.config.makeRoot(packageJson);
-        export module StatusBar
+        export namespace ViewOnExplorer
         {
-            export const enabled = root.makeEntry<boolean>("unsaved-files.statusBar.enabled", "root-workspace");
-            export const noUnsavedFilesStatusLabel = root.makeEntry<string>("unsaved-files.statusBar.noUnsavedFilesStatusLabel", "root-workspace");
-            export const anyUnsavedFilesStatusLabel = root.makeEntry<string>("unsaved-files.statusBar.anyUnsavedFilesStatusLabel", "root-workspace");
-            export const label = root.makeEntry<string>("unsaved-files.statusBar.label", "root-workspace");
-        }
-        export module ViewOnExplorer
-        {
-            export const enabled = root.makeEntry<boolean>("unsaved-files.viewOnExplorer.enabled", "root-workspace");
+            export const enabled = root.makeEntry<boolean>("external-files.viewOnExplorer.enabled", "root-workspace");
         }
     }
     const showTextDocument = async (textDocument : vscode.TextDocument) : Promise<vscode.TextEditor> => await vscode.window.showTextDocument
@@ -92,14 +80,10 @@ export module UnsavedFiles
     export const initialize = (context : vscode.ExtensionContext): void =>
     {
         const showCommandKey = `${applicationKey}.show`;
-        const showNextCommandKey = `${applicationKey}.showNext`;
-        const showPreviousCommandKey = `${applicationKey}.showPrevious`;
         context.subscriptions.push
         (
             //  コマンドの登録
             vscode.commands.registerCommand(showCommandKey, show),
-            vscode.commands.registerCommand(showNextCommandKey, showNext),
-            vscode.commands.registerCommand(showPreviousCommandKey, showPrevious),
             vscode.commands.registerCommand(`${applicationKey}.revealFileInFinder`, makeCommand("revealFileInOS")),
             vscode.commands.registerCommand(`${applicationKey}.revealFileInExplorer`, makeCommand("revealFileInOS")),
             vscode.commands.registerCommand(`${applicationKey}.copyFilePath`, makeCommand("copyFilePath")),
@@ -110,25 +94,6 @@ export module UnsavedFiles
             vscode.commands.registerCommand(`${applicationKey}.showActiveFileInExplorer`, makeCommand("workbench.files.action.showActiveFileInExplorer", "withActivate")),
             vscode.commands.registerCommand(`${applicationKey}.showView`, showView),
             vscode.commands.registerCommand(`${applicationKey}.hideView`, hideView),
-            //  ステータスバーアイテムの登録
-            unsavedFilesLabel = vscel.statusbar.createItem
-            ({
-                alignment: vscode.StatusBarAlignment.Left,
-                command: showCommandKey,
-                tooltip: locale.map("statusbar.show.tooltip")
-            }),
-            nextLabel = vscel.statusbar.createItem
-            ({
-                alignment: vscode.StatusBarAlignment.Left,
-                text: "$(triangle-right)",
-                command: showNextCommandKey
-            }),
-            previousLabel = vscel.statusbar.createItem
-            ({
-                alignment: vscode.StatusBarAlignment.Left,
-                text: "$(triangle-left)",
-                command: showPreviousCommandKey
-            }),
             //  TreeDataProovider の登録
             vscode.window.registerTreeDataProvider(applicationKey, unsavedFilesProvider),
             //  イベントリスナーの登録
@@ -141,7 +106,7 @@ export module UnsavedFiles
             (
                 event =>
                 {
-                    if (event.affectsConfiguration("unsaved-files"))
+                    if (event.affectsConfiguration("external-files"))
                     {
                         onDidChangeConfiguration();
                     }
@@ -151,14 +116,6 @@ export module UnsavedFiles
         updateViewOnExplorer();
         updateUnsavedDocuments();
     };
-    const getUnsavedFilesLabelText = () : string =>
-    [
-        unsavedDocuments.length <= 0 ?
-            Config.StatusBar.noUnsavedFilesStatusLabel.get("default-scope"):
-            Config.StatusBar.anyUnsavedFilesStatusLabel.get("default-scope"),
-        Config.StatusBar.label.get("default-scope"),
-        `${unsavedDocuments.length}`
-    ].filter(i => 0 < i.length).join(" ");
     const getUnsavedDocumentsSource = () => vscode.workspace.textDocuments.filter(i => i.isDirty || i.isUntitled);
     const updateUnsavedDocuments = () : void =>
     {
@@ -193,63 +150,11 @@ export module UnsavedFiles
                     .concat(unsavedDocuments.filter(i => i.fileName !== activeDocument.fileName));
             }
         }
-        if (0 < unsavedDocuments.length)
-        {
-            const sortedUnsavedDocuments = unsavedDocuments
-                .map(i => i) // 元の配列の順番を壊さない為に一次配列を作成する
-                .sort((a, b) => a.fileName.localeCompare(b.fileName));
-            const currentIndex = sortedUnsavedDocuments.map(i => i.fileName).indexOf(unsavedDocuments[0].fileName);
-            nextUnsavedDocument = sortedUnsavedDocuments[(currentIndex +1) % sortedUnsavedDocuments.length];
-            previousUnsavedDocument = sortedUnsavedDocuments[(currentIndex -1 +sortedUnsavedDocuments.length) % sortedUnsavedDocuments.length];
-        }
-        else
-        {
-            nextUnsavedDocument = null;
-            previousUnsavedDocument = null;
-        }
-        updateStatusBar();
         unsavedFilesProvider.update();
     };
     const onDidChangeConfiguration = () : void =>
     {
         updateViewOnExplorer();
-        updateStatusBar();
-    };
-    export const updateStatusBar = () : void =>
-    {
-        if (Config.StatusBar.enabled.get("default-scope"))
-        {
-            if (1 < unsavedDocuments.length && previousUnsavedDocument && nextUnsavedDocument)
-            {
-                if (undefined === previousLabel.tooltip)
-                {
-                    unsavedFilesLabel.hide();
-                }
-                previousLabel.tooltip = locale.map("statusbar.showNext.tooltip").replace(/\{0\}/g, previousUnsavedDocument.fileName);
-                previousLabel.show();
-                unsavedFilesLabel.text = getUnsavedFilesLabelText();
-                unsavedFilesLabel.show();
-                nextLabel.tooltip = locale.map("statusbar.showNext.tooltip").replace(/\{0\}/g, nextUnsavedDocument.fileName);
-                nextLabel.show();
-            }
-            else
-            {
-                previousLabel.tooltip = undefined;
-                previousLabel.hide();
-                unsavedFilesLabel.text = getUnsavedFilesLabelText();
-                unsavedFilesLabel.show();
-                nextLabel.tooltip = undefined;
-                nextLabel.hide();
-            }
-        }
-        else
-        {
-            previousLabel.tooltip = undefined;
-            previousLabel.hide();
-            unsavedFilesLabel.hide();
-            nextLabel.tooltip = undefined;
-            nextLabel.hide();
-        }
     };
     const updateViewOnExplorer = () : void =>
     {
@@ -301,34 +206,12 @@ export module UnsavedFiles
             break;
         }
     };
-    export const showNext = async () : Promise<void> =>
-    {
-        if (nextUnsavedDocument)
-        {
-            await showTextDocument(nextUnsavedDocument);
-        }
-        else
-        {
-            await showNoUnsavedFilesMessage();
-        }
-    };
-    export const showPrevious = async () : Promise<void> =>
-    {
-        if (previousUnsavedDocument)
-        {
-            await showTextDocument(previousUnsavedDocument);
-        }
-        else
-        {
-            await showNoUnsavedFilesMessage();
-        }
-    };
     const showView = async () : Promise<void> => await Config.ViewOnExplorer.enabled.set(true);
     const hideView = async () : Promise<void> => await Config.ViewOnExplorer.enabled.set(false);
 }
 export const activate = (context: vscode.ExtensionContext) : void =>
 {
-    UnsavedFiles.initialize(context);
+    ExternalFiles.initialize(context);
 };
 export const deactivate = () : void =>
 {
