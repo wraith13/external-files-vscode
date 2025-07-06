@@ -9,8 +9,10 @@ const locale = vscel.locale.make(localeEn, { "ja": localeJa });
 export namespace ExternalFiles
 {
     const applicationKey = "external-files";
-    let unsavedDocuments : vscode.TextDocument[] = [];
-    class UnsavedFilesProvider implements vscode.TreeDataProvider<vscode.TreeItem>
+    const isExternalFiles = (document: vscode.TextDocument) : boolean =>
+        ! document.isUntitled && 0 === (vscode.workspace.workspaceFolders ?? []).filter(i => document.uri.path.startsWith(i.uri.path)).length;
+    let externalDocuments : vscode.TextDocument[] = [];
+    class ExternalFilesProvider implements vscode.TreeDataProvider<vscode.TreeItem>
     {
         private onDidChangeTreeDataEventEmitter = new vscode.EventEmitter<vscode.TreeItem | undefined>();
         readonly onDidChangeTreeData = this.onDidChangeTreeDataEventEmitter.event;
@@ -21,7 +23,7 @@ export namespace ExternalFiles
         getChildren(_element?: vscode.TreeItem | undefined): vscode.ProviderResult<vscode.TreeItem[]>
         {
             //  unsavedDocuments は他の処理全般の都合でソートされており、順番がちょくちょく変わって view に表示するのに適さないので getUnsavedDocumentsSource() を直接利用する。
-            const unsavedDocumentsSource = getUnsavedDocumentsSource();
+            const unsavedDocumentsSource = getExternalDocumentsSource();
             return 0 < unsavedDocumentsSource.length ?
                 unsavedDocumentsSource.map
                 (
@@ -54,7 +56,7 @@ export namespace ExternalFiles
         }
         update = () => this.onDidChangeTreeDataEventEmitter.fire(undefined);
     }
-    let unsavedFilesProvider = new UnsavedFilesProvider();
+    let unsavedFilesProvider = new ExternalFilesProvider();
     export namespace Config
     {
         const root = vscel.config.makeRoot(packageJson);
@@ -97,11 +99,8 @@ export namespace ExternalFiles
             //  TreeDataProovider の登録
             vscode.window.registerTreeDataProvider(applicationKey, unsavedFilesProvider),
             //  イベントリスナーの登録
-            vscode.window.onDidChangeActiveTextEditor(() => updateUnsavedDocumentsOrder()),
-            vscode.workspace.onDidOpenTextDocument(() => updateUnsavedDocuments()),
-            vscode.workspace.onDidCloseTextDocument(() => updateUnsavedDocuments()),
-            vscode.workspace.onDidChangeTextDocument(() => updateUnsavedDocuments()),
-            vscode.workspace.onDidSaveTextDocument(() => updateUnsavedDocuments()),
+            vscode.window.onDidChangeActiveTextEditor(() => updateExternalDocumentsOrder()),
+            vscode.workspace.onDidOpenTextDocument(() => updateExternalDocuments()),
             vscode.workspace.onDidChangeConfiguration
             (
                 event =>
@@ -114,42 +113,27 @@ export namespace ExternalFiles
             )
         );
         updateViewOnExplorer();
-        updateUnsavedDocuments();
+        updateExternalDocuments();
     };
-    const getUnsavedDocumentsSource = () => vscode.workspace.textDocuments.filter(i => i.isDirty || i.isUntitled);
-    const updateUnsavedDocuments = () : void =>
+    const getExternalDocumentsSource = () => vscode.workspace.textDocuments.filter(i => isExternalFiles(i));
+    const updateExternalDocuments = () : void =>
     {
-        const unsavedDocumentsSource = getUnsavedDocumentsSource();
-        const oldUnsavedDocumentsFileName = unsavedDocuments
+        const unsavedDocumentsSource = getExternalDocumentsSource();
+        const oldUnsavedDocumentsFileName = externalDocuments
             .map(i => i.fileName);
         //  既知のドキュメントの情報を新しいオブジェクトに差し替えつつ、消えたドキュメントを間引く
-        unsavedDocuments = oldUnsavedDocumentsFileName
+        externalDocuments = oldUnsavedDocumentsFileName
             .map(i => unsavedDocumentsSource.find(j => j.fileName === i))
             .filter(i => undefined !== i)
             .map(i => <vscode.TextDocument>i);
         //  既知でないドキュメントのオブジェクトを先頭に挿入
-        unsavedDocuments = unsavedDocumentsSource
+        externalDocuments = unsavedDocumentsSource
             .filter(i => oldUnsavedDocumentsFileName.indexOf(i.fileName) < 0)
-            .concat(unsavedDocuments);
-        updateUnsavedDocumentsOrder();
+            .concat(externalDocuments);
+        updateExternalDocumentsOrder();
     };
-    const updateUnsavedDocumentsOrder = () : void =>
+    const updateExternalDocumentsOrder = () : void =>
     {
-        //  アクティブなドキュメントを先頭へ
-        const activeTextEditor = vscode.window.activeTextEditor;
-        if (activeTextEditor)
-        {
-            const activeDocument = activeTextEditor.document;
-            if
-            (
-                (activeDocument.isDirty || activeDocument.isUntitled) &&
-                unsavedDocuments[0].fileName !== activeDocument.fileName
-            )
-            {
-                unsavedDocuments = [activeTextEditor.document]
-                    .concat(unsavedDocuments.filter(i => i.fileName !== activeDocument.fileName));
-            }
-        }
         unsavedFilesProvider.update();
     };
     const onDidChangeConfiguration = () : void =>
@@ -165,13 +149,13 @@ export namespace ExternalFiles
             Config.ViewOnExplorer.enabled.get("default-scope")
         );
     };
-    const showNoUnsavedFilesMessage = async () => await vscode.window.showInformationMessage(locale.map("noUnsavedFiles.message"));
+    const showNoExternalFilesMessage = async () => await vscode.window.showInformationMessage(locale.map("noUnsavedFiles.message"));
     const stripFileName = (path : string) : string => path.substr(0, path.length -stripDirectory(path).length);
     const stripDirectory = (path : string) : string => path.split('\\').reverse()[0].split('/').reverse()[0];
     const digest = (text : string) : string => text.replace(/\s+/g, " ").substr(0, 128);
     const showQuickPickUnsavedDocument = () => vscode.window.showQuickPick
     (
-        unsavedDocuments.map
+        externalDocuments.map
         (
             i =>
             ({
@@ -189,13 +173,13 @@ export namespace ExternalFiles
     );
     export const show = async () : Promise<void> =>
     {
-        switch(unsavedDocuments.length)
+        switch(externalDocuments.length)
         {
         case 0:
-            await showNoUnsavedFilesMessage();
+            await showNoExternalFilesMessage();
             break;
         case 1:
-            await showTextDocument(unsavedDocuments[0]);
+            await showTextDocument(externalDocuments[0]);
             break;
         default:
             const selected = await showQuickPickUnsavedDocument();

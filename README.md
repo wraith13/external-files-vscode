@@ -67,8 +67,6 @@ Command name on `keybindings.json` is diffarent from on Command Pallete. See bel
 |on Command Pallete|on keybindings.json|
 |-|-|
 |`External Files: Show`|`external-files.show`|
-|`External Files: Show Next`|`external-files.showNext`|
-|`External Files: Show Previous`|`external-files.showPrevious`|
 
 ## Release Notes
 

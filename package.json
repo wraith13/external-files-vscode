@@ -2,7 +2,7 @@
     "name": "external-files-vscode",
     "displayName": "External Files",
     "description": "Easy access to external files for vscode.",
-    "icon": "images/unsavedhex.128.png",
+    "icon": "images/externalhex.128.png",
     "version": "2.1.4",
     "publisher": "wraith13",
     "license": "SEE LICENSE IN LICENSE_1_0.txt",
