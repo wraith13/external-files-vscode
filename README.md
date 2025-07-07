@@ -14,8 +14,6 @@ Easy access to external files for vscode.
 
 ![screen shot: Show](./images/screenshot.png)
 
-> This extension only shows external files, does not save nor close.
-
 ## Tutorial
 
 ### 0. ⬇️ Install External Files
@@ -42,19 +40,8 @@ Enjoy!
 
 This extension contributes the following settings by [`settings.json`](https://code.visualstudio.com/docs/customization/userandworkspace#_creating-user-and-workspace-settings)( Mac: <kbd>Command</kbd>+<kbd>,</kbd>, Windows / Linux: <kbd>File</kbd> -> <kbd>Preferences</kbd> -> <kbd>User Settings</kbd> ):
 
-* `external-files.statusBar.enabled`: set Enable/Disable external files count in status bar
-* `external-files.statusBar.noUnsavedFilesStatusLabel`: set no external files's label
-* `external-files.statusBar.anyUnsavedFilesStatusLabel`: set any external files's label
-* `external-files.statusBar.label`: set unsaved's label
 * `external-files.viewOnExplorer.enabled`: set Enable/Disable external files in view on explorer
 
-You can embed icons in the label text by leveraging the syntax:
-
-`My text $(icon-name) contains icons like $(icon'name) this one.`
-
-Where the icon-name is taken from the [octicon](https://octicons.github.com) icon set, e.g. `light-bulb`, `thumbsup`, `zap` etc.
-
-You can specify unicode characters ( include emoji ) as label text too.
 
 ## Keyboard shortcut Settings
 
@@ -88,8 +75,8 @@ see ChangLog on [marketplace](https://marketplace.visualstudio.com/items/wraith1
 
 |Icon|Name|Description|
 |---|---|---|
-|![](https://wraith13.gallerycdn.vsassets.io/extensions/wraith13/background-phi-colors/3.1.0/1581619161244/Microsoft.VisualStudio.Services.Icons.Default) |[Background Phi Colors](https://marketplace.visualstudio.com/items?itemName=wraith13.background-phi-colors)|This extension colors the background in various ways.|
-|![](https://wraith13.gallerycdn.vsassets.io/extensions/wraith13/blitz/1.10.0/1600673285404/Microsoft.VisualStudio.Services.Icons.Default) |[Blitz](https://marketplace.visualstudio.com/items?itemName=wraith13.blitz)|Provide a quick and comfortable way to change settings by quick pick based UI.|
-|![](https://wraith13.gallerycdn.vsassets.io/extensions/wraith13/zoombar-vscode/1.2.1/1563089420894/Microsoft.VisualStudio.Services.Icons.Default) |[Zoom Bar](https://marketplace.visualstudio.com/items?itemName=wraith13.zoombar-vscode)|Zoom UI in status bar for VS Code.|
+|![](https://wraith13.gallerycdn.vsassets.io/extensions/wraith13/unsaved-files-vscode/2.1.1/1562823380255/Microsoft.VisualStudio.Services.Icons.Default) |[Unsaved Files](https://marketplace.visualstudio.com/items?itemName=wraith13.unsaved-files-vscode)|Easy access to unsaved files for VS Code.|
+|![](https://wraith13.gallerycdn.vsassets.io/extensions/wraith13/bracket-lens/1.0.0/1603272166087/Microsoft.VisualStudio.Services.Icons.Default) |[Bracket Lens](https://marketplace.visualstudio.com/items?itemName=wraith13.bracket-lens)|Show bracket header on closing bracket.|
+|![](https://wraith13.gallerycdn.vsassets.io/extensions/wraith13/open-in-github-desktop/1.4.3/1658183901851/Microsoft.VisualStudio.Services.Icons.Default) |[Open in GitHub Desktop](https://marketplace.visualstudio.com/items?itemName=wraith13.zoombar-vscode)|Open in GitHub Desktop from VS Code.|
 
-See all wraith13's  expansions: <https://marketplace.visualstudio.com/publishers/wraith13>
+See all wraith13's expansions: <https://marketplace.visualstudio.com/publishers/wraith13>

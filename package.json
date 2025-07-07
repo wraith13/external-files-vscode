@@ -37,7 +37,7 @@
                 {
                     "id": "external-files",
                     "name": "%external-files-vscode.title%",
-                    "when": "showUnsavedFilesViewOnexplorer",
+                    "when": "showExternalFilesViewOnexplorer",
                     "icon": "images/externalhex.1024.svg"
                 }
             ]
@@ -171,30 +171,6 @@
             {
                 "title": "%external-files-vscode.title%",
                 "properties": {
-                    "external-files.statusBar.enabled": {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "%external-files.statusBar.enabled.description%",
-                        "scope": "window"
-                    },
-                    "external-files.statusBar.noUnsavedFilesStatusLabel": {
-                        "type": "string",
-                        "default": "$(check)",
-                        "description": "%external-files.statusBar.noUnsavedFilesStatusLabel.description%",
-                        "scope": "window"
-                    },
-                    "external-files.statusBar.anyUnsavedFilesStatusLabel": {
-                        "type": "string",
-                        "default": "$(primitive-dot)",
-                        "description": "%external-files.statusBar.anyUnsavedFilesStatusLabel.description%",
-                        "scope": "window"
-                    },
-                    "external-files.statusBar.label": {
-                        "type": "string",
-                        "default": "%external-files.statusBar.label.default%",
-                        "description": "%external-files.statusBar.label.description%",
-                        "scope": "window"
-                    },
                     "external-files.viewOnExplorer.enabled": {
                         "type": "boolean",
                         "default": true,
@@ -218,7 +194,7 @@
         "@wraith13/vscel": "^0.0.52"
     },
     "devDependencies": {
-        "@types/vscode": "^1.61.0",
+        "@types/vscode": "^1.97.2",
         "@types/webpack-env": "^1.16.2",
         "@typescript-eslint/eslint-plugin": "^4.31.1",
         "@typescript-eslint/parser": "^4.31.1",
@@ -228,7 +204,7 @@
         "glob": "^7.2.0",
         "process": "^0.11.10",
         "ts-loader": "^9.2.5",
-        "typescript": "^4.4.3",
+        "typescript": "^5.8.3",
         "webpack": "^5.52.1",
         "webpack-cli": "^4.8.0"
     }

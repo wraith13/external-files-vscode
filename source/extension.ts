@@ -51,7 +51,7 @@ export namespace ExternalFiles
                     })
                 ):
                 [{
-                    label: locale.map("noUnsavedFiles.message"),
+                    label: locale.map("noExternalFiles.message"),
                 }];
         }
         update = () => this.onDidChangeTreeDataEventEmitter.fire(undefined);
@@ -145,11 +145,11 @@ export namespace ExternalFiles
         vscode.commands.executeCommand
         (
             "setContext",
-            "showUnsavedFilesViewOnexplorer",
+            "showExternalFilesViewOnexplorer",
             Config.ViewOnExplorer.enabled.get("default-scope")
         );
     };
-    const showNoExternalFilesMessage = async () => await vscode.window.showInformationMessage(locale.map("noUnsavedFiles.message"));
+    const showNoExternalFilesMessage = async () => await vscode.window.showInformationMessage(locale.map("noExternalFiles.message"));
     const stripFileName = (path : string) : string => path.substr(0, path.length -stripDirectory(path).length);
     const stripDirectory = (path : string) : string => path.split('\\').reverse()[0].split('/').reverse()[0];
     const digest = (text : string) : string => text.replace(/\s+/g, " ").substr(0, 128);
@@ -168,7 +168,7 @@ export namespace ExternalFiles
             })
         ),
         {
-            placeHolder: locale.map("selectUnsavedFiles.placeHolder"),
+            placeHolder: locale.map("selectExternalFiles.placeHolder"),
         }
     );
     export const show = async () : Promise<void> =>
