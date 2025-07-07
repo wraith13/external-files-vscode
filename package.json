@@ -38,7 +38,7 @@
                     "id": "external-files",
                     "name": "%external-files-vscode.title%",
                     "when": "showUnsavedFilesViewOnexplorer",
-                    "icon": ""
+                    "icon": "images/externalhex.1024.svg"
                 }
             ]
         },
