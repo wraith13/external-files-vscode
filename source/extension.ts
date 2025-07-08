@@ -8,10 +8,22 @@ export type LocaleKeyType = keyof typeof localeEn;
 const locale = vscel.locale.make(localeEn, { "ja": localeJa });
 export namespace ExternalFiles
 {
-    const applicationKey = "external-files";
+    const publisher = packageJson.publisher;
+    const applicationKey = packageJson.name;
     const isExternalFiles = (document: vscode.TextDocument) : boolean =>
         ! document.isUntitled && 0 === (vscode.workspace.workspaceFolders ?? []).filter(i => document.uri.path.startsWith(i.uri.path)).length;
     let externalDocuments : vscode.TextDocument[] = [];
+    const recentlyUsedExternalDocumentsKey = `${publisher}.${applicationKey}.recentlyUsedExternalDocuments`;
+    const getRecentlyExternalDocuments = () : vscode.Uri[] =>
+        extensionContext.workspaceState.get<string[]>(recentlyUsedExternalDocumentsKey, [])
+        .map(i => vscode.Uri.parse(i));
+    const setRecentlyExternalDocuments = (documents: vscode.Uri[]): Thenable<void> =>
+        extensionContext.workspaceState.update(recentlyUsedExternalDocumentsKey, documents.map(i => i.toString()));
+    const addRecentlyExternalDocument = (document: vscode.Uri) : Thenable<void> =>
+    {
+        let current = getRecentlyExternalDocuments();
+        return setRecentlyExternalDocuments(current);
+    };
     class ExternalFilesProvider implements vscode.TreeDataProvider<vscode.TreeItem>
     {
         private onDidChangeTreeDataEventEmitter = new vscode.EventEmitter<vscode.TreeItem | undefined>();
@@ -193,8 +205,10 @@ export namespace ExternalFiles
     const showView = async () : Promise<void> => await Config.ViewOnExplorer.enabled.set(true);
     const hideView = async () : Promise<void> => await Config.ViewOnExplorer.enabled.set(false);
 }
+let extensionContext: vscode.ExtensionContext;
 export const activate = (context: vscode.ExtensionContext) : void =>
 {
+    extensionContext = context;
     ExternalFiles.initialize(context);
 };
 export const deactivate = () : void =>

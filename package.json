@@ -1,5 +1,5 @@
 {
-    "name": "external-files-vscode",
+    "name": "external-files",
     "displayName": "External Files",
     "description": "Easy access to external files for vscode.",
     "icon": "images/externalhex.128.png",
@@ -175,6 +175,14 @@
                         "type": "boolean",
                         "default": true,
                         "description": "%external-files.viewOnExplorer.enabled.description%",
+                        "scope": "window"
+                    },
+                    "external-files.maxRecentlyFiles": {
+                        "type": "number",
+                        "default": 8,
+                        "minimum": 0,
+                        "maximum": 100,
+                        "description": "%external-files.maxRecentlyFiles.description%",
                         "scope": "window"
                     }
                 }
