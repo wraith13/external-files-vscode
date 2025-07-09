@@ -17,20 +17,42 @@ export namespace ExternalFiles
     const isExternalFiles = (document: vscode.TextDocument): boolean =>
         ! document.isUntitled && 0 === (vscode.workspace.workspaceFolders ?? []).filter(i => document.uri.path.startsWith(i.uri.path)).length;
     const recentlyUsedExternalDocumentsKey = `${publisher}.${applicationKey}.recentlyUsedExternalDocuments`;
-    const clearRecentlyExternalDocuments = (): Thenable<void> =>
+    const clearRecentlyUsedExternalDocuments = (): Thenable<void> =>
         extensionContext.workspaceState.update(recentlyUsedExternalDocumentsKey, []);
-    const getRecentlyExternalDocuments = (): vscode.Uri[] =>
+    const getRecentlyUsedExternalDocuments = (): vscode.Uri[] =>
         extensionContext.workspaceState.get<string[]>(recentlyUsedExternalDocumentsKey, [])
         .map(i => vscode.Uri.parse(i));
-    const setRecentlyExternalDocuments = (documents: vscode.Uri[]): Thenable<void> =>
+    const setRecentlyUsedExternalDocuments = (documents: vscode.Uri[]): Thenable<void> =>
         extensionContext.workspaceState.update(recentlyUsedExternalDocumentsKey, documents.map(i => i.toString()));
-    const addRecentlyExternalDocument = (document: vscode.Uri): Thenable<void> =>
+    const addRecentlyUsedExternalDocument = (document: vscode.Uri): Thenable<void> =>
     {
-        let current = getRecentlyExternalDocuments();
+        let current = getRecentlyUsedExternalDocuments();
         current = current.filter(i => i.toString() !== document.toString());
         current.unshift(document);
         current = current.slice(0, maxRecentlyFiles.get("root-workspace"));
-        return setRecentlyExternalDocuments(current);
+        return setRecentlyUsedExternalDocuments(current);
+    };
+    const pinnedExternalDocumentsKey = `${publisher}.${applicationKey}.pinnedExternalDocuments`;
+    const getPinnedExternalDocuments = (): vscode.Uri[] =>
+        extensionContext.workspaceState.get<string[]>(pinnedExternalDocumentsKey, [])
+        .map(i => vscode.Uri.parse(i));
+    const setPinnedExternalDocuments = (documents: vscode.Uri[]): Thenable<void> =>
+        extensionContext.workspaceState.update(pinnedExternalDocumentsKey, documents.map(i => i.toString()));
+    const isPinnedExternalDocument = (document: vscode.Uri): boolean =>
+        getPinnedExternalDocuments().some(i => i.toString() === document.toString());
+    const addPinnedExternalDocument = (document: vscode.Uri): Thenable<void> =>
+    {
+        let current = getPinnedExternalDocuments();
+        current = current.filter(i => i.toString() !== document.toString());
+        current.unshift(document);
+        current.sort();
+        return setPinnedExternalDocuments(current);
+    };
+    const removePinnedExternalDocument = (document: vscode.Uri): Thenable<void> =>
+    {
+        let current = getPinnedExternalDocuments();
+        current = current.filter(i => i.toString() !== document.toString());
+        return setPinnedExternalDocuments(current);
     };
     class ExternalFilesProvider implements vscode.TreeDataProvider<vscode.TreeItem>
     {
@@ -42,7 +64,7 @@ export namespace ExternalFiles
         }
         getChildren(_element?: vscode.TreeItem | undefined): vscode.ProviderResult<vscode.TreeItem[]>
         {
-            const externalDocuments = getRecentlyExternalDocuments();
+            const externalDocuments = getRecentlyUsedExternalDocuments();
             return 0 < externalDocuments.length ?
                 externalDocuments.map
                 (
@@ -56,7 +78,7 @@ export namespace ExternalFiles
                             title: "show",
                             command: "vscode.open",
                             arguments:[i]
-                        },
+                        }
                     })
                 ):
                 [{
@@ -121,7 +143,7 @@ export namespace ExternalFiles
                 }
             )
         );
-        clearRecentlyExternalDocuments();
+        clearRecentlyUsedExternalDocuments();
         updateViewOnExplorer();
         unsavedFilesProvider.update();
     };
@@ -129,7 +151,7 @@ export namespace ExternalFiles
     {
         if (isExternalFiles(document))
         {
-            await addRecentlyExternalDocument(document.uri);
+            await addRecentlyUsedExternalDocument(document.uri);
             unsavedFilesProvider.update();
         }
     };
@@ -153,7 +175,7 @@ export namespace ExternalFiles
         path.split('\\').reverse()[0].split('/').reverse()[0];
     const showQuickPickUnsavedDocument = () => vscode.window.showQuickPick
     (
-        getRecentlyExternalDocuments().map
+        getRecentlyUsedExternalDocuments().map
         (
             i =>
             ({
@@ -168,7 +190,7 @@ export namespace ExternalFiles
     );
     export const show = async (): Promise<void> =>
     {
-        const externalDocuments = getRecentlyExternalDocuments();
+        const externalDocuments = getRecentlyUsedExternalDocuments();
         switch(externalDocuments.length)
         {
         case 0:
