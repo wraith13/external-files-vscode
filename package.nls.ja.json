@@ -1,8 +1,6 @@
 {
     "external-files-vscode.title": "外部ファイル",
     "external-files-vscode.show.title": "表示",
-    "external-files-vscode.showNext.title": "次を表示",
-    "external-files-vscode.showPrevious.title": "前を表示",
     "external-files-vscode.revealFileInFinder.title": "Finder で表示します",
     "external-files-vscode.revealFileInExplorer.title": "エクスプローラーで表示する",
     "external-files-vscode.copyFilePath.title": "このファイルのパスのコピー",

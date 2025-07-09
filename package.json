@@ -179,7 +179,7 @@
                     },
                     "external-files.maxRecentlyFiles": {
                         "type": "number",
-                        "default": 8,
+                        "default": 30,
                         "minimum": 0,
                         "maximum": 100,
                         "description": "%external-files.maxRecentlyFiles.description%",

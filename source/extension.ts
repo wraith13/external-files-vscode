@@ -4,24 +4,32 @@ import * as vscel from '@wraith13/vscel';
 import packageJson from "../package.json";
 import localeEn from "../package.nls.json";
 import localeJa from "../package.nls.ja.json";
+const configRoot = vscel.config.makeRoot(packageJson);
+export const maxRecentlyFiles = configRoot.makeEntry<number>("external-files.maxRecentlyFiles", "root-workspace");
 export type LocaleKeyType = keyof typeof localeEn;
 const locale = vscel.locale.make(localeEn, { "ja": localeJa });
 export namespace ExternalFiles
 {
     const publisher = packageJson.publisher;
     const applicationKey = packageJson.name;
-    const isExternalFiles = (document: vscode.TextDocument) : boolean =>
+    const isRegularTextEditor = (editor: vscode.TextEditor): boolean =>
+        undefined !== editor.viewColumn && 0 < editor.viewColumn;
+    const isExternalFiles = (document: vscode.TextDocument): boolean =>
         ! document.isUntitled && 0 === (vscode.workspace.workspaceFolders ?? []).filter(i => document.uri.path.startsWith(i.uri.path)).length;
-    let externalDocuments : vscode.TextDocument[] = [];
     const recentlyUsedExternalDocumentsKey = `${publisher}.${applicationKey}.recentlyUsedExternalDocuments`;
-    const getRecentlyExternalDocuments = () : vscode.Uri[] =>
+    const clearRecentlyExternalDocuments = (): Thenable<void> =>
+        extensionContext.workspaceState.update(recentlyUsedExternalDocumentsKey, []);
+    const getRecentlyExternalDocuments = (): vscode.Uri[] =>
         extensionContext.workspaceState.get<string[]>(recentlyUsedExternalDocumentsKey, [])
         .map(i => vscode.Uri.parse(i));
     const setRecentlyExternalDocuments = (documents: vscode.Uri[]): Thenable<void> =>
         extensionContext.workspaceState.update(recentlyUsedExternalDocumentsKey, documents.map(i => i.toString()));
-    const addRecentlyExternalDocument = (document: vscode.Uri) : Thenable<void> =>
+    const addRecentlyExternalDocument = (document: vscode.Uri): Thenable<void> =>
     {
         let current = getRecentlyExternalDocuments();
+        current = current.filter(i => i.toString() !== document.toString());
+        current.unshift(document);
+        current = current.slice(0, maxRecentlyFiles.get("root-workspace"));
         return setRecentlyExternalDocuments(current);
     };
     class ExternalFilesProvider implements vscode.TreeDataProvider<vscode.TreeItem>
@@ -34,32 +42,21 @@ export namespace ExternalFiles
         }
         getChildren(_element?: vscode.TreeItem | undefined): vscode.ProviderResult<vscode.TreeItem[]>
         {
-            //  unsavedDocuments は他の処理全般の都合でソートされており、順番がちょくちょく変わって view に表示するのに適さないので getUnsavedDocumentsSource() を直接利用する。
-            const unsavedDocumentsSource = getExternalDocumentsSource();
-            return 0 < unsavedDocumentsSource.length ?
-                unsavedDocumentsSource.map
+            const externalDocuments = getRecentlyExternalDocuments();
+            return 0 < externalDocuments.length ?
+                externalDocuments.map
                 (
                     i =>
                     ({
-                        label: stripDirectory(i.fileName),
-                        resourceUri: i.uri,
-                        description: i.isUntitled ?
-                            digest(i.getText()):
-                            stripFileName
-                            (
-                                vscode.workspace.rootPath ?
-                                    i.fileName.replace(new RegExp("^" +vscode.workspace.rootPath.replace(/([\!\"\#\$\%\&\'\(\)\~\^\|\\\[\]\{\}\+\*\,\.\/])/g, "\\$1")),""):
-                                    i.fileName
-                            )
-                            .replace(/^[\/\\]*/, "")
-                            .replace(/[\/\\]*$/, ""),
+                        label: stripDirectory(i.fsPath),
+                        resourceUri: i,
+                        description: stripFileName(i.fsPath),
                         command:
                         {
                             title: "show",
                             command: "vscode.open",
-                            arguments:[i.uri]
+                            arguments:[i]
                         },
-                        contextValue: i.isUntitled ? "untitled": "",
                     })
                 ):
                 [{
@@ -77,7 +74,7 @@ export namespace ExternalFiles
             export const enabled = root.makeEntry<boolean>("external-files.viewOnExplorer.enabled", "root-workspace");
         }
     }
-    const showTextDocument = async (textDocument : vscode.TextDocument) : Promise<vscode.TextEditor> => await vscode.window.showTextDocument
+    const showTextDocument = async (textDocument: vscode.Uri): Promise<vscode.TextEditor> => await vscode.window.showTextDocument
     (
         textDocument,
         undefined
@@ -91,7 +88,7 @@ export namespace ExternalFiles
             }
             await vscode.commands.executeCommand(command, node.resourceUri);
         };
-    export const initialize = (context : vscode.ExtensionContext): void =>
+    export const initialize = (context: vscode.ExtensionContext): void =>
     {
         const showCommandKey = `${applicationKey}.show`;
         context.subscriptions.push
@@ -111,8 +108,8 @@ export namespace ExternalFiles
             //  TreeDataProovider の登録
             vscode.window.registerTreeDataProvider(applicationKey, unsavedFilesProvider),
             //  イベントリスナーの登録
-            vscode.window.onDidChangeActiveTextEditor(() => updateExternalDocumentsOrder()),
-            vscode.workspace.onDidOpenTextDocument(() => updateExternalDocuments()),
+            vscode.window.onDidChangeActiveTextEditor(a => a && isRegularTextEditor(a) && updateExternalDocuments(a.document)),
+            //vscode.workspace.onDidOpenTextDocument(a => updateExternalDocuments(a)),
             vscode.workspace.onDidChangeConfiguration
             (
                 event =>
@@ -124,35 +121,23 @@ export namespace ExternalFiles
                 }
             )
         );
+        clearRecentlyExternalDocuments();
         updateViewOnExplorer();
-        updateExternalDocuments();
-    };
-    const getExternalDocumentsSource = () => vscode.workspace.textDocuments.filter(i => isExternalFiles(i));
-    const updateExternalDocuments = () : void =>
-    {
-        const unsavedDocumentsSource = getExternalDocumentsSource();
-        const oldUnsavedDocumentsFileName = externalDocuments
-            .map(i => i.fileName);
-        //  既知のドキュメントの情報を新しいオブジェクトに差し替えつつ、消えたドキュメントを間引く
-        externalDocuments = oldUnsavedDocumentsFileName
-            .map(i => unsavedDocumentsSource.find(j => j.fileName === i))
-            .filter(i => undefined !== i)
-            .map(i => <vscode.TextDocument>i);
-        //  既知でないドキュメントのオブジェクトを先頭に挿入
-        externalDocuments = unsavedDocumentsSource
-            .filter(i => oldUnsavedDocumentsFileName.indexOf(i.fileName) < 0)
-            .concat(externalDocuments);
-        updateExternalDocumentsOrder();
-    };
-    const updateExternalDocumentsOrder = () : void =>
-    {
         unsavedFilesProvider.update();
     };
-    const onDidChangeConfiguration = () : void =>
+    const updateExternalDocuments = async (document: vscode.TextDocument) =>
+    {
+        if (isExternalFiles(document))
+        {
+            await addRecentlyExternalDocument(document.uri);
+            unsavedFilesProvider.update();
+        }
+    };
+    const onDidChangeConfiguration = (): void =>
     {
         updateViewOnExplorer();
     };
-    const updateViewOnExplorer = () : void =>
+    const updateViewOnExplorer = (): void =>
     {
         vscode.commands.executeCommand
         (
@@ -162,20 +147,18 @@ export namespace ExternalFiles
         );
     };
     const showNoExternalFilesMessage = async () => await vscode.window.showInformationMessage(locale.map("noExternalFiles.message"));
-    const stripFileName = (path : string) : string => path.substr(0, path.length -stripDirectory(path).length);
-    const stripDirectory = (path : string) : string => path.split('\\').reverse()[0].split('/').reverse()[0];
-    const digest = (text : string) : string => text.replace(/\s+/g, " ").substr(0, 128);
+    const stripFileName = (path: string): string =>
+        path.substr(0, path.length -stripDirectory(path).length);
+    const stripDirectory = (path: string): string =>
+        path.split('\\').reverse()[0].split('/').reverse()[0];
     const showQuickPickUnsavedDocument = () => vscode.window.showQuickPick
     (
-        externalDocuments.map
+        getRecentlyExternalDocuments().map
         (
             i =>
             ({
-                label: `$(primitive-dot) $(file-text) ${stripDirectory(i.fileName)}`,
-                description: i.isUntitled ?
-                    digest(i.getText()):
-                    stripFileName(i.fileName),
-                detail: i.languageId,
+                label: `$(primitive-dot) $(file-text) ${stripDirectory(i.fsPath)}`,
+                description: stripFileName(i.fsPath),
                 document: i
             })
         ),
@@ -183,8 +166,9 @@ export namespace ExternalFiles
             placeHolder: locale.map("selectExternalFiles.placeHolder"),
         }
     );
-    export const show = async () : Promise<void> =>
+    export const show = async (): Promise<void> =>
     {
+        const externalDocuments = getRecentlyExternalDocuments();
         switch(externalDocuments.length)
         {
         case 0:
@@ -202,8 +186,8 @@ export namespace ExternalFiles
             break;
         }
     };
-    const showView = async () : Promise<void> => await Config.ViewOnExplorer.enabled.set(true);
-    const hideView = async () : Promise<void> => await Config.ViewOnExplorer.enabled.set(false);
+    const showView = async (): Promise<void> => await Config.ViewOnExplorer.enabled.set(true);
+    const hideView = async (): Promise<void> => await Config.ViewOnExplorer.enabled.set(false);
 }
 let extensionContext: vscode.ExtensionContext;
 export const activate = (context: vscode.ExtensionContext) : void =>
