@@ -1,7 +1,7 @@
 {
     "external-files-vscode.title": "External Files",
-    "external-files-vscode.recentlyUsedExternalDocuments": "Recently Used External Files",
-    "external-files-vscode.pinnedExternalDocuments": "Pinned External Files",
+    "external-files-vscode.recentlyUsedExternalFiles": "Recently Used External Files",
+    "external-files-vscode.pinnedExternalFiles": "Pinned External Files",
     "external-files-vscode.show.title": "Show",
     "external-files-vscode.revealFileInFinder.title": "Reveal in Finder",
     "external-files-vscode.revealFileInExplorer.title": "Reveal in Explorer",

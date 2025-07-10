@@ -46,33 +46,35 @@
             "view/item/context": [
                 {
                     "command": "external-files.revealFileInFinder",
-                    "when": "viewItem != untitled && isMac"
+                    "when": "(viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile) && isMac"
                 },
                 {
                     "command": "external-files.revealFileInExplorer",
-                    "when": "viewItem != untitled && !isMac && !isWeb"
+                    "when": "(viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile) && !isMac && !isWeb"
                 },
                 {
                     "command": "external-files.copyFilePath",
-                    "when": "viewItem != untitled"
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
                 },
                 {
                     "command": "external-files.copyRelativeFilePath",
-                    "when": "viewItem != untitled"
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
                 },
                 {
-                    "command": "external-files.compareFileWith"
+                    "command": "external-files.compareFileWith",
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
                 },
                 {
-                    "command": "external-files.compareWithClipboard"
+                    "command": "external-files.compareWithClipboard",
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
                 },
                 {
                     "command": "external-files.compareWithSaved",
-                    "when": "viewItem != untitled"
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
                 },
                 {
                     "command": "external-files.showActiveFileInExplorer",
-                    "when": "viewItem != untitled"
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
                 }
             ],
             "commandPalette": [

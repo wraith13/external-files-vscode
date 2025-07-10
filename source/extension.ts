@@ -16,44 +16,68 @@ export namespace ExternalFiles
         undefined !== editor.viewColumn && 0 < editor.viewColumn;
     const isExternalFiles = (document: vscode.TextDocument): boolean =>
         ! document.isUntitled && 0 === (vscode.workspace.workspaceFolders ?? []).filter(i => document.uri.path.startsWith(i.uri.path)).length;
-    const recentlyUsedExternalDocumentsKey = `${publisher}.${applicationKey}.recentlyUsedExternalDocuments`;
-    const clearRecentlyUsedExternalDocuments = (): Thenable<void> =>
-        extensionContext.workspaceState.update(recentlyUsedExternalDocumentsKey, []);
-    const getRecentlyUsedExternalDocuments = (): vscode.Uri[] =>
-        extensionContext.workspaceState.get<string[]>(recentlyUsedExternalDocumentsKey, [])
-        .map(i => vscode.Uri.parse(i));
-    const setRecentlyUsedExternalDocuments = (documents: vscode.Uri[]): Thenable<void> =>
-        extensionContext.workspaceState.update(recentlyUsedExternalDocumentsKey, documents.map(i => i.toString()));
-    const addRecentlyUsedExternalDocument = (document: vscode.Uri): Thenable<void> =>
+    namespace PinnedExternalFiles
     {
-        let current = getRecentlyUsedExternalDocuments();
-        current = current.filter(i => i.toString() !== document.toString());
-        current.unshift(document);
-        current = current.slice(0, maxRecentlyFiles.get("root-workspace"));
-        return setRecentlyUsedExternalDocuments(current);
-    };
-    const pinnedExternalDocumentsKey = `${publisher}.${applicationKey}.pinnedExternalDocuments`;
-    const getPinnedExternalDocuments = (): vscode.Uri[] =>
-        extensionContext.workspaceState.get<string[]>(pinnedExternalDocumentsKey, [])
-        .map(i => vscode.Uri.parse(i));
-    const setPinnedExternalDocuments = (documents: vscode.Uri[]): Thenable<void> =>
-        extensionContext.workspaceState.update(pinnedExternalDocumentsKey, documents.map(i => i.toString()));
-    const isPinnedExternalDocument = (document: vscode.Uri): boolean =>
-        getPinnedExternalDocuments().some(i => i.toString() === document.toString());
-    const addPinnedExternalDocument = (document: vscode.Uri): Thenable<void> =>
+        const key = `${publisher}.${applicationKey}.pinnedExternalFiles`;
+        export const get = (): vscode.Uri[] =>
+            extensionContext.workspaceState.get<string[]>(key, [])
+            .map(i => vscode.Uri.parse(i));
+        export const set = (documents: vscode.Uri[]): Thenable<void> =>
+            extensionContext.workspaceState.update(key, documents.map(i => i.toString()));
+        export const isPinned = (document: vscode.Uri): boolean =>
+            get().some(i => i.toString() === document.toString());
+        export const add = (document: vscode.Uri): Thenable<void> =>
+        {
+            let current = get();
+            current = current.filter(i => i.toString() !== document.toString());
+            current.unshift(document);
+            current.sort();
+            return set(current);
+        };
+        export const remove = (document: vscode.Uri): Thenable<void> =>
+        {
+            let current = get();
+            current = current.filter(i => i.toString() !== document.toString());
+            return set(current);
+        };
+    }
+    namespace RecentlyUsedExternalFiles
     {
-        let current = getPinnedExternalDocuments();
-        current = current.filter(i => i.toString() !== document.toString());
-        current.unshift(document);
-        current.sort();
-        return setPinnedExternalDocuments(current);
-    };
-    const removePinnedExternalDocument = (document: vscode.Uri): Thenable<void> =>
+        const key = `${publisher}.${applicationKey}.recentlyUsedExternalFiles`;
+        export const clear = (): Thenable<void> =>
+            extensionContext.workspaceState.update(key, []);
+        export const get = (): vscode.Uri[] =>
+            extensionContext.workspaceState.get<string[]>(key, [])
+            .map(i => vscode.Uri.parse(i));
+        export const set = (documents: vscode.Uri[]): Thenable<void> =>
+            extensionContext.workspaceState.update(key, documents.map(i => i.toString()));
+        export const add = (document: vscode.Uri): Thenable<void> =>
+        {
+            let current = get();
+            current = current.filter(i => i.toString() !== document.toString());
+            current.unshift(document);
+            current = current.slice(0, maxRecentlyFiles.get("root-workspace"));
+            return set(current);
+        };
+    }
+    namespace Icons
     {
-        let current = getPinnedExternalDocuments();
-        current = current.filter(i => i.toString() !== document.toString());
-        return setPinnedExternalDocuments(current);
-    };
+        export let pinIcon: vscode.IconPath;
+        export let historyIcon: vscode.IconPath;
+        export const initialize = (context: vscode.ExtensionContext): void =>
+        {
+            pinIcon =
+            {
+                light: vscode.Uri.joinPath(context.extensionUri, "images", "pin.1024.svg"),
+                dark: vscode.Uri.joinPath(context.extensionUri, "images", "pin-white.1024.svg"),
+            };
+            historyIcon =
+            {
+                light: vscode.Uri.joinPath(context.extensionUri, "images", "history.1024.svg"),
+                dark: vscode.Uri.joinPath(context.extensionUri, "images", "history-white.1024.svg"),
+            };
+        };
+    }
     class ExternalFilesProvider implements vscode.TreeDataProvider<vscode.TreeItem>
     {
         private onDidChangeTreeDataEventEmitter = new vscode.EventEmitter<vscode.TreeItem | undefined>();
@@ -62,32 +86,78 @@ export namespace ExternalFiles
         {
             return element;
         }
-        getChildren(_element?: vscode.TreeItem | undefined): vscode.ProviderResult<vscode.TreeItem[]>
+        getChildren(element?: vscode.TreeItem | undefined): vscode.ProviderResult<vscode.TreeItem[]>
         {
-            const externalDocuments = getRecentlyUsedExternalDocuments();
-            return 0 < externalDocuments.length ?
-                externalDocuments.map
-                (
-                    i =>
-                    ({
-                        label: stripDirectory(i.fsPath),
-                        resourceUri: i,
-                        description: stripFileName(i.fsPath),
-                        command:
-                        {
-                            title: "show",
-                            command: "vscode.open",
-                            arguments:[i]
-                        }
-                    })
-                ):
-                [{
-                    label: locale.map("noExternalFiles.message"),
-                }];
+            switch(element?.contextValue)
+            {
+            case undefined:
+                return [
+                    {
+                        iconPath: Icons.pinIcon,
+                        label: locale.map("external-files-vscode.pinnedExternalFiles"),
+                        collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
+                        contextValue: `${publisher}.${applicationKey}.pinnedExternalFilesRoot`,
+                    },
+                    {
+                        iconPath: Icons.historyIcon,
+                        label: locale.map("external-files-vscode.recentlyUsedExternalFiles"),
+                        collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
+                        contextValue: `${publisher}.${applicationKey}.recentlyUsedExternalFilesRoot`,
+                    }
+                ]
+            case `${publisher}.${applicationKey}.pinnedExternalFilesRoot`:
+                const pinnedExternalDocuments = PinnedExternalFiles.get();
+                return 0 < pinnedExternalDocuments.length ?
+                    pinnedExternalDocuments.map
+                    (
+                        i =>
+                        ({
+                            label: stripDirectory(i.fsPath),
+                            resourceUri: i,
+                            description: stripFileName(i.fsPath),
+                            command:
+                            {
+                                title: "show",
+                                command: "vscode.open",
+                                arguments:[i]
+                            },
+                            contextValue: `${publisher}.${applicationKey}.pinnedExternalFile`,
+                        })
+                    ):
+                    [{
+                        label: locale.map("noExternalFiles.message"),
+                        contextValue: `${publisher}.${applicationKey}.noFiles`,
+                    }];
+            case `${publisher}.${applicationKey}.recentlyUsedExternalFilesRoot`:
+                const recentlyUsedExternalDocuments = RecentlyUsedExternalFiles.get();
+                return 0 < recentlyUsedExternalDocuments.length ?
+                    recentlyUsedExternalDocuments.map
+                    (
+                        i =>
+                        ({
+                            label: stripDirectory(i.fsPath),
+                            resourceUri: i,
+                            description: stripFileName(i.fsPath),
+                            command:
+                            {
+                                title: "show",
+                                command: "vscode.open",
+                                arguments:[i]
+                            },
+                            contextValue: `${publisher}.${applicationKey}.recentlyUsedExternalFile`,
+                        })
+                    ):
+                    [{
+                        label: locale.map("noExternalFiles.message"),
+                        contextValue: `${publisher}.${applicationKey}.noFiles`,
+                    }];
+            default:
+                return [];
+            }
         }
         update = () => this.onDidChangeTreeDataEventEmitter.fire(undefined);
     }
-    let unsavedFilesProvider = new ExternalFilesProvider();
+    let externalFilesProvider = new ExternalFilesProvider();
     export namespace Config
     {
         const root = vscel.config.makeRoot(packageJson);
@@ -112,6 +182,7 @@ export namespace ExternalFiles
         };
     export const initialize = (context: vscode.ExtensionContext): void =>
     {
+        Icons.initialize(context);
         const showCommandKey = `${applicationKey}.show`;
         context.subscriptions.push
         (
@@ -128,7 +199,7 @@ export namespace ExternalFiles
             vscode.commands.registerCommand(`${applicationKey}.showView`, showView),
             vscode.commands.registerCommand(`${applicationKey}.hideView`, hideView),
             //  TreeDataProovider の登録
-            vscode.window.registerTreeDataProvider(applicationKey, unsavedFilesProvider),
+            vscode.window.registerTreeDataProvider(applicationKey, externalFilesProvider),
             //  イベントリスナーの登録
             vscode.window.onDidChangeActiveTextEditor(a => a && isRegularTextEditor(a) && updateExternalDocuments(a.document)),
             //vscode.workspace.onDidOpenTextDocument(a => updateExternalDocuments(a)),
@@ -143,16 +214,16 @@ export namespace ExternalFiles
                 }
             )
         );
-        clearRecentlyUsedExternalDocuments();
+        RecentlyUsedExternalFiles.clear();
         updateViewOnExplorer();
-        unsavedFilesProvider.update();
+        externalFilesProvider.update();
     };
     const updateExternalDocuments = async (document: vscode.TextDocument) =>
     {
         if (isExternalFiles(document))
         {
-            await addRecentlyUsedExternalDocument(document.uri);
-            unsavedFilesProvider.update();
+            await RecentlyUsedExternalFiles.add(document.uri);
+            externalFilesProvider.update();
         }
     };
     const onDidChangeConfiguration = (): void =>
@@ -175,7 +246,7 @@ export namespace ExternalFiles
         path.split('\\').reverse()[0].split('/').reverse()[0];
     const showQuickPickUnsavedDocument = () => vscode.window.showQuickPick
     (
-        getRecentlyUsedExternalDocuments().map
+        RecentlyUsedExternalFiles.get().map
         (
             i =>
             ({
@@ -190,7 +261,7 @@ export namespace ExternalFiles
     );
     export const show = async (): Promise<void> =>
     {
-        const externalDocuments = getRecentlyUsedExternalDocuments();
+        const externalDocuments = RecentlyUsedExternalFiles.get();
         switch(externalDocuments.length)
         {
         case 0:
