@@ -45,6 +45,16 @@
         "menus": {
             "view/item/context": [
                 {
+                    "command": "external-files.addPinnedFile",
+                    "when": "viewItem == wraith13.external-files.recentlyUsedExternalFile",
+                    "group": "inline"
+                },
+                {
+                    "command": "external-files.removePinnedFile",
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFile",
+                    "group": "inline"
+                },
+                {
                     "command": "external-files.revealFileInFinder",
                     "when": "(viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile) && isMac"
                 },
@@ -57,27 +67,19 @@
                     "when": "viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
                 },
                 {
-                    "command": "external-files.copyRelativeFilePath",
-                    "when": "viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
-                },
-                {
-                    "command": "external-files.compareFileWith",
-                    "when": "viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
-                },
-                {
-                    "command": "external-files.compareWithClipboard",
-                    "when": "viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
-                },
-                {
-                    "command": "external-files.compareWithSaved",
-                    "when": "viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
-                },
-                {
                     "command": "external-files.showActiveFileInExplorer",
                     "when": "viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
                 }
             ],
             "commandPalette": [
+                {
+                    "command": "external-files.addPinnedFile",
+                    "when": "wraith13.external-files.isRecentlyUsedExternalFile"
+                },
+                {
+                    "command": "external-files.removePinnedFile",
+                    "when": "wraith13.external-files.isPinnedExternalFile"
+                },
                 {
                     "command": "external-files.revealFileInFinder",
                     "when": "false"
@@ -88,22 +90,6 @@
                 },
                 {
                     "command": "external-files.copyFilePath",
-                    "when": "false"
-                },
-                {
-                    "command": "external-files.copyRelativeFilePath",
-                    "when": "false"
-                },
-                {
-                    "command": "external-files.compareFileWith",
-                    "when": "false"
-                },
-                {
-                    "command": "external-files.compareWithClipboard",
-                    "when": "false"
-                },
-                {
-                    "command": "external-files.compareWithSaved",
                     "when": "false"
                 },
                 {
@@ -129,6 +115,24 @@
                 "category": "%external-files-vscode.title%"
             },
             {
+                "icon": {
+                    "light": "images/add-pin.1024.svg",
+                    "dark": "images/add-pin-white.1024.svg"
+                },
+                "command": "external-files.addPinnedFile",
+                "title": "%external-files-vscode.addPinnedFile.title%",
+                "category": "%external-files-vscode.title%"
+            },
+            {
+                "icon": {
+                    "light": "images/remove-pin.1024.svg",
+                    "dark": "images/remove-pin-white.1024.svg"
+                },
+                "command": "external-files.removePinnedFile",
+                "title": "%external-files-vscode.removePinnedFile.title%",
+                "category": "%external-files-vscode.title%"
+            },
+            {
                 "command": "external-files.revealFileInFinder",
                 "title": "%external-files-vscode.revealFileInFinder.title%",
                 "category": "file"
@@ -141,26 +145,6 @@
             {
                 "command": "external-files.copyFilePath",
                 "title": "%external-files-vscode.copyFilePath.title%",
-                "category": "file"
-            },
-            {
-                "command": "external-files.copyRelativeFilePath",
-                "title": "%external-files-vscode.copyRelativeFilePath.title%",
-                "category": "file"
-            },
-            {
-                "command": "external-files.compareFileWith",
-                "title": "%external-files-vscode.compareFileWith.title%",
-                "category": "file"
-            },
-            {
-                "command": "external-files.compareWithClipboard",
-                "title": "%external-files-vscode.compareWithClipboard.title%",
-                "category": "file"
-            },
-            {
-                "command": "external-files.compareWithSaved",
-                "title": "%external-files-vscode.compareWithSaved.title%",
                 "category": "file"
             },
             {

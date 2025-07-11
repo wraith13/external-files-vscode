@@ -59,6 +59,12 @@ export namespace ExternalFiles
             current = current.slice(0, maxRecentlyFiles.get("root-workspace"));
             return set(current);
         };
+        export const remove = (document: vscode.Uri): Thenable<void> =>
+        {
+            let current = get();
+            current = current.filter(i => i.toString() !== document.toString());
+            return set(current);
+        };
     }
     namespace Icons
     {
@@ -171,6 +177,18 @@ export namespace ExternalFiles
         textDocument,
         undefined
     );
+    export const addPinnedFile = async (node: any): Promise<void> =>
+    {
+        await PinnedExternalFiles.add(node.resourceUri);
+        await RecentlyUsedExternalFiles.remove(node.resourceUri);
+        externalFilesProvider.update();
+    };
+    export const removePinnedFile = async (node: any): Promise<void> =>
+    {
+        await PinnedExternalFiles.remove(node.resourceUri);
+        await RecentlyUsedExternalFiles.add(node.resourceUri);
+        externalFilesProvider.update();
+    };
     export const makeCommand = (command: string, withActivate?: "withActivate") =>
         async (node: any) =>
         {
@@ -188,20 +206,19 @@ export namespace ExternalFiles
         (
             //  コマンドの登録
             vscode.commands.registerCommand(showCommandKey, show),
+            vscode.commands.registerCommand(`${applicationKey}.addPinnedFile`, addPinnedFile),
+            vscode.commands.registerCommand(`${applicationKey}.removePinnedFile`, removePinnedFile),
             vscode.commands.registerCommand(`${applicationKey}.revealFileInFinder`, makeCommand("revealFileInOS")),
             vscode.commands.registerCommand(`${applicationKey}.revealFileInExplorer`, makeCommand("revealFileInOS")),
             vscode.commands.registerCommand(`${applicationKey}.copyFilePath`, makeCommand("copyFilePath")),
-            vscode.commands.registerCommand(`${applicationKey}.copyRelativeFilePath`, makeCommand("copyRelativeFilePath")),
-            vscode.commands.registerCommand(`${applicationKey}.compareFileWith`, makeCommand("workbench.files.action.compareFileWith", "withActivate")),
-            vscode.commands.registerCommand(`${applicationKey}.compareWithClipboard`, makeCommand("workbench.files.action.compareWithClipboard", "withActivate")),
-            vscode.commands.registerCommand(`${applicationKey}.compareWithSaved`, makeCommand("workbench.files.action.compareWithSaved")),
             vscode.commands.registerCommand(`${applicationKey}.showActiveFileInExplorer`, makeCommand("workbench.files.action.showActiveFileInExplorer", "withActivate")),
             vscode.commands.registerCommand(`${applicationKey}.showView`, showView),
             vscode.commands.registerCommand(`${applicationKey}.hideView`, hideView),
             //  TreeDataProovider の登録
-            vscode.window.registerTreeDataProvider(applicationKey, externalFilesProvider),
+            vscode.window.createTreeView(applicationKey, { treeDataProvider: externalFilesProvider }),
+            //vscode.window.registerTreeDataProvider(applicationKey, externalFilesProvider),
             //  イベントリスナーの登録
-            vscode.window.onDidChangeActiveTextEditor(a => a && isRegularTextEditor(a) && updateExternalDocuments(a.document)),
+            vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor),
             //vscode.workspace.onDidOpenTextDocument(a => updateExternalDocuments(a)),
             vscode.workspace.onDidChangeConfiguration
             (
@@ -214,13 +231,37 @@ export namespace ExternalFiles
                 }
             )
         );
-        RecentlyUsedExternalFiles.clear();
+        //RecentlyUsedExternalFiles.clear();
         updateViewOnExplorer();
         externalFilesProvider.update();
+        onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
+    };
+    const onDidChangeActiveTextEditor = (editor: vscode.TextEditor | undefined): void =>
+    {
+        let isPinnedExternalFile = false;
+        let isRecentlyUsedExternalFile = false;
+        if (editor && isRegularTextEditor(editor))
+        {
+            isPinnedExternalFile = PinnedExternalFiles.isPinned(editor.document.uri);
+            isRecentlyUsedExternalFile = ! isPinnedExternalFile && isExternalFiles(editor.document);
+            updateExternalDocuments(editor.document);
+        }
+        vscode.commands.executeCommand
+        (
+            "setContext",
+            `${publisher}.${applicationKey}.isPinnedExternalFile`,
+            isPinnedExternalFile
+        );
+        vscode.commands.executeCommand
+        (
+            "setContext",
+            `${publisher}.${applicationKey}.isRecentlyUsedExternalFile`,
+            isRecentlyUsedExternalFile
+        );
     };
     const updateExternalDocuments = async (document: vscode.TextDocument) =>
     {
-        if (isExternalFiles(document))
+        if (isExternalFiles(document) && ! PinnedExternalFiles.isPinned(document.uri))
         {
             await RecentlyUsedExternalFiles.add(document.uri);
             externalFilesProvider.update();
