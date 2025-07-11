@@ -1,8 +1,11 @@
 {
     "external-files-vscode.title": "外部ファイル",
+    "external-files-vscode.externalFolders": "外部フォルダー",
     "external-files-vscode.recentlyUsedExternalFiles": "最近使用した外部ファイル",
     "external-files-vscode.pinnedExternalFiles": "ピン留めされた外部ファイル",
     "external-files-vscode.show.title": "表示",
+    "external-files-vscode.addExternalFolder.title": "外部フォルダーを登録",
+    "external-files-vscode.removeExternalFolder.title": "外部フォルダーを登録解除",
     "external-files-vscode.addPinnedFile.title": "外部ファイルをピン留め",
     "external-files-vscode.removePinnedFile.title": "外部ファイルのピン留めを解除",
     "external-files-vscode.revealFileInFinder.title": "Finder で表示します",
@@ -13,6 +16,7 @@
     "external-files-vscode.hideView.title": "ビューを隠す",
     "external-files.viewOnExplorer.enabled.description": "エクスプローラー上のビューでの外部ファイルの表示",
     "external-files.maxRecentlyFiles.description": "保持される最近の外部ファイルの最大数",
+    "noExternalFolders.message": "外部ファイルがありません",
     "noExternalFiles.message": "外部ファイルがありません",
     "selectExternalFiles.placeHolder": "外部ファイルを選択してください。"
 }

@@ -19,9 +19,9 @@ export namespace ExternalFiles
             const stat = await vscode.workspace.fs.stat(uri);
             switch(true)
             {
-            case 0 <= (stat.type & vscode.FileType.Directory):
+            case 0 < (stat.type & vscode.FileType.Directory):
                 return "folder";
-            case 0 <= (stat.type & vscode.FileType.File):
+            case 0 < (stat.type & vscode.FileType.File):
                 return "file";
             default:
                 return undefined;
@@ -36,6 +36,30 @@ export namespace ExternalFiles
         "file" === await isFolderOrFile(uri);
     export const isFolder = async (uri: vscode.Uri): Promise<boolean> =>
         "folder" === await isFolderOrFile(uri);
+    export const getSubFolders = async (uri: vscode.Uri): Promise<vscode.Uri[]> =>
+    {
+        const stat = await vscode.workspace.fs.stat(uri);
+        if (0 <= (stat.type & vscode.FileType.Directory))
+        {
+            const entries = await vscode.workspace.fs.readDirectory(uri);
+            return entries
+                .filter(i => 0 < (i[1] & vscode.FileType.Directory))
+                .map(i => vscode.Uri.joinPath(uri, i[0]));
+        }
+        return [];
+    };
+    export const getFiles = async (uri: vscode.Uri): Promise<vscode.Uri[]> =>
+    {
+        const stat = await vscode.workspace.fs.stat(uri);
+        if (0 <= (stat.type & vscode.FileType.Directory))
+        {
+            const entries = await vscode.workspace.fs.readDirectory(uri);
+            return entries
+                .filter(i => 0 < (i[1] & vscode.FileType.File))
+                .map(i => vscode.Uri.joinPath(uri, i[0]));
+        }
+        return [];
+    };
     const isRegularTextEditor = (editor: vscode.TextEditor): boolean =>
         undefined !== editor.viewColumn && 0 < editor.viewColumn;
     const isExternalFiles = (uri: vscode.Uri): boolean =>
@@ -119,10 +143,12 @@ export namespace ExternalFiles
     }
     namespace Icons
     {
+        export let folderIcon: vscode.IconPath;
         export let pinIcon: vscode.IconPath;
         export let historyIcon: vscode.IconPath;
         export const initialize = (context: vscode.ExtensionContext): void =>
         {
+            folderIcon = new vscode.ThemeIcon("folder");
             pinIcon =
             {
                 light: vscode.Uri.joinPath(context.extensionUri, "images", "pin.1024.svg"),
@@ -143,12 +169,18 @@ export namespace ExternalFiles
         {
             return element;
         }
-        getChildren(element?: vscode.TreeItem | undefined): vscode.ProviderResult<vscode.TreeItem[]>
+        async getChildren(element?: vscode.TreeItem | undefined): Promise<vscode.TreeItem[]>
         {
             switch(element?.contextValue)
             {
             case undefined:
                 return [
+                    {
+                        iconPath: Icons.folderIcon,
+                        label: locale.map("external-files-vscode.externalFolders"),
+                        collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
+                        contextValue: `${publisher}.${applicationKey}.pinnedExternalFoldersRoot`,
+                    },
                     {
                         iconPath: Icons.pinIcon,
                         label: locale.map("external-files-vscode.pinnedExternalFiles"),
@@ -161,34 +193,69 @@ export namespace ExternalFiles
                         collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
                         contextValue: `${publisher}.${applicationKey}.recentlyUsedExternalFilesRoot`,
                     }
-                ]
-            case `${publisher}.${applicationKey}.pinnedExternalFilesRoot`:
-            {
-                const result: vscode.TreeItem[] = [];
+                ];
+            case `${publisher}.${applicationKey}.pinnedExternalFoldersRoot`:
                 const pinnedExternalFolders = PinnedExternalFolders.get();
-                const pinnedExternalDocuments = PinnedExternalFiles.get();
-                result.push
-                (
-                    ...pinnedExternalFolders.map
+                return 0 < pinnedExternalFolders.length ?
+                    pinnedExternalFolders.map
                     (
                         i =>
                         ({
+                            iconPath: Icons.folderIcon,
                             label: stripDirectory(i.fsPath),
                             resourceUri: i,
                             description: stripFileName(i.fsPath),
-                            command:
-                            {
-                                title: "show",
-                                command: "vscode.open",
-                                arguments:[i]
-                            },
+                            collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
                             contextValue: `${publisher}.${applicationKey}.pinnedExternalFolder`,
                         })
-                    )
-                );
-                result.push
-                (
-                    ...pinnedExternalDocuments.map
+                    ):
+                    [{
+                        label: locale.map("noExternalFolders.message"),
+                        contextValue: `${publisher}.${applicationKey}.noFiles`,
+                    }];
+            case `${publisher}.${applicationKey}.pinnedExternalFolder`:
+            case `${publisher}.${applicationKey}.externalFolder`:
+                if (element.resourceUri)
+                {
+                    const subFolders = await getSubFolders(element.resourceUri);
+                    const files = await getFiles(element.resourceUri);
+                    return [
+                        ...subFolders.map
+                        (
+                            i =>
+                            ({
+                                iconPath: Icons.folderIcon,
+                                label: stripDirectory(i.fsPath),
+                                resourceUri: i,
+                                //description: stripFileName(i.fsPath),
+                                collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                                contextValue: `${publisher}.${applicationKey}.externalFolder`,
+                            })
+                        ),
+                        ...files.map
+                        (
+                            i =>
+                            ({
+                                iconPath: vscode.ThemeIcon.File,
+                                label: stripDirectory(i.fsPath),
+                                resourceUri: i,
+                                //description: stripFileName(i.fsPath),
+                                command:
+                                {
+                                    title: "show",
+                                    command: "vscode.open",
+                                    arguments:[i]
+                                },
+                                contextValue: `${publisher}.${applicationKey}.externalFile`,
+                            })
+                        )
+                    ];
+                }
+                return [];
+            case `${publisher}.${applicationKey}.pinnedExternalFilesRoot`:
+                const pinnedExternalDocuments = PinnedExternalFiles.get();
+                return 0 < pinnedExternalDocuments.length ?
+                    pinnedExternalDocuments.map
                     (
                         i =>
                         ({
@@ -203,18 +270,11 @@ export namespace ExternalFiles
                             },
                             contextValue: `${publisher}.${applicationKey}.pinnedExternalFile`,
                         })
-                    )
-                );
-                if (result.length <= 0)
-                {
-                    result.push
-                    ({
+                    ):
+                    [{
                         label: locale.map("noExternalFiles.message"),
                         contextValue: `${publisher}.${applicationKey}.noFiles`,
-                    });
-                }
-                return result;
-            }
+                    }];
             case `${publisher}.${applicationKey}.recentlyUsedExternalFilesRoot`:
                 const recentlyUsedExternalDocuments = RecentlyUsedExternalFiles.get();
                 return 0 < recentlyUsedExternalDocuments.length ?
@@ -271,6 +331,9 @@ export namespace ExternalFiles
                     .map((i: string) => vscode.Uri.parse(i));
                 switch(target.contextValue)
                 {
+                case `${publisher}.${applicationKey}.pinnedExternalFoldersRoot`:
+                case `${publisher}.${applicationKey}.externalFolder`:
+                case `${publisher}.${applicationKey}.externalFile`:
                 case `${publisher}.${applicationKey}.pinnedExternalFilesRoot`:
                 case `${publisher}.${applicationKey}.pinnedExternalFolder`:
                 case `${publisher}.${applicationKey}.pinnedExternalFile`:
@@ -346,11 +409,79 @@ export namespace ExternalFiles
         textDocument,
         undefined
     );
+    export const addExternalFolder = async (): Promise<void> =>
+    {
+        const folders = await vscode.window.showOpenDialog
+        (
+            {
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+                openLabel: locale.map("external-files-vscode.addExternalFolder.title"),
+                title: locale.map("external-files-vscode.externalFolders"),
+            }
+        );
+        if (folders)
+        {
+            await Promise.all
+            (
+                folders.map
+                (
+                    async (resourceUri: vscode.Uri) =>
+                        await PinnedExternalFolders.add(resourceUri)
+                )
+            );
+            treeDataProvider.update();
+        }
+    };
+    export const removeExternalFolder = async (resourceUri: vscode.Uri): Promise<void> =>
+    {
+        await PinnedExternalFolders.remove(resourceUri);
+        treeDataProvider.update();
+    };
     export const addPinnedFile = async (resourceUri: vscode.Uri): Promise<void> =>
     {
-        await PinnedExternalFiles.add(resourceUri);
-        await RecentlyUsedExternalFiles.remove(resourceUri);
-        treeDataProvider.update();
+        if (undefined === resourceUri)
+        {
+            const files = await vscode.window.showOpenDialog
+            (
+                {
+                    canSelectFiles: true,
+                    canSelectFolders: false,
+                    canSelectMany: false,
+                    openLabel: locale.map("external-files-vscode.addPinnedFile.title"),
+                    title: locale.map("external-files-vscode.pinnedExternalFiles"),
+                }
+            );
+            if (files)
+            {
+                await Promise.all
+                (
+                    files.map
+                    (
+                        async (resourceUri: vscode.Uri) =>
+                        {
+                            if (isExternalFiles(resourceUri))
+                            {
+                                await PinnedExternalFiles.add(resourceUri);
+                                await RecentlyUsedExternalFiles.remove(resourceUri);
+                            }
+                        }
+                    )
+                );
+                treeDataProvider.update();
+            }
+
+        }
+        else
+        {
+            if (isExternalFiles(resourceUri))
+            {
+                await PinnedExternalFiles.add(resourceUri);
+                await RecentlyUsedExternalFiles.remove(resourceUri);
+                treeDataProvider.update();
+            }
+        }
     };
     export const removePinnedFile = async (resourceUri: vscode.Uri): Promise<void> =>
     {
@@ -375,6 +506,8 @@ export namespace ExternalFiles
         (
             //  コマンドの登録
             vscode.commands.registerCommand(showCommandKey, show),
+            vscode.commands.registerCommand(`${applicationKey}.addExternalFolder`, addExternalFolder),
+            vscode.commands.registerCommand(`${applicationKey}.removeExternalFolder`, node => removeExternalFolder(node.resourceUri)),
             vscode.commands.registerCommand(`${applicationKey}.addPinnedFile`, node => addPinnedFile(node.resourceUri)),
             vscode.commands.registerCommand(`${applicationKey}.removePinnedFile`, node => removePinnedFile(node.resourceUri)),
             vscode.commands.registerCommand(`${applicationKey}.revealFileInFinder`, makeCommand("revealFileInOS")),
