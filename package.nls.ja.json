@@ -6,6 +6,8 @@
     "external-files-vscode.show.title": "表示",
     "external-files-vscode.addExternalFolder.title": "外部フォルダーを登録",
     "external-files-vscode.removeExternalFolder.title": "外部フォルダーを登録解除",
+    "external-files-vscode.reloadExternalFolder.title": "外部フォルダーを再読み込み",
+    "external-files-vscode.revealInTerminal.title": "ターミナルで表示",
     "external-files-vscode.addPinnedFile.title": "外部ファイルをピン留め",
     "external-files-vscode.removePinnedFile.title": "外部ファイルのピン留めを解除",
     "external-files-vscode.revealFileInFinder.title": "Finder で表示します",

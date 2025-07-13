@@ -3,7 +3,7 @@
     "displayName": "External Files",
     "description": "Easy access to external files for vscode.",
     "icon": "images/externalhex.128.png",
-    "version": "2.1.4",
+    "version": "0.0.0",
     "publisher": "wraith13",
     "license": "SEE LICENSE IN LICENSE_1_0.txt",
     "engines": {
@@ -22,7 +22,7 @@
     ],
     "keywords": [
         "external",
-        "untitled",
+        "folders",
         "files",
         "documents"
     ],
@@ -52,6 +52,15 @@
                 {
                     "command": "external-files.removeExternalFolder",
                     "when": "viewItem == wraith13.external-files.pinnedExternalFolder",
+                    "group": "inline"
+                },
+                {
+                    "command": "external-files.revealInTerminal",
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFolder || viewItem == wraith13.external-files.externalFolder"
+                },
+                {
+                    "command": "external-files.reloadExternalFolder",
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFoldersRoot",
                     "group": "inline"
                 },
                 {
@@ -89,6 +98,10 @@
                 {
                     "command": "external-files.removeExternalFolder",
                     "when": "false"
+                },
+                {
+                    "command": "external-files.reloadExternalFolder",
+                    "when": "true"
                 },
                 {
                     "command": "external-files.addPinnedFile",
@@ -148,6 +161,20 @@
                 },
                 "command": "external-files.removeExternalFolder",
                 "title": "%external-files-vscode.removeExternalFolder.title%",
+                "category": "%external-files-vscode.title%"
+            },
+            {
+                "icon": {
+                    "light": "images/toggle.1024.svg",
+                    "dark": "images/toggle-white.1024.svg"
+                },
+                "command": "external-files.reloadExternalFolder",
+                "title": "%external-files-vscode.reloadExternalFolder.title%",
+                "category": "%external-files-vscode.title%"
+            },
+            {
+                "command": "external-files.revealInTerminal",
+                "title": "%external-files-vscode.revealInTerminal.title%",
                 "category": "%external-files-vscode.title%"
             },
             {

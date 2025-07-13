@@ -6,6 +6,8 @@
     "external-files-vscode.show.title": "Show",
     "external-files-vscode.addExternalFolder.title": "Register External Folder",
     "external-files-vscode.removeExternalFolder.title": "Unregister External Folder",
+    "external-files-vscode.reloadExternalFolder.title": "Reload External Folder",
+    "external-files-vscode.revealInTerminal.title": "Reveal in Terminal",
     "external-files-vscode.addPinnedFile.title": "Pin External File",
     "external-files-vscode.removePinnedFile.title": "Unpin External File",
     "external-files-vscode.revealFileInFinder.title": "Reveal in Finder",
