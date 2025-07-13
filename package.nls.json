@@ -7,7 +7,11 @@
     "external-files-vscode.addExternalFolder.title": "Register External Folder",
     "external-files-vscode.removeExternalFolder.title": "Unregister External Folder",
     "external-files-vscode.reloadExternalFolder.title": "Reload External Folder",
-    "external-files-vscode.revealInTerminal.title": "Reveal in Terminal",
+    "external-files-vscode.newFolder.title": "New Folder...",
+    "external-files-vscode.newFile.title": "New File...",
+    "external-files-vscode.rename.title": "Rename...",
+    "external-files-vscode.remove.title": "Remove...",
+    "external-files-vscode.revealInTerminal.title": "Reveal in Integrated Terminal",
     "external-files-vscode.addPinnedFile.title": "Pin External File",
     "external-files-vscode.removePinnedFile.title": "Unpin External File",
     "external-files-vscode.revealFileInFinder.title": "Reveal in Finder",
@@ -20,5 +24,7 @@
     "external-files.maxRecentlyFiles.description": "Maximum number of recently used external files to keep",
     "noExternalFolders.message": "No external folders",
     "noExternalFiles.message": "No external files",
-    "selectExternalFiles.placeHolder": "Select a external file"
+    "selectExternalFiles.placeHolder": "Select a external file",
+    "remove.confirm.message": "Are you sure you want to remove this?",
+    "remove.button": "Remove"
 }

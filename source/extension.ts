@@ -410,7 +410,7 @@ export namespace ExternalFiles
                             {
                                 if (PinnedExternalFiles.isPinned(uri))
                                 {
-                                    await PinnedExternalFolders.remove(uri);
+                                    await PinnedExternalFiles.remove(uri);
                                 }
                                 if (isExternalFiles(uri))
                                 {
@@ -537,6 +537,148 @@ export namespace ExternalFiles
             }
             await vscode.commands.executeCommand(command, node.resourceUri);
         };
+    export const newFolder = async (node: any): Promise<void> =>
+    {
+        const folderPath = await getFolderPath(node.resourceUri);
+        if (folderPath)
+        {
+            const newFolderName = await vscode.window.showInputBox
+            (
+                {
+                    placeHolder: locale.map("external-files-vscode.newFolder.title"),
+                    prompt: locale.map("external-files-vscode.newFolder.title"),
+                }
+            );
+            if (newFolderName)
+            {
+                const newFolderUri = vscode.Uri.joinPath(node.resourceUri, newFolderName);
+                try
+                {
+                    await vscode.workspace.fs.createDirectory(newFolderUri);
+                    treeDataProvider.update(treeDataProvider.pinnedExternalFoldersRoot);
+                }
+                catch(error)
+                {
+                    vscode.window.showErrorMessage(error.message);
+                }
+            }
+        }
+    };
+    export const newFile = async (node: any): Promise<void> =>
+    {
+        const folderPath = await getFolderPath(node.resourceUri);
+        if (folderPath)
+        {
+            const newFileName = await vscode.window.showInputBox
+            (
+                {
+                    placeHolder: locale.map("external-files-vscode.newFile.title"),
+                    prompt: locale.map("external-files-vscode.newFile.title"),
+                }
+            );
+            if (newFileName)
+            {
+                const newFileUri = vscode.Uri.joinPath(node.resourceUri, newFileName);
+                try
+                {
+                    await vscode.workspace.fs.writeFile(newFileUri, new Uint8Array());
+                    await showTextDocument(newFileUri);
+                    treeDataProvider.update(treeDataProvider.pinnedExternalFoldersRoot);
+                }
+                catch(error)
+                {
+                    vscode.window.showErrorMessage(error.message);
+                }
+            }
+        }
+    };
+    export const renameFolder = async (node: any): Promise<void> =>
+    {
+        const folderPath = await getFolderPath(node.resourceUri);
+        if (folderPath)
+        {
+            const newFolderName = await vscode.window.showInputBox
+            (
+                {
+                    placeHolder: locale.map("external-files-vscode.rename.title"),
+                    value: stripDirectory(node.resourceUri.fsPath),
+                    prompt: locale.map("external-files-vscode.rename.title"),
+                }
+            );
+            if (newFolderName)
+            {
+                const newFolderUri = vscode.Uri.joinPath(node.resourceUri, "..", newFolderName);
+                try
+                {
+                    await vscode.workspace.fs.rename(node.resourceUri, newFolderUri);
+                    treeDataProvider.update(treeDataProvider.pinnedExternalFoldersRoot);
+                }
+                catch(error)
+                {
+                    vscode.window.showErrorMessage(error.message);
+                }
+            }
+        }
+    };
+    export const removeFolder = async (node: any): Promise<void> =>
+    {
+        const removeLabel = locale.map("remove.button");
+        const confirm = await vscode.window.showWarningMessage
+        (
+            locale.map("remove.confirm.message"),
+            { modal: true },
+            removeLabel
+        );
+        if (removeLabel === confirm)
+        {
+            await vscode.workspace.fs.delete(node.resourceUri, { useTrash: true, recursive: true });
+            treeDataProvider.update(treeDataProvider.pinnedExternalFoldersRoot);
+        }
+    };
+    export const renameFile = async (node: any): Promise<void> =>
+    {
+        const folderPath = await getFolderPath(node.resourceUri);
+        if (folderPath)
+        {
+            const newFileName = await vscode.window.showInputBox
+            (
+                {
+                    placeHolder: locale.map("external-files-vscode.rename.title"),
+                    value: stripDirectory(node.resourceUri.fsPath),
+                    prompt: locale.map("external-files-vscode.rename.title"),
+                }
+            );
+            if (newFileName)
+            {
+                const newFileUri = vscode.Uri.joinPath(node.resourceUri, "..", newFileName);
+                try
+                {
+                    await vscode.workspace.fs.rename(node.resourceUri, newFileUri);
+                    await showTextDocument(newFileUri);
+                    treeDataProvider.update(treeDataProvider.pinnedExternalFoldersRoot);
+                }
+                catch(error)
+                {
+                    vscode.window.showErrorMessage(error.message);
+                }
+            }
+        }
+    };
+    export const removeFile = async (node: any): Promise<void> =>
+    {
+        const removeLabel = locale.map("remove.button");
+        const confirm = await vscode.window.showWarningMessage
+        (
+            locale.map("remove.confirm.message"),
+            { modal: true },
+            removeLabel
+        );
+        if (removeLabel === confirm)
+        {
+            await vscode.workspace.fs.delete(node.resourceUri, { useTrash: true });
+            treeDataProvider.update(treeDataProvider.pinnedExternalFoldersRoot);
+        }
+    };
     export const initialize = (context: vscode.ExtensionContext): void =>
     {
         Icons.initialize(context);
@@ -546,18 +688,24 @@ export namespace ExternalFiles
         (
             //  コマンドの登録
             vscode.commands.registerCommand(showCommandKey, show),
-            vscode.commands.registerCommand(`${applicationKey}.addExternalFolder`, addExternalFolder),
-            vscode.commands.registerCommand(`${applicationKey}.removeExternalFolder`, node => removeExternalFolder(node.resourceUri)),
-            vscode.commands.registerCommand(`${applicationKey}.reloadExternalFolder`, _ => treeDataProvider.update(treeDataProvider.pinnedExternalFoldersRoot)),
-            vscode.commands.registerCommand(`${applicationKey}.revealInTerminal`, node => revealInTerminal(node.resourceUri)),
-            vscode.commands.registerCommand(`${applicationKey}.addPinnedFile`, node => addPinnedFile(node.resourceUri)),
-            vscode.commands.registerCommand(`${applicationKey}.removePinnedFile`, node => removePinnedFile(node.resourceUri)),
-            vscode.commands.registerCommand(`${applicationKey}.revealFileInFinder`, makeCommand("revealFileInOS")),
-            vscode.commands.registerCommand(`${applicationKey}.revealFileInExplorer`, makeCommand("revealFileInOS")),
-            vscode.commands.registerCommand(`${applicationKey}.copyFilePath`, makeCommand("copyFilePath")),
-            vscode.commands.registerCommand(`${applicationKey}.showActiveFileInExplorer`, makeCommand("workbench.files.action.showActiveFileInExplorer", "withActivate")),
             vscode.commands.registerCommand(`${applicationKey}.showView`, showView),
             vscode.commands.registerCommand(`${applicationKey}.hideView`, hideView),
+            vscode.commands.registerCommand(`${applicationKey}.addExternalFolder`, addExternalFolder),
+            vscode.commands.registerCommand(`${applicationKey}.reloadExternalFolder`, _ => treeDataProvider.update(treeDataProvider.pinnedExternalFoldersRoot)),
+            vscode.commands.registerCommand(`${applicationKey}.removeExternalFolder`, node => removeExternalFolder(node.resourceUri)),
+            vscode.commands.registerCommand(`${applicationKey}.removePinnedFile`, node => removePinnedFile(node.resourceUri)),
+            vscode.commands.registerCommand(`${applicationKey}.addPinnedFile`, node => addPinnedFile(node.resourceUri)),
+            vscode.commands.registerCommand(`${applicationKey}.newFile`, newFile),
+            vscode.commands.registerCommand(`${applicationKey}.newFolder`, newFolder),
+            vscode.commands.registerCommand(`${applicationKey}.revealFileInFinder`, makeCommand("revealFileInOS")),
+            vscode.commands.registerCommand(`${applicationKey}.revealFileInExplorer`, makeCommand("revealFileInOS")),
+            vscode.commands.registerCommand(`${applicationKey}.showActiveFileInExplorer`, makeCommand("workbench.files.action.showActiveFileInExplorer", "withActivate")),
+            vscode.commands.registerCommand(`${applicationKey}.revealInTerminal`, node => revealInTerminal(node.resourceUri)),
+            vscode.commands.registerCommand(`${applicationKey}.copyFilePath`, makeCommand("copyFilePath")),
+            vscode.commands.registerCommand(`${applicationKey}.renameFolder`, renameFolder),
+            vscode.commands.registerCommand(`${applicationKey}.removeFolder`, removeFolder),
+            vscode.commands.registerCommand(`${applicationKey}.renameFile`, renameFile),
+            vscode.commands.registerCommand(`${applicationKey}.removeFile`, removeFile),
             //  TreeDataProovider の登録
             vscode.window.createTreeView(applicationKey, { treeDataProvider, dragAndDropController }),
             //vscode.window.registerTreeDataProvider(applicationKey, externalFilesProvider),

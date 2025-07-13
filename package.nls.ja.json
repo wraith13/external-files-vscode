@@ -7,7 +7,11 @@
     "external-files-vscode.addExternalFolder.title": "外部フォルダーを登録",
     "external-files-vscode.removeExternalFolder.title": "外部フォルダーを登録解除",
     "external-files-vscode.reloadExternalFolder.title": "外部フォルダーを再読み込み",
-    "external-files-vscode.revealInTerminal.title": "ターミナルで表示",
+    "external-files-vscode.newFolder.title": "新しいフォルダー...",
+    "external-files-vscode.newFile.title": "新しいファイル...",
+    "external-files-vscode.rename.title": "名前の変更...",
+    "external-files-vscode.remove.title": "削除...",
+    "external-files-vscode.revealInTerminal.title": "統合ターミナルで表示",
     "external-files-vscode.addPinnedFile.title": "外部ファイルをピン留め",
     "external-files-vscode.removePinnedFile.title": "外部ファイルのピン留めを解除",
     "external-files-vscode.revealFileInFinder.title": "Finder で表示します",
@@ -20,5 +24,7 @@
     "external-files.maxRecentlyFiles.description": "保持される最近の外部ファイルの最大数",
     "noExternalFolders.message": "外部ファイルがありません",
     "noExternalFiles.message": "外部ファイルがありません",
-    "selectExternalFiles.placeHolder": "外部ファイルを選択してください。"
+    "selectExternalFiles.placeHolder": "外部ファイルを選択してください。",
+    "remove.confirm.message": "本当に削除しますか？",
+    "remove.button": "削除"
 }

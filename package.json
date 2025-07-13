@@ -47,25 +47,16 @@
                 {
                     "command": "external-files.addExternalFolder",
                     "when": "viewItem == wraith13.external-files.pinnedExternalFoldersRoot",
-                    "group": "inline"
-                },
-                {
-                    "command": "external-files.removeExternalFolder",
-                    "when": "viewItem == wraith13.external-files.pinnedExternalFolder",
-                    "group": "inline"
-                },
-                {
-                    "command": "external-files.revealInTerminal",
-                    "when": "viewItem == wraith13.external-files.pinnedExternalFolder || viewItem == wraith13.external-files.externalFolder"
+                    "group": "inline@1"
                 },
                 {
                     "command": "external-files.reloadExternalFolder",
                     "when": "viewItem == wraith13.external-files.pinnedExternalFoldersRoot",
-                    "group": "inline"
+                    "group": "inline@2"
                 },
                 {
-                    "command": "external-files.addPinnedFile",
-                    "when": "viewItem == wraith13.external-files.pinnedExternalFilesRoot || viewItem == wraith13.external-files.recentlyUsedExternalFile",
+                    "command": "external-files.removeExternalFolder",
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFolder",
                     "group": "inline"
                 },
                 {
@@ -74,20 +65,64 @@
                     "group": "inline"
                 },
                 {
+                    "command": "external-files.addPinnedFile",
+                    "when": "viewItem == wraith13.external-files.recentlyUsedExternalFile",
+                    "group": "inline"
+                },
+                {
+                    "command": "external-files.newFile",
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFolder || viewItem == wraith13.external-files.externalFolder",
+                    "group": "A@1"
+                },
+                {
+                    "command": "external-files.newFolder",
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFolder || viewItem == wraith13.external-files.externalFolder",
+                    "group": "A@2"
+                },
+                {
                     "command": "external-files.revealFileInFinder",
-                    "when": "(viewItem == wraith13.external-files.pinnedExternalFolder || viewItem == wraith13.external-files.externalFolder || viewItem == wraith13.external-files.externalFile || viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile) && isMac"
+                    "when": "(viewItem == wraith13.external-files.pinnedExternalFolder || viewItem == wraith13.external-files.externalFolder || viewItem == wraith13.external-files.externalFile || viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile) && isMac",
+                    "group": "B@1"
                 },
                 {
                     "command": "external-files.revealFileInExplorer",
-                    "when": "(viewItem == wraith13.external-files.pinnedExternalFolder || viewItem == wraith13.external-files.externalFolder || viewItem == wraith13.external-files.externalFile || viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile) && !isMac && !isWeb"
-                },
-                {
-                    "command": "external-files.copyFilePath",
-                    "when": "viewItem == wraith13.external-files.pinnedExternalFolder || viewItem == wraith13.external-files.externalFolder || viewItem == wraith13.external-files.externalFile || viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
+                    "when": "(viewItem == wraith13.external-files.pinnedExternalFolder || viewItem == wraith13.external-files.externalFolder || viewItem == wraith13.external-files.externalFile || viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile) && !isMac && !isWeb",
+                    "group": "B@2"
                 },
                 {
                     "command": "external-files.showActiveFileInExplorer",
-                    "when": "viewItem == wraith13.external-files.externalFile || viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile"
+                    "when": "viewItem == wraith13.external-files.externalFile || viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile",
+                    "group": "B@3"
+                },
+                {
+                    "command": "external-files.revealInTerminal",
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFolder || viewItem == wraith13.external-files.externalFolder",
+                    "group": "B@4"
+                },
+                {
+                    "command": "external-files.copyFilePath",
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFolder || viewItem == wraith13.external-files.externalFolder || viewItem == wraith13.external-files.externalFile || viewItem == wraith13.external-files.pinnedExternalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile",
+                    "group": "B@5"
+                },
+                {
+                    "command": "external-files.renameFolder",
+                    "when": "viewItem == wraith13.external-files.externalFolder",
+                    "group": "C@1"
+                },
+                {
+                    "command": "external-files.renameFile",
+                    "when": "viewItem == wraith13.external-files.externalFile",
+                    "group": "C@2"
+                },
+                {
+                    "command": "external-files.removeFolder",
+                    "when": "viewItem == wraith13.external-files.externalFolder",
+                    "group": "C@3"
+                },
+                {
+                    "command": "external-files.removeFile",
+                    "when": "viewItem == wraith13.external-files.externalFile",
+                    "group": "C@4"
                 }
             ],
             "commandPalette": [
@@ -96,20 +131,28 @@
                     "when": "false"
                 },
                 {
+                    "command": "external-files.reloadExternalFolder",
+                    "when": "true"
+                },
+                {
                     "command": "external-files.removeExternalFolder",
                     "when": "false"
                 },
                 {
-                    "command": "external-files.reloadExternalFolder",
-                    "when": "true"
+                    "command": "external-files.removePinnedFile",
+                    "when": "wraith13.external-files.isPinnedExternalFile"
                 },
                 {
                     "command": "external-files.addPinnedFile",
                     "when": "wraith13.external-files.isRecentlyUsedExternalFile"
                 },
                 {
-                    "command": "external-files.removePinnedFile",
-                    "when": "wraith13.external-files.isPinnedExternalFile"
+                    "command": "external-files.newFile",
+                    "when": "false"
+                },
+                {
+                    "command": "external-files.newFolder",
+                    "when": "false"
                 },
                 {
                     "command": "external-files.revealFileInFinder",
@@ -120,11 +163,31 @@
                     "when": "false"
                 },
                 {
+                    "command": "external-files.showActiveFileInExplorer",
+                    "when": "false"
+                },
+                {
+                    "command": "external-files.revealInTerminal",
+                    "when": "false"
+                },
+                {
                     "command": "external-files.copyFilePath",
                     "when": "false"
                 },
                 {
-                    "command": "external-files.showActiveFileInExplorer",
+                    "command": "external-files.renameFolder",
+                    "when": "false"
+                },
+                {
+                    "command": "external-files.renameFile",
+                    "when": "false"
+                },
+                {
+                    "command": "external-files.removeFolder",
+                    "when": "false"
+                },
+                {
+                    "command": "external-files.removeFile",
                     "when": "false"
                 }
             ]
@@ -156,15 +219,6 @@
             },
             {
                 "icon": {
-                    "light": "images/sub.1024.svg",
-                    "dark": "images/sub-white.1024.svg"
-                },
-                "command": "external-files.removeExternalFolder",
-                "title": "%external-files-vscode.removeExternalFolder.title%",
-                "category": "%external-files-vscode.title%"
-            },
-            {
-                "icon": {
                     "light": "images/toggle.1024.svg",
                     "dark": "images/toggle-white.1024.svg"
                 },
@@ -173,17 +227,12 @@
                 "category": "%external-files-vscode.title%"
             },
             {
-                "command": "external-files.revealInTerminal",
-                "title": "%external-files-vscode.revealInTerminal.title%",
-                "category": "%external-files-vscode.title%"
-            },
-            {
                 "icon": {
-                    "light": "images/pin.1024.svg",
-                    "dark": "images/pin-white.1024.svg"
+                    "light": "images/sub.1024.svg",
+                    "dark": "images/sub-white.1024.svg"
                 },
-                "command": "external-files.addPinnedFile",
-                "title": "%external-files-vscode.addPinnedFile.title%",
+                "command": "external-files.removeExternalFolder",
+                "title": "%external-files-vscode.removeExternalFolder.title%",
                 "category": "%external-files-vscode.title%"
             },
             {
@@ -196,6 +245,25 @@
                 "category": "%external-files-vscode.title%"
             },
             {
+                "icon": {
+                    "light": "images/pin.1024.svg",
+                    "dark": "images/pin-white.1024.svg"
+                },
+                "command": "external-files.addPinnedFile",
+                "title": "%external-files-vscode.addPinnedFile.title%",
+                "category": "%external-files-vscode.title%"
+            },
+            {
+                "command": "external-files.newFile",
+                "title": "%external-files-vscode.newFile.title%",
+                "category": "file"
+            },
+            {
+                "command": "external-files.newFolder",
+                "title": "%external-files-vscode.newFolder.title%",
+                "category": "file"
+            },
+            {
                 "command": "external-files.revealFileInFinder",
                 "title": "%external-files-vscode.revealFileInFinder.title%",
                 "category": "file"
@@ -206,13 +274,38 @@
                 "category": "file"
             },
             {
+                "command": "external-files.showActiveFileInExplorer",
+                "title": "%external-files-vscode.showActiveFileInExplorer.title%",
+                "category": "file"
+            },
+            {
+                "command": "external-files.revealInTerminal",
+                "title": "%external-files-vscode.revealInTerminal.title%",
+                "category": "file"
+            },
+            {
                 "command": "external-files.copyFilePath",
                 "title": "%external-files-vscode.copyFilePath.title%",
                 "category": "file"
             },
             {
-                "command": "external-files.showActiveFileInExplorer",
-                "title": "%external-files-vscode.showActiveFileInExplorer.title%",
+                "command": "external-files.renameFolder",
+                "title": "%external-files-vscode.rename.title%",
+                "category": "file"
+            },
+            {
+                "command": "external-files.renameFile",
+                "title": "%external-files-vscode.rename.title%",
+                "category": "file"
+            },
+            {
+                "command": "external-files.removeFolder",
+                "title": "%external-files-vscode.remove.title%",
+                "category": "file"
+            },
+            {
+                "command": "external-files.removeFile",
+                "title": "%external-files-vscode.remove.title%",
                 "category": "file"
             }
         ],
