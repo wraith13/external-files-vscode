@@ -715,13 +715,9 @@ export namespace ExternalFiles
     {
         Icons.initialize(context);
         treeDataProvider = new ExternalFilesProvider();
-        const showCommandKey = `${applicationKey}.show`;
         context.subscriptions.push
         (
             //  コマンドの登録
-            vscode.commands.registerCommand(showCommandKey, show),
-            vscode.commands.registerCommand(`${applicationKey}.showView`, showView),
-            vscode.commands.registerCommand(`${applicationKey}.hideView`, hideView),
             vscode.commands.registerCommand(`${applicationKey}.addExternalFolder`, addExternalFolder),
             vscode.commands.registerCommand(`${applicationKey}.reloadExternalFolder`, _ => treeDataProvider.update(treeDataProvider.pinnedExternalFoldersRoot)),
             vscode.commands.registerCommand(`${applicationKey}.removeExternalFolder`, node => removeExternalFolder(node.resourceUri)),
@@ -803,48 +799,10 @@ export namespace ExternalFiles
             Config.ViewOnExplorer.enabled.get("default-scope")
         );
     };
-    const showNoExternalFilesMessage = async () => await vscode.window.showInformationMessage(locale.map("noExternalFiles.message"));
     const stripFileName = (path: string): string =>
         path.substr(0, path.length -stripDirectory(path).length);
     const stripDirectory = (path: string): string =>
         path.split('\\').reverse()[0].split('/').reverse()[0];
-    const showQuickPickExternalDocument = () => vscode.window.showQuickPick
-    (
-        RecentlyUsedExternalFiles.get().map
-        (
-            i =>
-            ({
-                label: `$(primitive-dot) $(file-text) ${stripDirectory(i.fsPath)}`,
-                description: stripFileName(i.fsPath),
-                document: i
-            })
-        ),
-        {
-            placeHolder: locale.map("selectExternalFiles.placeHolder"),
-        }
-    );
-    export const show = async (): Promise<void> =>
-    {
-        const externalDocuments = RecentlyUsedExternalFiles.get();
-        switch(externalDocuments.length)
-        {
-        case 0:
-            await showNoExternalFilesMessage();
-            break;
-        case 1:
-            await showTextDocument(externalDocuments[0]);
-            break;
-        default:
-            const selected = await showQuickPickExternalDocument();
-            if (selected)
-            {
-                await showTextDocument(selected.document);
-            }
-            break;
-        }
-    };
-    const showView = async (): Promise<void> => await Config.ViewOnExplorer.enabled.set(true);
-    const hideView = async (): Promise<void> => await Config.ViewOnExplorer.enabled.set(false);
 }
 let extensionContext: vscode.ExtensionContext;
 export const activate = (context: vscode.ExtensionContext) : void =>

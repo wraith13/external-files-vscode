@@ -7,7 +7,6 @@ Easy access to external files for vscode.
 
 ## Features
 
-* show external files from command pallete
 * show external files from view on explorer
 
 ![screen shot: View on Explorer](./images/screenshot3.png)
@@ -30,30 +29,11 @@ You can change [settings](#extension-settings) by `settings.json`.
 
 Enjoy!
 
-## Commands
-
-* `External Files: Show` : show external files
-* `External Files: Show View` show view on explorer
-* `External Files: Hide View` hide view on explorer
-
 ## Extension Settings
 
 This extension contributes the following settings by [`settings.json`](https://code.visualstudio.com/docs/customization/userandworkspace#_creating-user-and-workspace-settings)( Mac: <kbd>Command</kbd>+<kbd>,</kbd>, Windows / Linux: <kbd>File</kbd> -> <kbd>Preferences</kbd> -> <kbd>User Settings</kbd> ):
 
 * `external-files.viewOnExplorer.enabled`: set Enable/Disable external files in view on explorer
-
-
-## Keyboard shortcut Settings
-
-In default, External Files's commands doesn't apply keyboard shortcuts. Althogh,
-you can apply keyboard shortcuts by [`keybindings.json`](https://code.visualstudio.com/docs/customization/keybindings#_customizing-shortcuts)
-( Mac: <kbd>Code</kbd> -> <kbd>Preferences</kbd> -> <kbd>Keyboard Shortcuts</kbd>, Windows / Linux: <kbd>File</kbd> -> <kbd>Preferences</kbd> -> <kbd>Keyboard Shortcuts</kbd>).
-
-Command name on `keybindings.json` is diffarent from on Command Pallete. See below table.
-
-|on Command Pallete|on keybindings.json|
-|-|-|
-|`External Files: Show`|`external-files.show`|
 
 ## Release Notes
 

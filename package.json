@@ -194,21 +194,6 @@
         },
         "commands": [
             {
-                "command": "external-files.show",
-                "title": "%external-files-vscode.show.title%",
-                "category": "%external-files-vscode.title%"
-            },
-            {
-                "command": "external-files.showView",
-                "title": "%external-files-vscode.showView.title%",
-                "category": "%external-files-vscode.title%"
-            },
-            {
-                "command": "external-files.hideView",
-                "title": "%external-files-vscode.hideView.title%",
-                "category": "%external-files-vscode.title%"
-            },
-            {
                 "icon": {
                     "light": "images/add.1024.svg",
                     "dark": "images/add-white.1024.svg"
