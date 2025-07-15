@@ -87,6 +87,76 @@ export namespace ExternalFiles
         0 === (vscode.workspace.workspaceFolders ?? []).filter(i => uri.path.startsWith(i.uri.path)).length;
     const isExternalDocuments = (document: vscode.TextDocument): boolean =>
         ! document.isUntitled && isExternalFiles(document.uri);
+    namespace Bookmark
+    {
+        export type JsonType = { [key: string]: { folders: string[]; files: string[]; } };
+        export type LiveType = { [key: string]: { folders: vscode.Uri[]; files: vscode.Uri[]; } };
+        export const blankEntry = (): LiveType[string] => ({ folders: [], files: [] });
+        export const jsonToLive = (json: JsonType): LiveType =>
+            Object.entries(json).reduce
+            (
+                (acc, [key, value]) =>
+                ({
+                    ...acc,
+                    [key]:
+                    {
+                        folders: value.folders.map(i => vscode.Uri.parse(i)),
+                        files: value.files.map(i => vscode.Uri.parse(i)),
+                    }
+                }),
+                {}
+            );
+        export const liveToJson = (live: LiveType): JsonType =>
+            Object.entries(live).reduce
+            (
+                (acc, [key, value]) =>
+                ({
+                    ...acc,
+                    [key]:
+                    {
+                        folders: value.folders.map(i => i.toString()),
+                        files: value.files.map(i => i.toString()),
+                    }
+                }),
+                {}
+            );
+        export const addFolder = (bookmark: LiveType, key: string, document: vscode.Uri): LiveType =>
+        {
+            let entry = bookmark[key] ?? blankEntry();
+            let current = entry.folders;
+            current = current.filter(i => i.toString() !== document.toString());
+            current.unshift(document);
+            current.sort();
+            entry.folders = current;
+            bookmark[key] = entry;
+            return bookmark;
+        };
+        export const removeFolder = (bookmark: LiveType, key: string, document: vscode.Uri): LiveType =>
+        {
+            let entry = bookmark[key];
+            if (entry)
+            {
+                let current = entry.folders;
+                current = current.filter(i => i.toString() !== document.toString());
+                current.sort();
+                entry.folders = current;
+                bookmark[key] = entry;
+            }
+            return bookmark;
+        };
+    }
+    namespace GlobalBookmark
+    {
+        const stateKey = `${publisher}.${applicationKey}.grobalBookmark`;
+        export const get = (): Bookmark.LiveType =>
+            Bookmark.jsonToLive(extensionContext.globalState.get<Bookmark.JsonType>(stateKey, {}));
+        export const set = (bookmark: Bookmark.LiveType): Thenable<void> =>
+            extensionContext.workspaceState.update(stateKey, Bookmark.liveToJson(bookmark));
+        export const addFolder = (key: string, document: vscode.Uri): Thenable<void> =>
+            set(Bookmark.addFolder(get(), key, document));
+        export const removeFolder = (key: string, document: vscode.Uri): Thenable<void> =>
+            set(Bookmark.removeFolder(get(), key, document));
+    }
     namespace PinnedExternalFolders
     {
         const key = `${publisher}.${applicationKey}.pinnedExternalFolders`;
