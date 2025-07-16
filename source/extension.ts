@@ -169,7 +169,7 @@ export namespace ExternalFiles
             return bookmark;
         };
     }
-    namespace GlobalBookmark
+    export namespace GlobalBookmark
     {
         const stateKey = `${publisher}.${applicationKey}.grobalBookmark`;
         export const get = (): Bookmark.LiveType =>
@@ -185,7 +185,7 @@ export namespace ExternalFiles
         export const removeFile = (key: string, document: vscode.Uri): Thenable<void> =>
             set(Bookmark.removeFile(get(), key, document));
     }
-    namespace WorkspaceBookmark
+    export namespace WorkspaceBookmark
     {
         const stateKey = `${publisher}.${applicationKey}.grobalBookmark`;
         export const get = (): Bookmark.LiveType =>
@@ -280,12 +280,10 @@ export namespace ExternalFiles
     }
     namespace Icons
     {
-        export let folderIcon: vscode.IconPath;
         export let pinIcon: vscode.IconPath;
         export let historyIcon: vscode.IconPath;
         export const initialize = (context: vscode.ExtensionContext): void =>
         {
-            folderIcon = new vscode.ThemeIcon("folder");
             pinIcon =
             {
                 light: vscode.Uri.joinPath(context.extensionUri, "images", "pin.1024.svg"),
@@ -312,8 +310,9 @@ export namespace ExternalFiles
         {
             this.pinnedExternalFoldersRoot =
             {
-                iconPath: Icons.folderIcon,
+                iconPath: vscode.ThemeIcon.Folder,
                 label: locale.map("external-files-vscode.externalFolders"),
+                description: "Global",
                 collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
                 contextValue: `${publisher}.${applicationKey}.pinnedExternalFoldersRoot`,
             };
@@ -321,6 +320,7 @@ export namespace ExternalFiles
             {
                 iconPath: Icons.pinIcon,
                 label: locale.map("external-files-vscode.pinnedExternalFiles"),
+                description: "Workspace",
                 collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
                 contextValue: `${publisher}.${applicationKey}.pinnedExternalFilesRoot`,
             };
@@ -337,6 +337,30 @@ export namespace ExternalFiles
         {
             return element;
         }
+        uriToFolderTreeItem = (uri: vscode.Uri, contextValue: string, description?: string): vscode.TreeItem =>
+        ({
+            iconPath: vscode.ThemeIcon.Folder,
+            label: stripDirectory(uri.fsPath),
+            resourceUri: uri,
+            description,
+            collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+            contextValue,
+        });
+        uriToFileTreeItem = (uri: vscode.Uri, contextValue: string, description?: string): vscode.TreeItem =>
+        ({
+            iconPath: vscode.ThemeIcon.File,
+            label: stripDirectory(uri.fsPath),
+            resourceUri: uri,
+            description,
+            command:
+            {
+                title: "show",
+                command: "vscode.open",
+                arguments:[uri]
+            },
+            contextValue,
+        });
+        //bookmarkToTreeItem = (key: string, value: Bookmark.LiveType[string], icon: vscode.IconPath, contextValue: string): vscode.TreeItem[] =>
         async getChildren(element?: vscode.TreeItem | undefined): Promise<vscode.TreeItem[]>
         {
             switch(element?.contextValue)
@@ -353,15 +377,12 @@ export namespace ExternalFiles
                 {
                     this.pinnedExternalFolders = pinnedExternalFolders.map
                     (
-                        i =>
-                        ({
-                            iconPath: Icons.folderIcon,
-                            label: stripDirectory(i.fsPath),
-                            resourceUri: i,
-                            description: stripFileName(i.fsPath),
-                            collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-                            contextValue: `${publisher}.${applicationKey}.pinnedExternalFolder`,
-                        })
+                        i => this.uriToFolderTreeItem
+                        (
+                            i,
+                            `${publisher}.${applicationKey}.pinnedExternalFolder`,
+                            stripFileName(i.fsPath)
+                        )
                     );
                     return this.pinnedExternalFolders;
                 }
@@ -384,32 +405,19 @@ export namespace ExternalFiles
                     return [
                         ...subFolders.map
                         (
-                            i =>
-                            ({
-                                iconPath: Icons.folderIcon,
-                                label: stripDirectory(i.fsPath),
-                                resourceUri: i,
-                                //description: stripFileName(i.fsPath),
-                                collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-                                contextValue: `${publisher}.${applicationKey}.externalFolder`,
-                            })
+                            i => this.uriToFolderTreeItem
+                            (
+                                i,
+                                `${publisher}.${applicationKey}.externalFolder`
+                            )
                         ),
                         ...files.map
                         (
-                            i =>
-                            ({
-                                iconPath: vscode.ThemeIcon.File,
-                                label: stripDirectory(i.fsPath),
-                                resourceUri: i,
-                                //description: stripFileName(i.fsPath),
-                                command:
-                                {
-                                    title: "show",
-                                    command: "vscode.open",
-                                    arguments:[i]
-                                },
-                                contextValue: `${publisher}.${applicationKey}.externalFile`,
-                            })
+                            i => this.uriToFileTreeItem
+                            (
+                                i,
+                                `${publisher}.${applicationKey}.externalFile`
+                            )
                         )
                     ];
                 }
@@ -419,19 +427,12 @@ export namespace ExternalFiles
                 return 0 < pinnedExternalDocuments.length ?
                     pinnedExternalDocuments.map
                     (
-                        i =>
-                        ({
-                            label: stripDirectory(i.fsPath),
-                            resourceUri: i,
-                            description: stripFileName(i.fsPath),
-                            command:
-                            {
-                                title: "show",
-                                command: "vscode.open",
-                                arguments:[i]
-                            },
-                            contextValue: `${publisher}.${applicationKey}.pinnedExternalFile`,
-                        })
+                        i => this.uriToFileTreeItem
+                        (
+                            i,
+                            `${publisher}.${applicationKey}.pinnedExternalFile`,
+                            stripFileName(i.fsPath)
+                        )
                     ):
                     [{
                         label: locale.map("noExternalFiles.message"),
@@ -442,19 +443,12 @@ export namespace ExternalFiles
                 return 0 < recentlyUsedExternalDocuments.length ?
                     recentlyUsedExternalDocuments.map
                     (
-                        i =>
-                        ({
-                            label: stripDirectory(i.fsPath),
-                            resourceUri: i,
-                            description: stripFileName(i.fsPath),
-                            command:
-                            {
-                                title: "show",
-                                command: "vscode.open",
-                                arguments:[i]
-                            },
-                            contextValue: `${publisher}.${applicationKey}.recentlyUsedExternalFile`,
-                        })
+                        i => this.uriToFileTreeItem
+                        (
+                            i,
+                            `${publisher}.${applicationKey}.recentlyUsedExternalFile`,
+                            stripFileName(i.fsPath)
+                        )
                     ):
                     [{
                         label: locale.map("noExternalFiles.message"),
