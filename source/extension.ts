@@ -144,6 +144,30 @@ export namespace ExternalFiles
             }
             return bookmark;
         };
+        export const addFile = (bookmark: LiveType, key: string, document: vscode.Uri): LiveType =>
+        {
+            let entry = bookmark[key] ?? blankEntry();
+            let current = entry.files;
+            current = current.filter(i => i.toString() !== document.toString());
+            current.unshift(document);
+            current.sort();
+            entry.files = current;
+            bookmark[key] = entry;
+            return bookmark;
+        };
+        export const removeFile = (bookmark: LiveType, key: string, document: vscode.Uri): LiveType =>
+        {
+            let entry = bookmark[key];
+            if (entry)
+            {
+                let current = entry.files;
+                current = current.filter(i => i.toString() !== document.toString());
+                current.sort();
+                entry.files = current;
+                bookmark[key] = entry;
+            }
+            return bookmark;
+        };
     }
     namespace GlobalBookmark
     {
@@ -151,11 +175,31 @@ export namespace ExternalFiles
         export const get = (): Bookmark.LiveType =>
             Bookmark.jsonToLive(extensionContext.globalState.get<Bookmark.JsonType>(stateKey, {}));
         export const set = (bookmark: Bookmark.LiveType): Thenable<void> =>
+            extensionContext.globalState.update(stateKey, Bookmark.liveToJson(bookmark));
+        export const addFolder = (key: string, document: vscode.Uri): Thenable<void> =>
+            set(Bookmark.addFolder(get(), key, document));
+        export const removeFolder = (key: string, document: vscode.Uri): Thenable<void> =>
+            set(Bookmark.removeFolder(get(), key, document));
+        export const addFile = (key: string, document: vscode.Uri): Thenable<void> =>
+            set(Bookmark.addFile(get(), key, document));
+        export const removeFile = (key: string, document: vscode.Uri): Thenable<void> =>
+            set(Bookmark.removeFile(get(), key, document));
+    }
+    namespace WorkspaceBookmark
+    {
+        const stateKey = `${publisher}.${applicationKey}.grobalBookmark`;
+        export const get = (): Bookmark.LiveType =>
+            Bookmark.jsonToLive(extensionContext.workspaceState.get<Bookmark.JsonType>(stateKey, {}));
+        export const set = (bookmark: Bookmark.LiveType): Thenable<void> =>
             extensionContext.workspaceState.update(stateKey, Bookmark.liveToJson(bookmark));
         export const addFolder = (key: string, document: vscode.Uri): Thenable<void> =>
             set(Bookmark.addFolder(get(), key, document));
         export const removeFolder = (key: string, document: vscode.Uri): Thenable<void> =>
             set(Bookmark.removeFolder(get(), key, document));
+        export const addFile = (key: string, document: vscode.Uri): Thenable<void> =>
+            set(Bookmark.addFile(get(), key, document));
+        export const removeFile = (key: string, document: vscode.Uri): Thenable<void> =>
+            set(Bookmark.removeFile(get(), key, document));
     }
     namespace PinnedExternalFolders
     {
@@ -258,6 +302,8 @@ export namespace ExternalFiles
     {
         private onDidChangeTreeDataEventEmitter = new vscode.EventEmitter<vscode.TreeItem | undefined>();
         readonly onDidChangeTreeData = this.onDidChangeTreeDataEventEmitter.event;
+        public GlobalBookmark: vscode.TreeItem[];
+        public WorkspaceBookmark: vscode.TreeItem[];
         public pinnedExternalFoldersRoot: vscode.TreeItem;
         public pinnedExternalFolders: vscode.TreeItem[];
         public pinnedExternalFilesRoot: vscode.TreeItem;
@@ -819,7 +865,8 @@ export namespace ExternalFiles
                         onDidChangeConfiguration();
                     }
                 }
-            )
+            ),
+            vscode.workspace.onDidChangeWorkspaceFolders(_ => treeDataProvider.update(undefined)),
         );
         //RecentlyUsedExternalFiles.clear();
         updateViewOnExplorer();
