@@ -6,6 +6,9 @@ import localeEn from "../package.nls.json";
 import localeJa from "../package.nls.ja.json";
 export type LocaleKeyType = keyof typeof localeEn;
 const locale = vscel.locale.make(localeEn, { "ja": localeJa });
+export const undefinedable = <ValueType, ResultType>(target: (value: ValueType) => ResultType) =>
+    (value: ValueType | undefined): ResultType | undefined =>
+        undefined === value ? undefined : target(value);
 export namespace ExternalFiles
 {
     const publisher = packageJson.publisher;
@@ -91,6 +94,8 @@ export namespace ExternalFiles
     {
         export type JsonType = { [key: string]: { folders: string[]; files: string[]; } };
         export type LiveType = { [key: string]: { folders: vscode.Uri[]; files: vscode.Uri[]; } };
+        export const regulateKey = (key: string): string =>
+            key.trim().replace(/[\s]+/g, " ");
         export const blankEntry = (): LiveType[string] => ({ folders: [], files: [] });
         export const jsonToLive = (json: JsonType): LiveType =>
             Object.entries(json).reduce
@@ -300,8 +305,8 @@ export namespace ExternalFiles
     {
         private onDidChangeTreeDataEventEmitter = new vscode.EventEmitter<vscode.TreeItem | undefined>();
         readonly onDidChangeTreeData = this.onDidChangeTreeDataEventEmitter.event;
-        public GlobalBookmark: vscode.TreeItem[];
-        public WorkspaceBookmark: vscode.TreeItem[];
+        public GlobalBookmark: { [key: string]: vscode.TreeItem };
+        public WorkspaceBookmark: { [key: string]: vscode.TreeItem };
         public pinnedExternalFoldersRoot: vscode.TreeItem;
         public pinnedExternalFolders: vscode.TreeItem[];
         public pinnedExternalFilesRoot: vscode.TreeItem;
@@ -463,6 +468,10 @@ export namespace ExternalFiles
             this.pinnedExternalFolders.find(i => makeSureEndWithSlash(i.resourceUri?.toString() ?? "") === makeSureEndWithSlash(document.toString()));
         updateByUri = (uri: vscode.Uri) =>
             this.update(this.getMatchedPinnedExternalFolder(uri) ?? this.pinnedExternalFoldersRoot);
+        updateGlobalBookmark = async (key: string): Promise<void> =>
+            this.update(this.GlobalBookmark[key]);
+        updateWorkspaceBookmark = async (key: string): Promise<void> =>
+            this.update(this.WorkspaceBookmark[key]);
     }
     let treeDataProvider: ExternalFilesProvider;
     class DragAndDropController implements vscode.TreeDragAndDropController<vscode.TreeItem>
@@ -819,6 +828,90 @@ export namespace ExternalFiles
                 vscode.window.showErrorMessage(error.message);
             }
             treeDataProvider.updateByUri(node.resourceUri);
+        }
+    };
+    export const registerBookmark = async (node: any): Promise<void> =>
+    {
+        if (node.resourceUri)
+        {
+            const globalBookmarkKeys = Object.keys(GlobalBookmark.get());
+            const workspaceBookmarkKeys = Object.keys(WorkspaceBookmark.get());
+            const selectedBookmark = await vscode.window.showQuickPick
+            (
+                [
+                    ...globalBookmarkKeys.map(i => ({ label: i, value: i, scope: "global" })),
+                    ...workspaceBookmarkKeys.map(i => ({ label: i, value: i, scope: "workspace" })),
+                    {
+                        label: locale.map("external-files-vscode.addNewGlobalBookmark.title"),
+                        value: "new",
+                        scope: "new-global"
+                    },
+                    {
+                        label: locale.map("external-files-vscode.addNewWorkspaceBookmark.title"),
+                        value: "new",
+                        scope: "new-workspace"
+                    }
+                ],
+                {
+                    placeHolder: locale.map("selectBookmark.title"),
+                    canPickMany: false,
+                    ignoreFocusOut: true,
+                }
+            );
+            if (selectedBookmark)
+            {
+                switch(selectedBookmark.scope)
+                {
+                case "global":
+                    await GlobalBookmark.addFolder(selectedBookmark.value, node.resourceUri);
+                    treeDataProvider.updateGlobalBookmark(selectedBookmark.value);
+                    break;
+                case "workspace":
+                    await WorkspaceBookmark.addFolder(selectedBookmark.value, node.resourceUri);
+                    treeDataProvider.updateWorkspaceBookmark(selectedBookmark.value);
+                    break;
+                case "new-global":
+                    {
+                        const newKey = undefinedable(Bookmark.regulateKey)
+                        (
+                            await vscode.window.showInputBox
+                            (
+                                {
+                                    placeHolder: locale.map("newBookmark.placeHolder"),
+                                    prompt: locale.map("external-files-vscode.addNewGlobalBookmark.title"),
+                                }
+                            )
+                        );
+                        if (newKey)
+                        {
+                            await GlobalBookmark.addFolder(newKey, node.resourceUri);
+                            treeDataProvider.update(undefined);
+                        }
+                    }
+                    break;
+                case "new-workspace":
+                    {
+                        const newKey = undefinedable(Bookmark.regulateKey)
+                        (
+                            await vscode.window.showInputBox
+                            (
+                                {
+                                    placeHolder: locale.map("newBookmark.placeHolder"),
+                                    prompt: locale.map("external-files-vscode.addNewWorkspaceBookmark.title"),
+                                }
+                            )
+                        );
+                        if (newKey)
+                        {
+                            await WorkspaceBookmark.addFolder(newKey, node.resourceUri);
+                            treeDataProvider.update(undefined);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
         }
     };
     export const initialize = (context: vscode.ExtensionContext): void =>
