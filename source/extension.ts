@@ -206,58 +206,6 @@ export namespace ExternalFiles
         export const removeFile = (key: string, document: vscode.Uri): Thenable<void> =>
             set(Bookmark.removeFile(get(), key, document));
     }
-    namespace PinnedExternalFolders
-    {
-        const key = `${publisher}.${applicationKey}.pinnedExternalFolders`;
-        export const get = (): vscode.Uri[] =>
-            extensionContext.workspaceState.get<string[]>(key, [])
-            .map(i => vscode.Uri.parse(i));
-        export const set = (documents: vscode.Uri[]): Thenable<void> =>
-            extensionContext.workspaceState.update(key, documents.map(i => i.toString()));
-        export const isPinned = (document: vscode.Uri): boolean =>
-            get().some(i => i.toString() === document.toString());
-        export const isInPinned = (document: vscode.Uri): boolean =>
-            get().some(i => makeSureEndWithSlash(document.path).startsWith(makeSureEndWithSlash(i.path)));
-        export const add = (document: vscode.Uri): Thenable<void> =>
-        {
-            let current = get();
-            current = current.filter(i => i.toString() !== document.toString());
-            current.unshift(document);
-            current.sort();
-            return set(current);
-        };
-        export const remove = (document: vscode.Uri): Thenable<void> =>
-        {
-            let current = get();
-            current = current.filter(i => i.toString() !== document.toString());
-            return set(current);
-        };
-    }
-    namespace PinnedExternalFiles
-    {
-        const key = `${publisher}.${applicationKey}.pinnedExternalFiles`;
-        export const get = (): vscode.Uri[] =>
-            extensionContext.workspaceState.get<string[]>(key, [])
-            .map(i => vscode.Uri.parse(i));
-        export const set = (documents: vscode.Uri[]): Thenable<void> =>
-            extensionContext.workspaceState.update(key, documents.map(i => i.toString()));
-        export const isPinned = (document: vscode.Uri): boolean =>
-            get().some(i => i.toString() === document.toString());
-        export const add = (document: vscode.Uri): Thenable<void> =>
-        {
-            let current = get();
-            current = current.filter(i => i.toString() !== document.toString());
-            current.unshift(document);
-            current.sort();
-            return set(current);
-        };
-        export const remove = (document: vscode.Uri): Thenable<void> =>
-        {
-            let current = get();
-            current = current.filter(i => i.toString() !== document.toString());
-            return set(current);
-        };
-    }
     namespace RecentlyUsedExternalFiles
     {
         const key = `${publisher}.${applicationKey}.recentlyUsedExternalFiles`;
@@ -307,28 +255,9 @@ export namespace ExternalFiles
         readonly onDidChangeTreeData = this.onDidChangeTreeDataEventEmitter.event;
         public GlobalBookmark: { [key: string]: vscode.TreeItem };
         public WorkspaceBookmark: { [key: string]: vscode.TreeItem };
-        public pinnedExternalFoldersRoot: vscode.TreeItem;
-        public pinnedExternalFolders: vscode.TreeItem[];
-        public pinnedExternalFilesRoot: vscode.TreeItem;
         public recentlyUsedExternalFilesRoot: vscode.TreeItem;
         constructor()
         {
-            this.pinnedExternalFoldersRoot =
-            {
-                iconPath: vscode.ThemeIcon.Folder,
-                label: locale.map("external-files-vscode.externalFolders"),
-                description: "Global",
-                collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
-                contextValue: `${publisher}.${applicationKey}.pinnedExternalFoldersRoot`,
-            };
-            this.pinnedExternalFilesRoot =
-            {
-                iconPath: Icons.pinIcon,
-                label: locale.map("external-files-vscode.pinnedExternalFiles"),
-                description: "Workspace",
-                collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
-                contextValue: `${publisher}.${applicationKey}.pinnedExternalFilesRoot`,
-            };
             this.recentlyUsedExternalFilesRoot =
             {
                 iconPath: Icons.historyIcon,
@@ -371,36 +300,43 @@ export namespace ExternalFiles
             switch(element?.contextValue)
             {
             case undefined:
+                this.GlobalBookmark = Object.entries(GlobalBookmark.get()).reduce
+                (
+                    (acc, [key, _value]) =>
+                    ({
+                        ...acc,
+                        [key]:
+                        {
+                            iconPath: Icons.pinIcon,
+                            label: key,
+                            collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                            contextValue: `${publisher}.${applicationKey}.globalBookmark`,
+                            resourceUri: undefined,
+                        }
+                    }),
+                    {}
+                );
+                this.WorkspaceBookmark = Object.entries(WorkspaceBookmark.get()).reduce
+                (
+                    (acc, [key, _value]) =>
+                    ({
+                        ...acc,
+                        [key]:
+                        {
+                            iconPath: Icons.pinIcon,
+                            label: key,
+                            collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                            contextValue: `${publisher}.${applicationKey}.workspaceBookmark`,
+                            resourceUri: undefined,
+                        }
+                    }),
+                    {}
+                );
                 return [
-                    this.pinnedExternalFoldersRoot,
-                    this.pinnedExternalFilesRoot,
+                    ...Object.values(this.GlobalBookmark),
+                    ...Object.values(this.WorkspaceBookmark),
                     this.recentlyUsedExternalFilesRoot
                 ];
-            case `${publisher}.${applicationKey}.pinnedExternalFoldersRoot`:
-                const pinnedExternalFolders = PinnedExternalFolders.get();
-                if (0 < pinnedExternalFolders.length)
-                {
-                    this.pinnedExternalFolders = pinnedExternalFolders.map
-                    (
-                        i => this.uriToFolderTreeItem
-                        (
-                            i,
-                            `${publisher}.${applicationKey}.pinnedExternalFolder`,
-                            stripFileName(i.fsPath)
-                        )
-                    );
-                    return this.pinnedExternalFolders;
-                }
-                else
-                {
-                    this.pinnedExternalFolders = [];
-                    return [
-                        {
-                            label: locale.map("noExternalFolders.message"),
-                            contextValue: `${publisher}.${applicationKey}.noFiles`,
-                        }
-                    ];
-                }
             case `${publisher}.${applicationKey}.pinnedExternalFolder`:
             case `${publisher}.${applicationKey}.externalFolder`:
                 if (element.resourceUri)
@@ -427,22 +363,6 @@ export namespace ExternalFiles
                     ];
                 }
                 return [];
-            case `${publisher}.${applicationKey}.pinnedExternalFilesRoot`:
-                const pinnedExternalDocuments = PinnedExternalFiles.get();
-                return 0 < pinnedExternalDocuments.length ?
-                    pinnedExternalDocuments.map
-                    (
-                        i => this.uriToFileTreeItem
-                        (
-                            i,
-                            `${publisher}.${applicationKey}.pinnedExternalFile`,
-                            stripFileName(i.fsPath)
-                        )
-                    ):
-                    [{
-                        label: locale.map("noExternalFiles.message"),
-                        contextValue: `${publisher}.${applicationKey}.noFiles`,
-                    }];
             case `${publisher}.${applicationKey}.recentlyUsedExternalFilesRoot`:
                 const recentlyUsedExternalDocuments = RecentlyUsedExternalFiles.get();
                 return 0 < recentlyUsedExternalDocuments.length ?
@@ -464,10 +384,10 @@ export namespace ExternalFiles
             }
         }
         update = (data: vscode.TreeItem | undefined) => this.onDidChangeTreeDataEventEmitter.fire(data);
-        getMatchedPinnedExternalFolder= (document: vscode.Uri): vscode.TreeItem | undefined =>
-            this.pinnedExternalFolders.find(i => makeSureEndWithSlash(i.resourceUri?.toString() ?? "") === makeSureEndWithSlash(document.toString()));
-        updateByUri = (uri: vscode.Uri) =>
-            this.update(this.getMatchedPinnedExternalFolder(uri) ?? this.pinnedExternalFoldersRoot);
+        // getMatchedPinnedExternalFolder= (document: vscode.Uri): vscode.TreeItem | undefined =>
+        //     this.pinnedExternalFolders.find(i => makeSureEndWithSlash(i.resourceUri?.toString() ?? "") === makeSureEndWithSlash(document.toString()));
+        // updateByUri = (uri: vscode.Uri) =>
+        //     this.update(this.getMatchedPinnedExternalFolder(uri) ?? this.pinnedExternalFoldersRoot);
         updateGlobalBookmark = async (key: string): Promise<void> =>
             this.update(this.GlobalBookmark[key]);
         updateWorkspaceBookmark = async (key: string): Promise<void> =>
@@ -500,12 +420,8 @@ export namespace ExternalFiles
                     .map((i: string) => vscode.Uri.parse(i));
                 switch(target.contextValue)
                 {
-                case `${publisher}.${applicationKey}.pinnedExternalFoldersRoot`:
                 case `${publisher}.${applicationKey}.externalFolder`:
                 case `${publisher}.${applicationKey}.externalFile`:
-                case `${publisher}.${applicationKey}.pinnedExternalFilesRoot`:
-                case `${publisher}.${applicationKey}.pinnedExternalFolder`:
-                case `${publisher}.${applicationKey}.pinnedExternalFile`:
                     await Promise.all
                     (
                         uriList.map
@@ -517,17 +433,8 @@ export namespace ExternalFiles
                                     switch(await isFolderOrFile(uri))
                                     {
                                     case "folder":
-                                        if ( ! PinnedExternalFolders.isPinned(uri))
-                                        {
-                                            await PinnedExternalFolders.add(uri);
-                                        }
                                         break;
                                     case "file":
-                                        if ( ! PinnedExternalFiles.isPinned(uri))
-                                        {
-                                            await PinnedExternalFiles.add(uri);
-                                            await RecentlyUsedExternalFiles.remove(uri);
-                                        }
                                         break;
                                     default:
                                         break;
@@ -545,10 +452,6 @@ export namespace ExternalFiles
                         (
                             async (uri: vscode.Uri) =>
                             {
-                                if (PinnedExternalFiles.isPinned(uri))
-                                {
-                                    await PinnedExternalFiles.remove(uri);
-                                }
                                 if (isExternalFiles(uri))
                                 {
                                     await RecentlyUsedExternalFiles.add(uri);
@@ -612,58 +515,6 @@ export namespace ExternalFiles
                 }
             );
         }
-    };
-    export const addPinnedFile = async (resourceUri: vscode.Uri): Promise<void> =>
-    {
-        if (undefined === resourceUri)
-        {
-            const files = await vscode.window.showOpenDialog
-            (
-                {
-                    canSelectFiles: true,
-                    canSelectFolders: false,
-                    canSelectMany: false,
-                    openLabel: locale.map("external-files-vscode.addPinnedFile.title"),
-                    title: locale.map("external-files-vscode.pinnedExternalFiles"),
-                }
-            );
-            if (files)
-            {
-                await Promise.all
-                (
-                    files.map
-                    (
-                        async (resourceUri: vscode.Uri) =>
-                        {
-                            if (isExternalFiles(resourceUri))
-                            {
-                                await PinnedExternalFiles.add(resourceUri);
-                                await RecentlyUsedExternalFiles.remove(resourceUri);
-                            }
-                        }
-                    )
-                );
-                treeDataProvider.update(treeDataProvider.pinnedExternalFilesRoot);
-                treeDataProvider.update(treeDataProvider.recentlyUsedExternalFilesRoot);
-            }
-
-        }
-        else
-        {
-            if (isExternalFiles(resourceUri))
-            {
-                await PinnedExternalFiles.add(resourceUri);
-                await RecentlyUsedExternalFiles.remove(resourceUri);
-                treeDataProvider.update(treeDataProvider.pinnedExternalFilesRoot);
-            }
-        }
-    };
-    export const removePinnedFile = async (resourceUri: vscode.Uri): Promise<void> =>
-    {
-        await PinnedExternalFiles.remove(resourceUri);
-        await RecentlyUsedExternalFiles.add(resourceUri);
-        treeDataProvider.update(treeDataProvider.pinnedExternalFilesRoot);
-        treeDataProvider.update(treeDataProvider.recentlyUsedExternalFilesRoot);
     };
     export const makeCommand = (command: string, withActivate?: "withActivate") =>
         async (node: any) =>
@@ -830,87 +681,84 @@ export namespace ExternalFiles
             treeDataProvider.updateByUri(node.resourceUri);
         }
     };
-    export const registerBookmark = async (node: any): Promise<void> =>
+    export const registerBookmark = async (resourceUri: vscode.Uri): Promise<void> =>
     {
-        if (node.resourceUri)
-        {
-            const globalBookmarkKeys = Object.keys(GlobalBookmark.get());
-            const workspaceBookmarkKeys = Object.keys(WorkspaceBookmark.get());
-            const selectedBookmark = await vscode.window.showQuickPick
-            (
-                [
-                    ...globalBookmarkKeys.map(i => ({ label: i, value: i, scope: "global" })),
-                    ...workspaceBookmarkKeys.map(i => ({ label: i, value: i, scope: "workspace" })),
-                    {
-                        label: locale.map("external-files-vscode.addNewGlobalBookmark.title"),
-                        value: "new",
-                        scope: "new-global"
-                    },
-                    {
-                        label: locale.map("external-files-vscode.addNewWorkspaceBookmark.title"),
-                        value: "new",
-                        scope: "new-workspace"
-                    }
-                ],
+        const globalBookmarkKeys = Object.keys(GlobalBookmark.get());
+        const workspaceBookmarkKeys = Object.keys(WorkspaceBookmark.get());
+        const selectedBookmark = await vscode.window.showQuickPick
+        (
+            [
+                ...globalBookmarkKeys.map(i => ({ label: i, value: i, scope: "global" })),
+                ...workspaceBookmarkKeys.map(i => ({ label: i, value: i, scope: "workspace" })),
                 {
-                    placeHolder: locale.map("selectBookmark.title"),
-                    canPickMany: false,
-                    ignoreFocusOut: true,
+                    label: locale.map("external-files-vscode.addNewGlobalBookmark.title"),
+                    value: "new",
+                    scope: "new-global"
+                },
+                {
+                    label: locale.map("external-files-vscode.addNewWorkspaceBookmark.title"),
+                    value: "new",
+                    scope: "new-workspace"
                 }
-            );
-            if (selectedBookmark)
+            ],
             {
-                switch(selectedBookmark.scope)
+                placeHolder: locale.map("selectBookmark.title"),
+                canPickMany: false,
+                ignoreFocusOut: true,
+            }
+        );
+        if (selectedBookmark)
+        {
+            switch(selectedBookmark.scope)
+            {
+            case "global":
+                await GlobalBookmark.addFolder(selectedBookmark.value, resourceUri);
+                treeDataProvider.updateGlobalBookmark(selectedBookmark.value);
+                break;
+            case "workspace":
+                await WorkspaceBookmark.addFolder(selectedBookmark.value, resourceUri);
+                treeDataProvider.updateWorkspaceBookmark(selectedBookmark.value);
+                break;
+            case "new-global":
                 {
-                case "global":
-                    await GlobalBookmark.addFolder(selectedBookmark.value, node.resourceUri);
-                    treeDataProvider.updateGlobalBookmark(selectedBookmark.value);
-                    break;
-                case "workspace":
-                    await WorkspaceBookmark.addFolder(selectedBookmark.value, node.resourceUri);
-                    treeDataProvider.updateWorkspaceBookmark(selectedBookmark.value);
-                    break;
-                case "new-global":
-                    {
-                        const newKey = undefinedable(Bookmark.regulateKey)
+                    const newKey = undefinedable(Bookmark.regulateKey)
+                    (
+                        await vscode.window.showInputBox
                         (
-                            await vscode.window.showInputBox
-                            (
-                                {
-                                    placeHolder: locale.map("newBookmark.placeHolder"),
-                                    prompt: locale.map("external-files-vscode.addNewGlobalBookmark.title"),
-                                }
-                            )
-                        );
-                        if (newKey)
-                        {
-                            await GlobalBookmark.addFolder(newKey, node.resourceUri);
-                            treeDataProvider.update(undefined);
-                        }
-                    }
-                    break;
-                case "new-workspace":
+                            {
+                                placeHolder: locale.map("newBookmark.placeHolder"),
+                                prompt: locale.map("external-files-vscode.addNewGlobalBookmark.title"),
+                            }
+                        )
+                    );
+                    if (newKey)
                     {
-                        const newKey = undefinedable(Bookmark.regulateKey)
-                        (
-                            await vscode.window.showInputBox
-                            (
-                                {
-                                    placeHolder: locale.map("newBookmark.placeHolder"),
-                                    prompt: locale.map("external-files-vscode.addNewWorkspaceBookmark.title"),
-                                }
-                            )
-                        );
-                        if (newKey)
-                        {
-                            await WorkspaceBookmark.addFolder(newKey, node.resourceUri);
-                            treeDataProvider.update(undefined);
-                        }
+                        await GlobalBookmark.addFolder(newKey, resourceUri);
+                        treeDataProvider.update(undefined);
                     }
-                    break;
-                default:
-                    break;
                 }
+                break;
+            case "new-workspace":
+                {
+                    const newKey = undefinedable(Bookmark.regulateKey)
+                    (
+                        await vscode.window.showInputBox
+                        (
+                            {
+                                placeHolder: locale.map("newBookmark.placeHolder"),
+                                prompt: locale.map("external-files-vscode.addNewWorkspaceBookmark.title"),
+                            }
+                        )
+                    );
+                    if (newKey)
+                    {
+                        await WorkspaceBookmark.addFolder(newKey, resourceUri);
+                        treeDataProvider.update(undefined);
+                    }
+                }
+                break;
+            default:
+                break;
             }
         }
     };
@@ -922,10 +770,7 @@ export namespace ExternalFiles
         (
             //  コマンドの登録
             vscode.commands.registerCommand(`${applicationKey}.addExternalFolder`, addExternalFolder),
-            vscode.commands.registerCommand(`${applicationKey}.reloadExternalFolder`, _ => treeDataProvider.update(treeDataProvider.pinnedExternalFoldersRoot)),
             vscode.commands.registerCommand(`${applicationKey}.removeExternalFolder`, node => removeExternalFolder(node.resourceUri)),
-            vscode.commands.registerCommand(`${applicationKey}.removePinnedFile`, node => removePinnedFile(node.resourceUri)),
-            vscode.commands.registerCommand(`${applicationKey}.addPinnedFile`, node => addPinnedFile(node.resourceUri)),
             vscode.commands.registerCommand(`${applicationKey}.newFile`, newFile),
             vscode.commands.registerCommand(`${applicationKey}.newFolder`, newFolder),
             vscode.commands.registerCommand(`${applicationKey}.revealFileInFinder`, makeCommand("revealFileInOS")),
@@ -961,20 +806,12 @@ export namespace ExternalFiles
     };
     const onDidChangeActiveTextEditor = (editor: vscode.TextEditor | undefined): void =>
     {
-        let isPinnedExternalFile = false;
         let isRecentlyUsedExternalFile = false;
         if (editor && isRegularTextEditor(editor))
         {
-            isPinnedExternalFile = PinnedExternalFiles.isPinned(editor.document.uri);
-            isRecentlyUsedExternalFile = ! isPinnedExternalFile && isExternalDocuments(editor.document);
+            isRecentlyUsedExternalFile = isExternalDocuments(editor.document);
             updateExternalDocuments(editor.document);
         }
-        vscode.commands.executeCommand
-        (
-            "setContext",
-            `${publisher}.${applicationKey}.isPinnedExternalFile`,
-            isPinnedExternalFile
-        );
         vscode.commands.executeCommand
         (
             "setContext",
@@ -984,7 +821,7 @@ export namespace ExternalFiles
     };
     const updateExternalDocuments = async (document: vscode.TextDocument) =>
     {
-        if (isExternalDocuments(document) && ! PinnedExternalFiles.isPinned(document.uri))
+        if (isExternalDocuments(document))
         {
             await RecentlyUsedExternalFiles.add(document.uri);
             treeDataProvider.update(treeDataProvider.recentlyUsedExternalFilesRoot);
