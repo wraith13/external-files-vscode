@@ -176,7 +176,8 @@ export namespace ExternalFiles
     }
     export namespace GlobalBookmark
     {
-        const stateKey = `${publisher}.${applicationKey}.grobalBookmark`;
+        const stateKey = `${publisher}.${applicationKey}.globalBookmark`;
+        const uriPrefix = `${publisher}.${applicationKey}://globalBookmark/`;
         export const get = (): Bookmark.LiveType =>
             Bookmark.jsonToLive(extensionContext.globalState.get<Bookmark.JsonType>(stateKey, {}));
         export const set = (bookmark: Bookmark.LiveType): Thenable<void> =>
@@ -189,10 +190,17 @@ export namespace ExternalFiles
             set(Bookmark.addFile(get(), key, document));
         export const removeFile = (key: string, document: vscode.Uri): Thenable<void> =>
             set(Bookmark.removeFile(get(), key, document));
+        export const getUri = (key: string): vscode.Uri =>
+            vscode.Uri.parse(`${uriPrefix}${encodeURIComponent(key)}`);
+        export const getKeyFromUri = (uri: vscode.Uri): string | undefined =>
+            uri.path.startsWith(uriPrefix) ?
+                decodeURIComponent(uri.path.substring(uriPrefix.length)):
+                undefined;
     }
     export namespace WorkspaceBookmark
     {
-        const stateKey = `${publisher}.${applicationKey}.grobalBookmark`;
+        const stateKey = `${publisher}.${applicationKey}.workspaceBookmark`;
+        const uriPrefix = `${publisher}.${applicationKey}://workspaceBookmark/`;
         export const get = (): Bookmark.LiveType =>
             Bookmark.jsonToLive(extensionContext.workspaceState.get<Bookmark.JsonType>(stateKey, {}));
         export const set = (bookmark: Bookmark.LiveType): Thenable<void> =>
@@ -205,17 +213,23 @@ export namespace ExternalFiles
             set(Bookmark.addFile(get(), key, document));
         export const removeFile = (key: string, document: vscode.Uri): Thenable<void> =>
             set(Bookmark.removeFile(get(), key, document));
+        export const getUri = (key: string): vscode.Uri =>
+            vscode.Uri.parse(`${uriPrefix}${encodeURIComponent(key)}`);
+        export const getKeyFromUri = (uri: vscode.Uri): string | undefined =>
+            uri.path.startsWith(uriPrefix) ?
+                decodeURIComponent(uri.path.substring(uriPrefix.length)):
+                undefined;
     }
     namespace RecentlyUsedExternalFiles
     {
-        const key = `${publisher}.${applicationKey}.recentlyUsedExternalFiles`;
+        const stateKey = `${publisher}.${applicationKey}.recentlyUsedExternalFiles`;
         export const clear = (): Thenable<void> =>
-            extensionContext.workspaceState.update(key, []);
+            extensionContext.workspaceState.update(stateKey, []);
         export const get = (): vscode.Uri[] =>
-            extensionContext.workspaceState.get<string[]>(key, [])
+            extensionContext.workspaceState.get<string[]>(stateKey, [])
             .map(i => vscode.Uri.parse(i));
         export const set = (documents: vscode.Uri[]): Thenable<void> =>
-            extensionContext.workspaceState.update(key, documents.map(i => i.toString()));
+            extensionContext.workspaceState.update(stateKey, documents.map(i => i.toString()));
         export const add = (document: vscode.Uri): Thenable<void> =>
         {
             let current = get();
@@ -230,6 +244,8 @@ export namespace ExternalFiles
             current = current.filter(i => i.toString() !== document.toString());
             return set(current);
         };
+        export const getUri = (): vscode.Uri =>
+            vscode.Uri.parse(`${publisher}.${applicationKey}://recentlyUsedExternalFiles`);
     }
     namespace Icons
     {
@@ -264,6 +280,7 @@ export namespace ExternalFiles
                 label: locale.map("external-files-vscode.recentlyUsedExternalFiles"),
                 collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
                 contextValue: `${publisher}.${applicationKey}.recentlyUsedExternalFilesRoot`,
+                resourceUri: RecentlyUsedExternalFiles.getUri(),
             };
             this.update(undefined);
         }
@@ -311,7 +328,7 @@ export namespace ExternalFiles
                             label: key,
                             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
                             contextValue: `${publisher}.${applicationKey}.globalBookmark`,
-                            resourceUri: undefined,
+                            resourceUri: GlobalBookmark.getUri(key),
                         }
                     }),
                     {}
@@ -327,7 +344,7 @@ export namespace ExternalFiles
                             label: key,
                             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
                             contextValue: `${publisher}.${applicationKey}.workspaceBookmark`,
-                            resourceUri: undefined,
+                            resourceUri: WorkspaceBookmark.getUri(key),
                         }
                     }),
                     {}
