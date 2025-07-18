@@ -253,8 +253,8 @@ export namespace ExternalFiles
     {
         private onDidChangeTreeDataEventEmitter = new vscode.EventEmitter<vscode.TreeItem | undefined>();
         readonly onDidChangeTreeData = this.onDidChangeTreeDataEventEmitter.event;
-        public GlobalBookmark: { [key: string]: vscode.TreeItem };
-        public WorkspaceBookmark: { [key: string]: vscode.TreeItem };
+        public globalBookmark: { [key: string]: vscode.TreeItem };
+        public workspaceBookmark: { [key: string]: vscode.TreeItem };
         public recentlyUsedExternalFilesRoot: vscode.TreeItem;
         constructor()
         {
@@ -300,7 +300,7 @@ export namespace ExternalFiles
             switch(element?.contextValue)
             {
             case undefined:
-                this.GlobalBookmark = Object.entries(GlobalBookmark.get()).reduce
+                this.globalBookmark = Object.entries(GlobalBookmark.get()).reduce
                 (
                     (acc, [key, _value]) =>
                     ({
@@ -316,7 +316,7 @@ export namespace ExternalFiles
                     }),
                     {}
                 );
-                this.WorkspaceBookmark = Object.entries(WorkspaceBookmark.get()).reduce
+                this.workspaceBookmark = Object.entries(WorkspaceBookmark.get()).reduce
                 (
                     (acc, [key, _value]) =>
                     ({
@@ -333,11 +333,60 @@ export namespace ExternalFiles
                     {}
                 );
                 return [
-                    ...Object.values(this.GlobalBookmark),
-                    ...Object.values(this.WorkspaceBookmark),
+                    ...Object.values(this.globalBookmark),
+                    ...Object.values(this.workspaceBookmark),
                     this.recentlyUsedExternalFilesRoot
                 ];
-            case `${publisher}.${applicationKey}.pinnedExternalFolder`:
+            case `${publisher}.${applicationKey}.globalBookmark`:
+                if ("string" === typeof element.label && this.globalBookmark[element.label])
+                {
+                    return [
+                        ...GlobalBookmark.get()[element.label].folders.map
+                        (
+                            i => this.uriToFolderTreeItem
+                            (
+                                i,
+                                `${publisher}.${applicationKey}.rootExternalFolder`,
+                                stripFileName(i.fsPath)
+                            )
+                        ),
+                        ...GlobalBookmark.get()[element.label].files.map
+                        (
+                            i => this.uriToFileTreeItem
+                            (
+                                i,
+                                `${publisher}.${applicationKey}.rootExternalFile`,
+                                stripFileName(i.fsPath)
+                            )
+                        )
+                    ];
+                }
+                return [];
+            case `${publisher}.${applicationKey}.workspaceBookmark`:
+                if ("string" === typeof element.label && this.globalBookmark[element.label])
+                {
+                    return [
+                        ...WorkspaceBookmark.get()[element.label].folders.map
+                        (
+                            i => this.uriToFolderTreeItem
+                            (
+                                i,
+                                `${publisher}.${applicationKey}.rootExternalFolder`,
+                                stripFileName(i.fsPath)
+                            )
+                        ),
+                        ...WorkspaceBookmark.get()[element.label].files.map
+                        (
+                            i => this.uriToFileTreeItem
+                            (
+                                i,
+                                `${publisher}.${applicationKey}.rootExternalFile`,
+                                stripFileName(i.fsPath)
+                            )
+                        )
+                    ];
+                }
+                return [];
             case `${publisher}.${applicationKey}.externalFolder`:
                 if (element.resourceUri)
                 {
@@ -388,10 +437,40 @@ export namespace ExternalFiles
         //     this.pinnedExternalFolders.find(i => makeSureEndWithSlash(i.resourceUri?.toString() ?? "") === makeSureEndWithSlash(document.toString()));
         // updateByUri = (uri: vscode.Uri) =>
         //     this.update(this.getMatchedPinnedExternalFolder(uri) ?? this.pinnedExternalFoldersRoot);
+        updateMatchBookmarkByUri = (bookmark: Bookmark.LiveType, uri: vscode.Uri) =>
+        {
+            Object.keys(bookmark).forEach
+            (
+                key =>
+                {
+                    for(const file of bookmark[key].files)
+                    {
+                        if (file.toString() === uri.toString())
+                        {
+                            this.update(this.globalBookmark[key]);
+                            return;
+                        }
+                    }
+                    for(const folder of bookmark[key].folders)
+                    {
+                        if (makeSureEndWithSlash(uri.toString()).startsWith(makeSureEndWithSlash(folder.toString())))
+                        {
+                            this.update(this.globalBookmark[key]);
+                            return;
+                        }
+                    }
+                }
+            )
+        };
+        updateByUri = (uri: vscode.Uri) =>
+        {
+            this.updateMatchBookmarkByUri(GlobalBookmark.get(), uri);
+            this.updateMatchBookmarkByUri(WorkspaceBookmark.get(), uri);
+        };
         updateGlobalBookmark = async (key: string): Promise<void> =>
-            this.update(this.GlobalBookmark[key]);
+            this.update(this.globalBookmark[key]);
         updateWorkspaceBookmark = async (key: string): Promise<void> =>
-            this.update(this.WorkspaceBookmark[key]);
+            this.update(this.workspaceBookmark[key]);
     }
     let treeDataProvider: ExternalFilesProvider;
     class DragAndDropController implements vscode.TreeDragAndDropController<vscode.TreeItem>
