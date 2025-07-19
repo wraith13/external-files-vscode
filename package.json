@@ -298,12 +298,6 @@
             {
                 "title": "%external-files-vscode.title%",
                 "properties": {
-                    "external-files.viewOnExplorer.enabled": {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "%external-files.viewOnExplorer.enabled.description%",
-                        "scope": "window"
-                    },
                     "external-files.maxRecentlyFiles": {
                         "type": "number",
                         "default": 30,

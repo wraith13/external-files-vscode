@@ -16,10 +16,6 @@ export namespace ExternalFiles
     {
         const root = vscel.config.makeRoot(packageJson);
         export const maxRecentlyFiles = root.makeEntry<number>("external-files.maxRecentlyFiles", "root-workspace");
-        export namespace ViewOnExplorer
-        {
-            export const enabled = root.makeEntry<boolean>("external-files.viewOnExplorer.enabled", "root-workspace");
-        }
     }
     export const makeSureEndWithSlash = (path: string): string =>
         path.endsWith("/") ? path : path + "/";
@@ -78,27 +74,32 @@ export namespace ExternalFiles
     namespace RecentlyUsedExternalFiles
     {
         const stateKey = `${publisher}.${applicationKey}.recentlyUsedExternalFiles`;
+        export type JsonType = string[];
+        export type LiveType = vscode.Uri[];
+        export type ItemType = vscode.Uri;
         export const clear = (): Thenable<void> =>
             extensionContext.workspaceState.update(stateKey, []);
-        export const get = (): vscode.Uri[] =>
-            extensionContext.workspaceState.get<string[]>(stateKey, [])
+        export const get = (): LiveType =>
+            extensionContext.workspaceState.get<JsonType>(stateKey, [])
             .map(i => vscode.Uri.parse(i));
-        export const set = (documents: vscode.Uri[]): Thenable<void> =>
+        export const set = (documents: LiveType): Thenable<void> =>
             extensionContext.workspaceState.update(stateKey, documents.map(i => i.toString()));
-        export const add = (document: vscode.Uri): Thenable<void> =>
+        const removeItem = (data: LiveType, document: ItemType): LiveType =>
+            data.filter(i => i.toString() !== document.toString());
+        const regulateData = (data: LiveType): LiveType =>
+            data.slice(0, Config.maxRecentlyFiles.get("root-workspace"));
+        export const add = (document: ItemType): Thenable<void> =>
         {
             let current = get();
-            current = current.filter(i => i.toString() !== document.toString());
+            current = removeItem(current, document);
             current.unshift(document);
-            current = current.slice(0, Config.maxRecentlyFiles.get("root-workspace"));
+            current = regulateData(current);
             return set(current);
         };
-        export const remove = (document: vscode.Uri): Thenable<void> =>
-        {
-            let current = get();
-            current = current.filter(i => i.toString() !== document.toString());
-            return set(current);
-        };
+        export const remove = (document: ItemType): Thenable<void> =>
+            set(removeItem(get(), document));
+        export const regulate = (): Thenable<void> =>
+            set(regulateData(get()));
         export const getUri = (): vscode.Uri =>
             vscode.Uri.parse(`${publisher}.${applicationKey}://recentlyUsedExternalFiles`);
     }
@@ -472,21 +473,24 @@ export namespace ExternalFiles
     };
     export const removeExternalFolder = async (node: any): Promise<void> =>
     {
-        const bookmarkUri = node.parentResourceUri as vscode.Uri | undefined;
-        if (bookmarkUri)
+        const bookmarkUri = node.parentResourceUri;
+        if (bookmarkUri instanceof vscode.Uri)
         {
             const resourceUri = node.resourceUri;
-            const globalBookmarkKey = GlobalBookmark.getKeyFromUri(bookmarkUri);
-            if (globalBookmarkKey)
+            if (resourceUri instanceof vscode.Uri)
             {
-                await GlobalBookmark.removeFolder(globalBookmarkKey, resourceUri)
+                const globalBookmarkKey = GlobalBookmark.getKeyFromUri(bookmarkUri);
+                if (globalBookmarkKey)
+                {
+                    await GlobalBookmark.removeFolder(globalBookmarkKey, resourceUri)
+                }
+                const workspaceBookmarkKey = WorkspaceBookmark.getKeyFromUri(bookmarkUri);
+                if (workspaceBookmarkKey)
+                {
+                    await WorkspaceBookmark.removeFolder(workspaceBookmarkKey, resourceUri)
+                }
+                treeDataProvider.updateByUri(bookmarkUri);
             }
-            const workspaceBookmarkKey = WorkspaceBookmark.getKeyFromUri(bookmarkUri);
-            if (workspaceBookmarkKey)
-            {
-                await WorkspaceBookmark.removeFolder(workspaceBookmarkKey, resourceUri)
-            }
-            treeDataProvider.updateByUri(bookmarkUri);
         }
     };
     export const revealInTerminal = async (resourceUri: vscode.Uri): Promise<void> =>
@@ -686,14 +690,14 @@ export namespace ExternalFiles
                 {
                     if (event.affectsConfiguration("external-files"))
                     {
-                        onDidChangeConfiguration();
+                        RecentlyUsedExternalFiles.regulate();
+                        treeDataProvider.update(treeDataProvider.recentlyUsedExternalFilesRoot);
                     }
                 }
             ),
             vscode.workspace.onDidChangeWorkspaceFolders(_ => treeDataProvider.update(undefined)),
         );
         //RecentlyUsedExternalFiles.clear();
-        updateViewOnExplorer();
         onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
     };
     const onDidChangeActiveTextEditor = (editor: vscode.TextEditor | undefined): void =>
@@ -718,19 +722,6 @@ export namespace ExternalFiles
             await RecentlyUsedExternalFiles.add(document.uri);
             treeDataProvider.update(treeDataProvider.recentlyUsedExternalFilesRoot);
         }
-    };
-    const onDidChangeConfiguration = (): void =>
-    {
-        updateViewOnExplorer();
-    };
-    const updateViewOnExplorer = (): void =>
-    {
-        vscode.commands.executeCommand
-        (
-            "setContext",
-            "showExternalFilesViewOnexplorer",
-            Config.ViewOnExplorer.enabled.get("default-scope")
-        );
     };
 }
 let extensionContext: vscode.ExtensionContext;
