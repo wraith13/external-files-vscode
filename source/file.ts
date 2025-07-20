@@ -2,8 +2,10 @@ import * as vscode from "vscode";
 import { locale } from "./locale";
 export namespace File
 {
+    export const regulateName = (key: string): string =>
+        key.trim().replace(/[\s]+/g, " ");
     export const stripFileName = (path: string): string =>
-        path.substr(0, path.length -stripDirectory(path).length);
+        path.slice(0, path.length -stripDirectory(path).length);
     export const stripDirectory = (path: string): string =>
         path.split('\\').reverse()[0].split('/').reverse()[0];
     export const isFolderOrFile = async (uri: vscode.Uri): Promise<"folder" | "file" | undefined> =>

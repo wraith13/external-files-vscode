@@ -45,7 +45,7 @@
         "menus": {
             "view/title": [
                 {
-                    "command": "external-files.addBookmark",
+                    "command": "external-files.newBookmark",
                     "when": "view == wraith13.external-files.externalFilesView",
                     "group": "navigation@1"
                 },
@@ -57,29 +57,19 @@
             ],
             "view/item/context": [
                 {
-                    "command": "external-files.addExternalFolder",
+                    "command": "external-files.addExternalFiles",
                     "when": "viewItem == wraith13.external-files.pinnedExternalFoldersRoot",
                     "group": "inline@1"
                 },
                 {
-                    "command": "external-files.reloadExternalFolder",
-                    "when": "viewItem == wraith13.external-files.pinnedExternalFoldersRoot",
-                    "group": "inline@2"
-                },
-                {
-                    "command": "external-files.removeExternalFolder",
+                    "command": "external-files.removeExternalFile",
                     "when": "viewItem == wraith13.external-files.pinnedExternalFolder",
                     "group": "inline"
                 },
                 {
-                    "command": "external-files.removePinnedFile",
-                    "when": "viewItem == wraith13.external-files.pinnedExternalFile",
-                    "group": "inline"
-                },
-                {
-                    "command": "external-files.addPinnedFile",
-                    "when": "viewItem == wraith13.external-files.recentlyUsedExternalFile",
-                    "group": "inline"
+                    "command": "external-files.registerToBookmark",
+                    "when": "viewItem == wraith13.external-files.pinnedExternalFoldersRoot",
+                    "group": "inline@1"
                 },
                 {
                     "command": "external-files.newFile",
@@ -139,24 +129,24 @@
             ],
             "commandPalette": [
                 {
-                    "command": "external-files.addExternalFolder",
+                    "command": "external-files.newBookmark",
                     "when": "false"
                 },
                 {
-                    "command": "external-files.reloadExternalFolder",
+                    "command": "external-files.reloadAll",
+                    "when": "false"
+                },
+                {
+                    "command": "external-files.addExternalFiles",
+                    "when": "false"
+                },
+                {
+                    "command": "external-files.removeExternalFile",
+                    "when": "false"
+                },
+                {
+                    "command": "external-files.registerToBookmark",
                     "when": "true"
-                },
-                {
-                    "command": "external-files.removeExternalFolder",
-                    "when": "false"
-                },
-                {
-                    "command": "external-files.removePinnedFile",
-                    "when": "wraith13.external-files.isPinnedExternalFile"
-                },
-                {
-                    "command": "external-files.addPinnedFile",
-                    "when": "wraith13.external-files.isRecentlyUsedExternalFile"
                 },
                 {
                     "command": "external-files.newFile",
@@ -191,11 +181,11 @@
                     "when": "false"
                 },
                 {
-                    "command": "external-files.renameFile",
+                    "command": "external-files.removeFolder",
                     "when": "false"
                 },
                 {
-                    "command": "external-files.removeFolder",
+                    "command": "external-files.renameFile",
                     "when": "false"
                 },
                 {

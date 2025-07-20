@@ -39,6 +39,11 @@ export namespace Bookmark
         bookmark[key] = bookmark[key] ?? blankEntry();
         return bookmark;
     };
+    export const removeKey = (bookmark: LiveType, key: string): LiveType =>
+    {
+        delete bookmark[key];
+        return bookmark;
+    };
     export const addFolder = (bookmark: LiveType, key: string, document: vscode.Uri): LiveType =>
     {
         let entry = bookmark[key] ?? blankEntry();
@@ -87,4 +92,32 @@ export namespace Bookmark
         }
         return bookmark;
     };
+    export class Instance
+    {
+        constructor(public uriPrefix: string, public getFromStorage: () => JsonType, public setToStorage: (bookmark: JsonType) => Thenable<void>)
+        {
+        }
+        public get = (): Bookmark.LiveType =>
+            Bookmark.jsonToLive(this.getFromStorage());
+        public set = (bookmark: Bookmark.LiveType): Thenable<void> =>
+            this.setToStorage(Bookmark.liveToJson(bookmark));
+        public addKey = (key: string): Thenable<void> =>
+            this.set(Bookmark.addKey(this.get(), key));
+        public removeKey = (key: string): Thenable<void> =>
+            this.set(Bookmark.removeKey(this.get(), key));
+        public addFolder = (key: string, document: vscode.Uri): Thenable<void> =>
+            this.set(Bookmark.addFolder(this.get(), key, document));
+        public removeFolder = (key: string, document: vscode.Uri): Thenable<void> =>
+            this.set(Bookmark.removeFolder(this.get(), key, document));
+        public addFile = (key: string, document: vscode.Uri): Thenable<void> =>
+            this.set(Bookmark.addFile(this.get(), key, document));
+        public removeFile = (key: string, document: vscode.Uri): Thenable<void> =>
+            this.set(Bookmark.removeFile(this.get(), key, document));
+        public getUri = (key: string): vscode.Uri =>
+            vscode.Uri.parse(`${this.uriPrefix}${encodeURIComponent(key)}`);
+        public getKeyFromUri = (uri: vscode.Uri): string | undefined =>
+            uri.path.startsWith(this.uriPrefix) ?
+                decodeURIComponent(uri.path.substring(this.uriPrefix.length)):
+                undefined;
+    }
 }
