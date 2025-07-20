@@ -34,6 +34,11 @@ export namespace Bookmark
             }),
             {}
         );
+    export const addKey = (bookmark: LiveType, key: string): LiveType =>
+    {
+        bookmark[key] = bookmark[key] ?? blankEntry();
+        return bookmark;
+    };
     export const addFolder = (bookmark: LiveType, key: string, document: vscode.Uri): LiveType =>
     {
         let entry = bookmark[key] ?? blankEntry();

@@ -43,6 +43,18 @@
             ]
         },
         "menus": {
+            "view/title": [
+                {
+                    "command": "external-files.addBookmark",
+                    "when": "view == wraith13.external-files.externalFilesView",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "external-files.reloadAll",
+                    "when": "view == wraith13.external-files.externalFilesView",
+                    "group": "navigation@2"
+                }
+            ],
             "view/item/context": [
                 {
                     "command": "external-files.addExternalFolder",
