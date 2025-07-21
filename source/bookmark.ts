@@ -101,6 +101,8 @@ export namespace Bookmark
             Bookmark.jsonToLive(this.getFromStorage());
         public set = (bookmark: Bookmark.LiveType): Thenable<void> =>
             this.setToStorage(Bookmark.liveToJson(bookmark));
+        public clear = (): Thenable<void> =>
+            this.setToStorage({});
         public addKey = (key: string): Thenable<void> =>
             this.set(Bookmark.addKey(this.get(), key));
         public removeKey = (key: string): Thenable<void> =>
@@ -116,8 +118,8 @@ export namespace Bookmark
         public getUri = (key: string): vscode.Uri =>
             vscode.Uri.parse(`${this.uriPrefix}${encodeURIComponent(key)}`);
         public getKeyFromUri = (uri: vscode.Uri): string | undefined =>
-            uri.path.startsWith(this.uriPrefix) ?
-                decodeURIComponent(uri.path.substring(this.uriPrefix.length)):
+            uri.toString().startsWith(this.uriPrefix.toLowerCase()) ?
+                decodeURIComponent(uri.toString().substring(this.uriPrefix.length)):
                 undefined;
     }
 }

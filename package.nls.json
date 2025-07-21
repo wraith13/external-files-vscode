@@ -2,6 +2,8 @@
     "external-files-vscode.title": "External Files",
     "external-files-vscode.externalFolders": "External Folders",
     "external-files-vscode.recentlyUsedExternalFiles": "Recently Used External Files",
+    "external-files-vscode.newBookmark.title": "Add New Bookmark",
+    "external-files-vscode.removeBookmark.title": "Remove Bookmark",
     "external-files-vscode.addExternalFolder.title": "Register External Folder",
     "external-files-vscode.removeExternalFolder.title": "Unregister External Folder",
     "external-files-vscode.reloadExternalFolder.title": "Reload External Folder",

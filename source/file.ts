@@ -20,6 +20,7 @@ export namespace File
             case 0 < (stat.type & vscode.FileType.File):
                 return "file";
             default:
+                vscode.window.showErrorMessage(`Unknown file stat: ${stat.type}`);
                 return undefined;
             }
         }
