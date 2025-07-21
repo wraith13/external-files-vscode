@@ -33,29 +33,31 @@ export namespace File
         "file" === await isFolderOrFile(uri);
     export const isFolder = async (uri: vscode.Uri): Promise<boolean> =>
         "folder" === await isFolderOrFile(uri);
-    export const getSubFolders = async (uri: vscode.Uri): Promise<vscode.Uri[]> =>
+    export const getFoldersAndFiles = async (uri: vscode.Uri): Promise<undefined | { folders:vscode.Uri[]; files:vscode.Uri[]}> =>
     {
-        const stat = await vscode.workspace.fs.stat(uri);
-        if (0 <= (stat.type & vscode.FileType.Directory))
+        if (await isFolder(uri))
         {
             const entries = await vscode.workspace.fs.readDirectory(uri);
-            return entries
-                .filter(i => 0 < (i[1] & vscode.FileType.Directory))
-                .map(i => vscode.Uri.joinPath(uri, i[0]));
+            const folders: vscode.Uri[] = [];
+            const files: vscode.Uri[] = [];
+            for (const entry of entries)
+            {
+                switch(await isFolderOrFile(vscode.Uri.joinPath(uri, entry[0])))
+                {
+                case "folder":
+                    folders.push(vscode.Uri.joinPath(uri, entry[0]));
+                    break;
+                case "file":
+                    files.push(vscode.Uri.joinPath(uri, entry[0]));
+                    break;
+                default:
+                    //vscode.window.showErrorMessage(`Unknown file stat for ${entry[0]}`);
+                    break;
+                }
+            }
+            return { folders, files };
         }
-        return [];
-    };
-    export const getFiles = async (uri: vscode.Uri): Promise<vscode.Uri[]> =>
-    {
-        const stat = await vscode.workspace.fs.stat(uri);
-        if (0 <= (stat.type & vscode.FileType.Directory))
-        {
-            const entries = await vscode.workspace.fs.readDirectory(uri);
-            return entries
-                .filter(i => 0 < (i[1] & vscode.FileType.File))
-                .map(i => vscode.Uri.joinPath(uri, i[0]));
-        }
-        return [];
+        return undefined;
     };
     export const getFolderPath = async (resourceUri: vscode.Uri): Promise<string | undefined> =>
     {

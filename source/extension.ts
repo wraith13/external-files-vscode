@@ -81,24 +81,31 @@ export namespace ExternalFiles
     }
     namespace Icons
     {
-        export let pinIcon: vscode.IconPath;
-        export let historyIcon: vscode.IconPath;
+        export let folder: vscode.IconPath;
+        export let file: vscode.IconPath;
+        export let bookmark: vscode.IconPath;
+        export let pin: vscode.IconPath;
+        export let history: vscode.IconPath;
         export const initialize = (context: vscode.ExtensionContext): void =>
         {
-            pinIcon =
+            folder = vscode.ThemeIcon.Folder;
+            file = vscode.ThemeIcon.File;
+            bookmark = new vscode.ThemeIcon("bookmark");
+            pin =
             {
                 light: vscode.Uri.joinPath(context.extensionUri, "images", "pin.1024.svg"),
                 dark: vscode.Uri.joinPath(context.extensionUri, "images", "pin-white.1024.svg"),
             };
-            historyIcon =
+            history =
             {
                 light: vscode.Uri.joinPath(context.extensionUri, "images", "history.1024.svg"),
                 dark: vscode.Uri.joinPath(context.extensionUri, "images", "history-white.1024.svg"),
             };
         };
     }
-    interface ExtendedTreeItem extends vscode.TreeItem {
-        parentResourceUri?: vscode.Uri;
+    interface ExtendedTreeItem extends vscode.TreeItem
+    {
+        parent?: vscode.TreeItem;
     }
     class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
     {
@@ -111,7 +118,7 @@ export namespace ExternalFiles
         {
             this.recentlyUsedExternalFilesRoot =
             {
-                iconPath: Icons.historyIcon,
+                iconPath: Icons.history,
                 label: locale.map("external-files-vscode.recentlyUsedExternalFiles"),
                 collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
                 contextValue: `${publisher}.${applicationKey}.recentlyUsedExternalFilesRoot`,
@@ -123,19 +130,19 @@ export namespace ExternalFiles
         {
             return element;
         }
-        uriToFolderTreeItem = (uri: vscode.Uri, contextValue: string, description?: string, parentResourceUri?: vscode.Uri): ExtendedTreeItem =>
+        uriToFolderTreeItem = (uri: vscode.Uri, contextValue: string, description?: string, parent?: vscode.TreeItem): ExtendedTreeItem =>
         ({
-            iconPath: vscode.ThemeIcon.Folder,
+            iconPath: Icons.folder,
             label: File.stripDirectory(uri.fsPath),
             resourceUri: uri,
             description,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
             contextValue,
-            parentResourceUri,
+            parent,
         });
-        uriToFileTreeItem = (uri: vscode.Uri, contextValue: string, description?: string, parentResourceUri?: vscode.Uri): ExtendedTreeItem =>
+        uriToFileTreeItem = (uri: vscode.Uri, contextValue: string, description?: string, parent?: vscode.TreeItem): ExtendedTreeItem =>
         ({
-            iconPath: vscode.ThemeIcon.File,
+            iconPath: Icons.file,
             label: File.stripDirectory(uri.fsPath),
             resourceUri: uri,
             description,
@@ -146,11 +153,11 @@ export namespace ExternalFiles
                 arguments:[uri]
             },
             contextValue,
-            parentResourceUri,
+            parent,
         });
-        async getChildren(element?: vscode.TreeItem | undefined): Promise<ExtendedTreeItem[]>
+        async getChildren(parent?: vscode.TreeItem | undefined): Promise<ExtendedTreeItem[]>
         {
-            switch(element?.contextValue)
+            switch(parent?.contextValue)
             {
             case undefined:
                 this.globalBookmark = Object.entries(GlobalBookmark.instance.get()).reduce
@@ -160,7 +167,7 @@ export namespace ExternalFiles
                         ...acc,
                         [key]:
                         {
-                            iconPath: Icons.pinIcon,
+                            iconPath: Icons.bookmark,
                             label: key,
                             //description: locale.map("external-files-vscode.globalBookmark.description"),
                             description: "GLOBAL",
@@ -178,7 +185,7 @@ export namespace ExternalFiles
                         ...acc,
                         [key]:
                         {
-                            iconPath: Icons.pinIcon,
+                            iconPath: Icons.bookmark,
                             label: key,
                             //description: locale.map("external-files-vscode.workspaceBookmark.description"),
                             description: "WORKSPACE",
@@ -195,84 +202,91 @@ export namespace ExternalFiles
                     this.recentlyUsedExternalFilesRoot
                 ];
             case `${publisher}.${applicationKey}.globalBookmark`:
-                if ("string" === typeof element.label && this.globalBookmark[element.label])
+                if ("string" === typeof parent.label && this.globalBookmark[parent.label])
                 {
                     return [
-                        ...GlobalBookmark.instance.get()[element.label].folders.map
+                        ...GlobalBookmark.instance.get()[parent.label].folders.map
                         (
                             i => this.uriToFolderTreeItem
                             (
                                 i,
                                 `${publisher}.${applicationKey}.rootExternalFolder`,
                                 "A:" +File.stripFileName(i.fsPath),
-                                element.resourceUri
+                                parent
                             )
                         ),
-                        ...GlobalBookmark.instance.get()[element.label].files.map
+                        ...GlobalBookmark.instance.get()[parent.label].files.map
                         (
                             i => this.uriToFileTreeItem
                             (
                                 i,
                                 `${publisher}.${applicationKey}.rootExternalFile`,
                                 "B:" +File.stripFileName(i.fsPath),
-                                element.resourceUri
+                                parent
                             )
                         )
                     ];
                 }
                 return [];
             case `${publisher}.${applicationKey}.workspaceBookmark`:
-                if ("string" === typeof element.label && this.workspaceBookmark[element.label])
+                if ("string" === typeof parent.label && this.workspaceBookmark[parent.label])
                 {
                     return [
-                        ...WorkspaceBookmark.instance.get()[element.label].folders.map
+                        ...WorkspaceBookmark.instance.get()[parent.label].folders.map
                         (
                             i => this.uriToFolderTreeItem
                             (
                                 i,
                                 `${publisher}.${applicationKey}.rootExternalFolder`,
                                 "C:" +File.stripFileName(i.fsPath),
-                                element.resourceUri
+                                parent
                             )
                         ),
-                        ...WorkspaceBookmark.instance.get()[element.label].files.map
+                        ...WorkspaceBookmark.instance.get()[parent.label].files.map
                         (
                             i => this.uriToFileTreeItem
                             (
                                 i,
                                 `${publisher}.${applicationKey}.rootExternalFile`,
                                 "D:" +File.stripFileName(i.fsPath),
-                                element.resourceUri
+                                parent
                             )
                         )
                     ];
                 }
                 return [];
+            case `${publisher}.${applicationKey}.rootExternalFolder`:
             case `${publisher}.${applicationKey}.externalFolder`:
-                if (element.resourceUri)
+                if (parent.resourceUri)
                 {
                     try
                     {
-                        const subFolders = await File.getSubFolders(element.resourceUri);
-                        const files = await File.getFiles(element.resourceUri);
-                        return [
-                            ...subFolders.map
-                            (
-                                i => this.uriToFolderTreeItem
+                        const filesAndFolders = await File.getFoldersAndFiles(parent.resourceUri);
+                        if (filesAndFolders)
+                        {
+                            return [
+                                ...filesAndFolders.folders.map
                                 (
-                                    i,
-                                    `${publisher}.${applicationKey}.externalFolder`
-                                )
-                            ),
-                            ...files.map
-                            (
-                                i => this.uriToFileTreeItem
+                                    i => this.uriToFolderTreeItem
+                                    (
+                                        i,
+                                        `${publisher}.${applicationKey}.externalFolder`,
+                                        // File.stripFileName(i.fsPath),
+                                        // element.resourceUri
+                                    )
+                                ),
+                                ...filesAndFolders.files.map
                                 (
-                                    i,
-                                    `${publisher}.${applicationKey}.externalFile`
+                                    i => this.uriToFileTreeItem
+                                    (
+                                        i,
+                                        `${publisher}.${applicationKey}.externalFile`,
+                                        // File.stripFileName(i.fsPath),
+                                        // element.resourceUri
+                                    )
                                 )
-                            )
-                        ];
+                            ];
+                        }
                     }
                     catch
                     {
@@ -290,7 +304,7 @@ export namespace ExternalFiles
                             i,
                             `${publisher}.${applicationKey}.recentlyUsedExternalFile`,
                             File.stripFileName(i.fsPath),
-                            element.resourceUri
+                            parent
                         )
                     ):
                     [{
@@ -503,7 +517,7 @@ export namespace ExternalFiles
         treeDataProvider.update(undefined);
     export const reload = async (node: any): Promise<void> =>
         treeDataProvider.update(node.resourceUri);
-    export const addExternalFiles = async (bookmarkUri: vscode.Uri): Promise<void> =>
+    export const addExternalFiles = async (node: any): Promise<void> =>
     {
         const files = await vscode.window.showOpenDialog
         (
@@ -517,6 +531,7 @@ export namespace ExternalFiles
         );
         if (files)
         {
+            const bookmarkUri = node.resourceUri;
             const globalBookmarkKey = GlobalBookmark.instance.getKeyFromUri(bookmarkUri);
             if (globalBookmarkKey)
             {
@@ -565,12 +580,12 @@ export namespace ExternalFiles
                     )
                 );
             }
-            treeDataProvider.updateByUri(bookmarkUri);
+            treeDataProvider.update(node);
         }
     };
     export const removeExternalFiles = async (node: any): Promise<void> =>
     {
-        const bookmarkUri = node.parentResourceUri;
+        const bookmarkUri = node.parent?.resourceUri;
         if (bookmarkUri instanceof vscode.Uri)
         {
             const resourceUri = node.resourceUri;
@@ -606,7 +621,7 @@ export namespace ExternalFiles
                         break;
                     }
                 }
-                treeDataProvider.updateByUri(bookmarkUri);
+                treeDataProvider.update(node.parent);
             }
         }
     };
@@ -810,7 +825,7 @@ export namespace ExternalFiles
             vscode.commands.registerCommand(`${applicationKey}.newBookmark`, newBookmark),
             vscode.commands.registerCommand(`${applicationKey}.removeBookmark`, removeBookmark),
             vscode.commands.registerCommand(`${applicationKey}.reloadAll`, reloadAll),
-            vscode.commands.registerCommand(`${applicationKey}.addExternalFiles`, node => addExternalFiles(node.resourceUri)),
+            vscode.commands.registerCommand(`${applicationKey}.addExternalFiles`, addExternalFiles),
             vscode.commands.registerCommand(`${applicationKey}.removeExternalFile`, removeExternalFiles),
             vscode.commands.registerCommand(`${applicationKey}.reload`, reload),
             vscode.commands.registerCommand(`${applicationKey}.registerToBookmark`, node => registerToBookmark(node.resourceUri)),
