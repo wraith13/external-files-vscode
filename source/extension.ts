@@ -90,7 +90,11 @@ export namespace ExternalFiles
         {
             folder = vscode.ThemeIcon.Folder;
             file = vscode.ThemeIcon.File;
-            bookmark = new vscode.ThemeIcon("bookmark");
+            bookmark =
+            {
+                light: vscode.Uri.joinPath(context.extensionUri, "images", "bookmark.1024.svg"),
+                dark: vscode.Uri.joinPath(context.extensionUri, "images", "bookmark-white.1024.svg"),
+            };
             pin =
             {
                 light: vscode.Uri.joinPath(context.extensionUri, "images", "pin.1024.svg"),
@@ -211,7 +215,7 @@ export namespace ExternalFiles
                             (
                                 i,
                                 `${publisher}.${applicationKey}.rootExternalFolder`,
-                                "A:" +File.stripFileName(i.fsPath),
+                                File.stripFileName(i.fsPath),
                                 parent
                             )
                         ),
@@ -221,7 +225,7 @@ export namespace ExternalFiles
                             (
                                 i,
                                 `${publisher}.${applicationKey}.rootExternalFile`,
-                                "B:" +File.stripFileName(i.fsPath),
+                                File.stripFileName(i.fsPath),
                                 parent
                             )
                         )
@@ -238,7 +242,7 @@ export namespace ExternalFiles
                             (
                                 i,
                                 `${publisher}.${applicationKey}.rootExternalFolder`,
-                                "C:" +File.stripFileName(i.fsPath),
+                                File.stripFileName(i.fsPath),
                                 parent
                             )
                         ),
@@ -248,7 +252,7 @@ export namespace ExternalFiles
                             (
                                 i,
                                 `${publisher}.${applicationKey}.rootExternalFile`,
-                                "D:" +File.stripFileName(i.fsPath),
+                                File.stripFileName(i.fsPath),
                                 parent
                             )
                         )
@@ -516,7 +520,7 @@ export namespace ExternalFiles
     export const reloadAll = async (): Promise<void> =>
         treeDataProvider.update(undefined);
     export const reload = async (node: any): Promise<void> =>
-        treeDataProvider.update(node.resourceUri);
+        treeDataProvider.update(node);
     export const addExternalFiles = async (node: any): Promise<void> =>
     {
         const files = await vscode.window.showOpenDialog

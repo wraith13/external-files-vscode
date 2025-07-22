@@ -214,8 +214,8 @@
         "commands": [
             {
                 "icon": {
-                    "light": "images/add.1024.svg",
-                    "dark": "images/add-white.1024.svg"
+                    "light": "images/bookmark.1024.svg",
+                    "dark": "images/bookmark-white.1024.svg"
                 },
                 "command": "external-files.newBookmark",
                 "title": "%external-files-vscode.newBookmark.title%",
@@ -268,8 +268,8 @@
             },
             {
                 "icon": {
-                    "light": "images/add.1024.svg",
-                    "dark": "images/add-white.1024.svg"
+                    "light": "images/bookmark.1024.svg",
+                    "dark": "images/bookmark-white.1024.svg"
                 },
                 "command": "external-files.registerToBookmark",
                 "title": "%external-files-vscode.registerToBookmark.title%",
