@@ -519,6 +519,11 @@ export namespace ExternalFiles
             treeDataProvider.update(undefined);
         }
     };
+    export const clearHistory = async (): Promise<void> =>
+    {
+        await RecentlyUsedExternalFiles.clear();
+        treeDataProvider.update(treeDataProvider.recentlyUsedExternalFilesRoot);
+    };
     export const addExternalFiles = async (node: any): Promise<void> =>
     {
         const files = await vscode.window.showOpenDialog
@@ -847,6 +852,7 @@ export namespace ExternalFiles
             vscode.commands.registerCommand(`${applicationKey}.newBookmark`, newBookmark),
             vscode.commands.registerCommand(`${applicationKey}.reloadAll`, reloadAll),
             vscode.commands.registerCommand(`${applicationKey}.removeBookmark`, removeBookmark),
+            vscode.commands.registerCommand(`${applicationKey}.clearHistory`, clearHistory),
             vscode.commands.registerCommand(`${applicationKey}.addExternalFiles`, addExternalFiles),
             vscode.commands.registerCommand(`${applicationKey}.registerToBookmark`, node => registerToBookmark(node.resourceUri)),
             vscode.commands.registerCommand(`${applicationKey}.newFile`, newFile),

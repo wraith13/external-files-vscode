@@ -61,6 +61,11 @@
                     "group": "A@0"
                 },
                 {
+                    "command": "external-files.clearHistory",
+                    "when": "viewItem == wraith13.external-files.recentlyUsedExternalFilesRoot",
+                    "group": "A@0"
+                },
+                {
                     "command": "external-files.addExternalFiles",
                     "when": "viewItem == wraith13.external-files.globalBookmark || viewItem == wraith13.external-files.workspaceBookmark",
                     "group": "inline@1"
@@ -150,6 +155,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "external-files.clearHistory",
+                    "when": "false"
+                },
+                {
                     "command": "external-files.addExternalFiles",
                     "when": "false"
                 },
@@ -233,6 +242,11 @@
             {
                 "command": "external-files.removeBookmark",
                 "title": "%external-files-vscode.removeBookmark.title%",
+                "category": "%external-files-vscode.title%"
+            },
+            {
+                "command": "external-files.clearHistory",
+                "title": "%external-files-vscode.clearHistory.title%",
                 "category": "%external-files-vscode.title%"
             },
             {

@@ -5,6 +5,7 @@
     "external-files-vscode.newBookmark.title": "Add New Bookmark...",
     "external-files-vscode.reloadAll.title": "Reload All",
     "external-files-vscode.removeBookmark.title": "Remove Bookmark",
+    "external-files-vscode.clearHistory.title": "Clear History",
     "external-files-vscode.addExternalFiles.title": "Register External Files/Folders...",
     "external-files-vscode.addExternalFiles.button": "Register to Bookmark",
     "external-files-vscode.registerToBookmark.title": "Register to Bookmark...",
