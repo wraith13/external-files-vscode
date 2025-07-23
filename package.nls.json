@@ -29,5 +29,7 @@
     "noExternalFiles.message": "No external files",
     "selectExternalFiles.placeHolder": "Select a external file",
     "remove.confirm.message": "Are you sure you want to remove this?",
-    "remove.button": "Remove"
+    "remove.button": "Remove",
+    "scope.global": "Global",
+    "scope.workspace": "Workspace"
 }

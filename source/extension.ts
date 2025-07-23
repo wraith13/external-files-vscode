@@ -173,8 +173,7 @@ export namespace ExternalFiles
                         {
                             iconPath: Icons.bookmark,
                             label: key,
-                            //description: locale.map("external-files-vscode.globalBookmark.description"),
-                            description: "GLOBAL",
+                            description: locale.map("scope.global"),
                             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
                             contextValue: `${publisher}.${applicationKey}.globalBookmark`,
                             resourceUri: GlobalBookmark.instance.getUri(key),
@@ -191,8 +190,7 @@ export namespace ExternalFiles
                         {
                             iconPath: Icons.bookmark,
                             label: key,
-                            //description: locale.map("external-files-vscode.workspaceBookmark.description"),
-                            description: "WORKSPACE",
+                            description: locale.map("scope.workspace"),
                             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
                             contextValue: `${publisher}.${applicationKey}.workspaceBookmark`,
                             resourceUri: WorkspaceBookmark.instance.getUri(key),
@@ -602,7 +600,7 @@ export namespace ExternalFiles
                     i =>
                     ({
                         label: `$(bookmark) ${i}`,
-                        description: "global",
+                        description: locale.map("scope.global"),
                         value: i,
                         scope: "global"
                     })
@@ -612,7 +610,7 @@ export namespace ExternalFiles
                     i =>
                     ({
                         label: `$(bookmark) ${i}`,
-                        description: "workspace",
+                        description: locale.map("scope.workspace"),
                         value: i,
                         scope: "workspace"
                     })
