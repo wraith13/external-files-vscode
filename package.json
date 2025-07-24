@@ -107,7 +107,7 @@
                 },
                 {
                     "command": "external-files.copyFilePath",
-                    "when": "viewItem == wraith13.external-files.rootExternalFolder || viewItem == wraith13.external-files.externalFolder || viewItem == wraith13.external-files.rootExternalFile || viewItem == wraith13.external-files.externalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile",
+                    "when": "viewItem == wraith13.external-files.rootExternalFolder || viewItem == wraith13.external-files.externalFolder || viewItem == wraith13.external-files.rootExternalFile || viewItem == wraith13.external-files.rootExternalUnknown || viewItem == wraith13.external-files.externalFile || viewItem == wraith13.external-files.recentlyUsedExternalFile",
                     "group": "B@5"
                 },
                 {
@@ -137,7 +137,7 @@
                 },
                 {
                     "command": "external-files.removeExternalFile",
-                    "when": "viewItem == wraith13.external-files.rootExternalFolder || viewItem == wraith13.external-files.rootExternalFile",
+                    "when": "viewItem == wraith13.external-files.rootExternalFolder || viewItem == wraith13.external-files.rootExternalFile || viewItem == wraith13.external-files.rootExternalUnknown",
                     "group": "E@1"
                 }
             ],

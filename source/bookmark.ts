@@ -3,22 +3,18 @@ import * as vscel from '@wraith13/vscel';
 import { File } from "./file";
 export namespace Bookmark
 {
-    export type JsonType = { [key: string]: { folders: string[]; files: string[]; } };
-    export type LiveType = { [key: string]: { folders: vscode.Uri[]; files: vscode.Uri[]; } };
+    export type JsonType = { [key: string]: string[]; };
+    export type LiveType = { [key: string]: vscode.Uri[]; };
     export const regulateKey = (key: string): string =>
         key.trim().replace(/[\s]+/g, " ");
-    export const blankEntry = (): LiveType[string] => ({ folders: [], files: [] });
+    export const blankEntry = (): LiveType[string] => [];
     export const jsonToLive = (json: JsonType): LiveType =>
         Object.entries(json).reduce
         (
             (acc, [key, value]) =>
             ({
                 ...acc,
-                [key]:
-                {
-                    folders: value.folders.map(i => vscode.Uri.parse(i)),
-                    files: value.files.map(i => vscode.Uri.parse(i)),
-                }
+                [key]: value.map(i => vscode.Uri.parse(i)),
             }),
             {}
         );
@@ -28,11 +24,7 @@ export namespace Bookmark
             (acc, [key, value]) =>
             ({
                 ...acc,
-                [key]:
-                {
-                    folders: value.folders.map(i => i.toString()),
-                    files: value.files.map(i => i.toString()),
-                }
+                [key]: value.map(i => i.toString()),
             }),
             {}
         );
@@ -46,37 +38,21 @@ export namespace Bookmark
         delete bookmark[key];
         return bookmark;
     };
-    // Regarding the processing of addFolder, addFile, and removeFolderOrFile:
-    // Since the file object pointed to by a URI can change from a file to a folder or from a folder to a file due to user actions,
-    // such redundant processing is necessary, and it is not possible to provide processing like removeFolder or removeFile.
-    export const addFolder = (bookmark: LiveType, key: string, document: vscode.Uri): LiveType =>
+    export const addEntry = (bookmark: LiveType, key: string, document: vscode.Uri): LiveType =>
     {
         let entry = bookmark[key] ?? blankEntry();
-        entry.folders = entry.folders.filter(i => i.toString() !== document.toString());
-        entry.folders.unshift(document);
-        entry.folders.sort();
-        entry.files = entry.files.filter(i => i.toString() !== document.toString());
+        entry = entry.filter(i => i.toString() !== document.toString());
+        entry.unshift(document);
+        entry.sort();
         bookmark[key] = entry;
         return bookmark;
     };
-    export const addFile = (bookmark: LiveType, key: string, document: vscode.Uri): LiveType =>
-    {
-        let entry = bookmark[key] ?? blankEntry();
-        entry.folders = entry.folders.filter(i => i.toString() !== document.toString());
-        entry.files = entry.files.filter(i => i.toString() !== document.toString());
-        entry.files.unshift(document);
-        entry.files.sort();
-        bookmark[key] = entry;
-        return bookmark;
-    };
-    export const removeFolderOrFile = (bookmark: LiveType, key: string, document: vscode.Uri): LiveType =>
+    export const removeEntry = (bookmark: LiveType, key: string, document: vscode.Uri): LiveType =>
     {
         let entry = bookmark[key];
         if (entry)
         {
-            entry.folders = entry.folders.filter(i => i.toString() !== document.toString());
-            entry.files = entry.files.filter(i => i.toString() !== document.toString());
-            bookmark[key] = entry;
+            bookmark[key] = entry.filter(i => i.toString() !== document.toString());
         }
         return bookmark;
     };
@@ -87,22 +63,7 @@ export namespace Bookmark
         {
             const regulatedKey = regulateKey(key);
             regulated[regulatedKey] = blankEntry();
-            regulated[regulatedKey].folders = value.folders
-                .filter
-                (
-                    (i, ix, list) =>
-                    list.findIndex(t => t.toString() === i.toString()) === ix
-                )
-                .sort
-                (
-                    vscel.comparer.make
-                    ([
-                        i => File.stripFileName(i.fsPath),
-                        i => File.stripFileName(i.path),
-                        i => i.toString(),
-                    ])
-                );
-            regulated[regulatedKey].files = value.files
+            regulated[regulatedKey] = value
                 .filter
                 (
                     (i, ix, list) =>
@@ -120,6 +81,35 @@ export namespace Bookmark
         }
         return regulated;
     };
+    export const getEntries = async (bookmark: LiveType, key: string): Promise<{ folders: vscode.Uri[]; files: vscode.Uri[]; unknowns: vscode.Uri[]; }> =>
+    {
+        const entries = bookmark[key] ?? [];
+        const folders: vscode.Uri[] = [];
+        const files: vscode.Uri[] = [];
+        const unknowns: vscode.Uri[] = [];
+        await Promise.all
+        (
+            entries.map
+            (
+                async entry =>
+                {
+                    switch(await File.isFolderOrFile(entry))
+                    {
+                    case "folder":
+                        folders.push(entry);
+                        break;
+                    case "file":
+                        files.push(entry);
+                        break;
+                    default:
+                        unknowns.push(entry);
+                        break;
+                    }
+                }
+            )
+        );
+        return { folders, files, unknowns };
+    };
     export class Instance
     {
         constructor(public uriPrefix: string, public getFromStorage: () => JsonType, public setToStorage: (bookmark: JsonType) => Thenable<void>)
@@ -135,17 +125,17 @@ export namespace Bookmark
             this.set(Bookmark.addKey(this.get(), key));
         public removeKey = (key: string): Thenable<void> =>
             this.set(Bookmark.removeKey(this.get(), key));
-        public addFolder = (key: string, document: vscode.Uri): Thenable<void> =>
-            this.set(Bookmark.addFolder(this.get(), key, document));
-        public addFile = (key: string, document: vscode.Uri): Thenable<void> =>
-            this.set(Bookmark.addFile(this.get(), key, document));
-        public removeFolderOrFile = (key: string, document: vscode.Uri): Thenable<void> =>
-            this.set(Bookmark.removeFolderOrFile(this.get(), key, document));
+        public addEntry = (key: string, document: vscode.Uri): Thenable<void> =>
+            this.set(Bookmark.addEntry(this.get(), key, document));
+        public removeEntry = (key: string, document: vscode.Uri): Thenable<void> =>
+            this.set(Bookmark.removeEntry(this.get(), key, document));
         public getUri = (key: string): vscode.Uri =>
             vscode.Uri.parse(`${this.uriPrefix}${encodeURIComponent(key)}`);
         public getKeyFromUri = (uri: vscode.Uri): string | undefined =>
             uri.toString().startsWith(this.uriPrefix.toLowerCase()) ?
                 decodeURIComponent(uri.toString().substring(this.uriPrefix.length)):
                 undefined;
+        public getEntries = async (key: string): Promise<{ folders: vscode.Uri[]; files: vscode.Uri[]; unknowns: vscode.Uri[]; }> =>
+            await Bookmark.getEntries(this.get(), key);
     }
 }

@@ -83,6 +83,7 @@ export namespace ExternalFiles
     {
         export let folder: vscode.IconPath;
         export let file: vscode.IconPath;
+        export let error: vscode.IconPath;
         export let bookmark: vscode.IconPath;
         export let pin: vscode.IconPath;
         export let history: vscode.IconPath;
@@ -90,6 +91,7 @@ export namespace ExternalFiles
         {
             folder = vscode.ThemeIcon.Folder;
             file = vscode.ThemeIcon.File;
+            error = new vscode.ThemeIcon("error");
             bookmark =
             {
                 light: vscode.Uri.joinPath(context.extensionUri, "images", "bookmark.1024.svg"),
@@ -159,6 +161,21 @@ export namespace ExternalFiles
             contextValue,
             parent,
         });
+        uriToUnknownTreeItem = (uri: vscode.Uri, contextValue: string, description?: string, parent?: vscode.TreeItem): ExtendedTreeItem =>
+        ({
+            iconPath: Icons.error,
+            label: File.stripDirectory(uri.fsPath),
+            resourceUri: uri,
+            description,
+            command:
+            {
+                title: "show",
+                command: "vscode.open",
+                arguments:[uri]
+            },
+            contextValue,
+            parent,
+        });
         orEmptyMessage = (source: ExtendedTreeItem[]): ExtendedTreeItem[] =>
             0 < source.length ?
                 source:
@@ -213,9 +230,10 @@ export namespace ExternalFiles
             case `${publisher}.${applicationKey}.globalBookmark`:
                 if ("string" === typeof parent.label && this.globalBookmark[parent.label])
                 {
+                    const entries = await GlobalBookmark.instance.getEntries(parent.label);
                     return this.orEmptyMessage
                     ([
-                        ...GlobalBookmark.instance.get()[parent.label].folders.map
+                        ...entries.folders.map
                         (
                             i => this.uriToFolderTreeItem
                             (
@@ -225,12 +243,22 @@ export namespace ExternalFiles
                                 parent
                             )
                         ),
-                        ...GlobalBookmark.instance.get()[parent.label].files.map
+                        ...entries.files.map
                         (
                             i => this.uriToFileTreeItem
                             (
                                 i,
                                 `${publisher}.${applicationKey}.rootExternalFile`,
+                                File.stripFileName(i.fsPath),
+                                parent
+                            )
+                        ),
+                        ...entries.unknowns.map
+                        (
+                            i => this.uriToUnknownTreeItem
+                            (
+                                i,
+                                `${publisher}.${applicationKey}.rootExternalUnknown`,
                                 File.stripFileName(i.fsPath),
                                 parent
                             )
@@ -241,9 +269,10 @@ export namespace ExternalFiles
             case `${publisher}.${applicationKey}.workspaceBookmark`:
                 if ("string" === typeof parent.label && this.workspaceBookmark[parent.label])
                 {
+                    const entries = await WorkspaceBookmark.instance.getEntries(parent.label);
                     return this.orEmptyMessage
                     ([
-                        ...WorkspaceBookmark.instance.get()[parent.label].folders.map
+                        ...entries.folders.map
                         (
                             i => this.uriToFolderTreeItem
                             (
@@ -253,12 +282,22 @@ export namespace ExternalFiles
                                 parent
                             )
                         ),
-                        ...WorkspaceBookmark.instance.get()[parent.label].files.map
+                        ...entries.files.map
                         (
                             i => this.uriToFileTreeItem
                             (
                                 i,
                                 `${publisher}.${applicationKey}.rootExternalFile`,
+                                File.stripFileName(i.fsPath),
+                                parent
+                            )
+                        ),
+                        ...entries.unknowns.map
+                        (
+                            i => this.uriToUnknownTreeItem
+                            (
+                                i,
+                                `${publisher}.${applicationKey}.rootExternalUnknown`,
                                 File.stripFileName(i.fsPath),
                                 parent
                             )
@@ -331,15 +370,7 @@ export namespace ExternalFiles
             (
                 key =>
                 {
-                    for(const file of bookmark[key].files)
-                    {
-                        if (file.toString() === uri.toString())
-                        {
-                            this.update(map[key]);
-                            return;
-                        }
-                    }
-                    for(const folder of bookmark[key].folders)
+                    for(const folder of bookmark[key])
                     {
                         if (makeSureEndWithSlash(uri.toString()).startsWith(makeSureEndWithSlash(folder.toString())))
                         {
@@ -552,19 +583,7 @@ export namespace ExternalFiles
                     files.map
                     (
                         async (resourceUri: vscode.Uri) =>
-                        {
-                            switch(await File.isFolderOrFile(resourceUri))
-                            {
-                            case "folder":
-                                await GlobalBookmark.instance.addFolder(globalBookmarkKey, resourceUri);
-                                break;
-                            case "file":
-                                await GlobalBookmark.instance.addFile(globalBookmarkKey, resourceUri);
-                                break;
-                            default:
-                                break;
-                            }
-                        }
+                            await GlobalBookmark.instance.addEntry(globalBookmarkKey, resourceUri)
                     )
                 );
             }
@@ -576,19 +595,7 @@ export namespace ExternalFiles
                     files.map
                     (
                         async (resourceUri: vscode.Uri) =>
-                        {
-                            switch(await File.isFolderOrFile(resourceUri))
-                            {
-                            case "folder":
-                                await WorkspaceBookmark.instance.addFolder(workspaceBookmarkKey, resourceUri);
-                                break;
-                            case "file":
-                                await WorkspaceBookmark.instance.addFile(workspaceBookmarkKey, resourceUri);
-                                break;
-                            default:
-                                break;
-                            }
-                        }
+                                await WorkspaceBookmark.instance.addEntry(workspaceBookmarkKey, resourceUri)
                     )
                 );
             }
@@ -644,34 +651,11 @@ export namespace ExternalFiles
             switch(selectedBookmark.scope)
             {
             case "global":
-                switch(await File.isFolderOrFile(resourceUri))
-                {
-                case "folder":
-                    await GlobalBookmark.instance.addFolder(selectedBookmark.value, resourceUri);
-                    break;
-                case "file":
-                    await GlobalBookmark.instance.addFile(selectedBookmark.value, resourceUri);
-                    break;
-                default:
-                    //vscode.window.showErrorMessage(locale.map("external-files-vscode.addNewGlobalBookmark.error"));
-                    break;
-                }
+                await GlobalBookmark.instance.addEntry(selectedBookmark.value, resourceUri);
                 treeDataProvider.updateGlobalBookmark(selectedBookmark.value);
                 break;
             case "workspace":
-                switch(await File.isFolderOrFile(resourceUri))
-                {
-                case "folder":
-                    await WorkspaceBookmark.instance.addFolder(selectedBookmark.value, resourceUri);
-                    break;
-                case "file":
-                    await WorkspaceBookmark.instance.addFile(selectedBookmark.value, resourceUri);
-                    break;
-                default:
-                    //vscode.window.showErrorMessage(locale.map("external-files-vscode.addNewWorkspaceBookmark.error"));
-                    break;
-                }
-                await WorkspaceBookmark.instance.addFolder(selectedBookmark.value, resourceUri);
+                await WorkspaceBookmark.instance.addEntry(selectedBookmark.value, resourceUri);
                 treeDataProvider.updateWorkspaceBookmark(selectedBookmark.value);
                 break;
             case "new-global":
@@ -688,18 +672,7 @@ export namespace ExternalFiles
                     );
                     if (newKey)
                     {
-                        switch(await File.isFolderOrFile(resourceUri))
-                        {
-                        case "folder":
-                            await GlobalBookmark.instance.addFolder(newKey, resourceUri);
-                            break;
-                        case "file":
-                            await GlobalBookmark.instance.addFile(newKey, resourceUri);
-                            break;
-                        default:
-                            //vscode.window.showErrorMessage(locale.map("external-files-vscode.addNewGlobalBookmark.error"));
-                            break;
-                        }
+                        await GlobalBookmark.instance.addEntry(newKey, resourceUri);
                         treeDataProvider.update(undefined);
                     }
                 }
@@ -718,18 +691,7 @@ export namespace ExternalFiles
                     );
                     if (newKey)
                     {
-                        switch(await File.isFolderOrFile(resourceUri))
-                        {
-                        case "folder":
-                            await WorkspaceBookmark.instance.addFolder(newKey, resourceUri);
-                            break;
-                        case "file":
-                            await WorkspaceBookmark.instance.addFile(newKey, resourceUri);
-                            break;
-                        default:
-                            //vscode.window.showErrorMessage(locale.map("external-files-vscode.addNewWorkspaceBookmark.error"));
-                            break;
-                        }
+                        await WorkspaceBookmark.instance.addEntry(newKey, resourceUri);
                         treeDataProvider.update(undefined);
                     }
                 }
@@ -830,12 +792,12 @@ export namespace ExternalFiles
                 const globalBookmarkKey = GlobalBookmark.instance.getKeyFromUri(bookmarkUri);
                 if (globalBookmarkKey)
                 {
-                    await GlobalBookmark.instance.removeFolderOrFile(globalBookmarkKey, resourceUri);
+                    await GlobalBookmark.instance.removeEntry(globalBookmarkKey, resourceUri);
                 }
                 const workspaceBookmarkKey = WorkspaceBookmark.instance.getKeyFromUri(bookmarkUri);
                 if (workspaceBookmarkKey)
                 {
-                    await WorkspaceBookmark.instance.removeFolderOrFile(workspaceBookmarkKey, resourceUri);
+                    await WorkspaceBookmark.instance.removeEntry(workspaceBookmarkKey, resourceUri);
                 }
                 treeDataProvider.update(node.parent);
             }
@@ -895,8 +857,8 @@ export namespace ExternalFiles
             ),
             vscode.workspace.onDidChangeWorkspaceFolders(_ => treeDataProvider.update(undefined)),
         );
-        //GlobalBookmark.instance.clear();
-        //WorkspaceBookmark.instance.clear();
+        // GlobalBookmark.instance.clear();
+        // WorkspaceBookmark.instance.clear();
         //RecentlyUsedExternalFiles.clear();
         // vscode.window.showErrorMessage
         // (
