@@ -22,7 +22,7 @@ export namespace ExternalFiles
     const isRegularTextEditor = (editor: vscode.TextEditor): boolean =>
         undefined !== editor.viewColumn && 0 < editor.viewColumn;
     const isExternalFiles = (uri: vscode.Uri): boolean =>
-        0 === (vscode.workspace.workspaceFolders ?? []).filter(i => uri.path.startsWith(i.uri.path)).length;
+        0 === (vscode.workspace.workspaceFolders ?? []).filter(i => makeSureEndWithSlash(uri.path).startsWith(makeSureEndWithSlash(i.uri.path))).length;
     const isExternalDocuments = (document: vscode.TextDocument): boolean =>
         ! document.isUntitled && isExternalFiles(document.uri);
     export namespace GlobalBookmark
@@ -483,29 +483,43 @@ export namespace ExternalFiles
                     .map((i: string) => vscode.Uri.parse(i));
                 switch(target.contextValue)
                 {
-                case `${publisher}.${applicationKey}.externalFolder`:
-                case `${publisher}.${applicationKey}.externalFile`:
-                    await Promise.all
-                    (
-                        uriList.map
+                case `${publisher}.${applicationKey}.globalBookmark`:
+                    const globalBookmarkKey = undefinedable(GlobalBookmark.instance.getKeyFromUri)(target.resourceUri);
+                    if (globalBookmarkKey)
+                    {
+                        await Promise.all
                         (
-                            async (uri: vscode.Uri) =>
-                            {
-                                if (isExternalFiles(uri))
+                            uriList.map
+                            (
+                                async (uri: vscode.Uri) =>
                                 {
-                                    switch(await File.isFolderOrFile(uri))
+                                    if (isExternalFiles(uri) && undefined !== await File.isFolderOrFile(uri))
                                     {
-                                    case "folder":
-                                        break;
-                                    case "file":
-                                        break;
-                                    default:
-                                        break;
+                                        await GlobalBookmark.instance.addEntry(globalBookmarkKey, uri);
                                     }
                                 }
-                            }
-                        )
-                    );
+                            )
+                        );
+                    }
+                    break;
+                case `${publisher}.${applicationKey}.workspaceBookmark`:
+                    const workspaceBookmarkKey = undefinedable(WorkspaceBookmark.instance.getKeyFromUri)(target.resourceUri);
+                    if (workspaceBookmarkKey)
+                    {
+                        await Promise.all
+                        (
+                            uriList.map
+                            (
+                                async (uri: vscode.Uri) =>
+                                {
+                                    if (isExternalFiles(uri) && undefined !== await File.isFolderOrFile(uri))
+                                    {
+                                        await WorkspaceBookmark.instance.addEntry(workspaceBookmarkKey, uri);
+                                    }
+                                }
+                            )
+                        );
+                    }
                     break;
                 case `${publisher}.${applicationKey}.recentlyUsedExternalFilesRoot`:
                 case `${publisher}.${applicationKey}.recentlyUsedExternalFile`:
@@ -515,7 +529,7 @@ export namespace ExternalFiles
                         (
                             async (uri: vscode.Uri) =>
                             {
-                                if (isExternalFiles(uri))
+                                if (isExternalFiles(uri) && await File.isFile(uri))
                                 {
                                     await RecentlyUsedExternalFiles.add(uri);
                                 }
@@ -930,7 +944,7 @@ export namespace ExternalFiles
         );
         // GlobalBookmark.instance.clear();
         // WorkspaceBookmark.instance.clear();
-        //RecentlyUsedExternalFiles.clear();
+        // RecentlyUsedExternalFiles.clear();
         // vscode.window.showErrorMessage
         // (
         //     JSON.stringify
