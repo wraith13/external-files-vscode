@@ -31,5 +31,6 @@
     "remove.confirm.message": "Are you sure you want to remove this?",
     "remove.button": "Remove",
     "scope.global": "Global",
-    "scope.workspace": "Workspace"
+    "scope.workspace": "Workspace",
+    "error.access": "Access Error"
 }

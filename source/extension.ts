@@ -109,6 +109,61 @@ export namespace ExternalFiles
             };
         };
     }
+    let treeDataProvider: ExternalFilesProvider;
+    class ErrorDecorationProvider implements vscode.FileDecorationProvider {
+        private _onDidChange = new vscode.EventEmitter<vscode.Uri | vscode.Uri[]>();
+        readonly onDidChangeFileDecorations = this._onDidChange.event;
+        provideFileDecoration(uri: vscode.Uri): vscode.ProviderResult<vscode.FileDecoration>
+        {
+            if (this.errorUris.includes(uri.toString()))
+            {
+                const result = new vscode.FileDecoration
+                (
+                    "!",
+                    locale.map("error.access"),
+                    new vscode.ThemeColor("problemsErrorIcon.foreground")
+                );
+                return result;
+            }
+            return undefined;
+        }
+        errorUris: string[] = [];
+        hasErrorUri(uri: vscode.Uri): boolean
+        {
+            return this.errorUris.includes(uri.toString());
+        }
+        clearErrorUris(): void
+        {
+            const uris = this.errorUris;
+            this.errorUris = [];
+            this._onDidChange.fire(uris.map(i => vscode.Uri.parse(i)));
+        }
+        addErrorUri(uri: vscode.Uri): void
+        {
+            if ( ! this.errorUris.includes(uri.toString()))
+            {
+                this.errorUris.push(uri.toString());
+                this._onDidChange.fire(uri);
+            }
+        }
+        addErrorUris(uris: vscode.Uri[]): void
+        {
+            uris.forEach(uri => this.addErrorUri(uri));
+        }
+        removeErrorUri(uri: vscode.Uri): void
+        {
+            const index = this.errorUris.indexOf(uri.toString());
+            if (0 <= index)
+            {
+                this.errorUris.splice(index, 1);
+                this._onDidChange.fire(uri);
+            }
+        }
+        removeErrorUris(uris: vscode.Uri[]): void
+        {
+            uris.forEach(uri => this.removeErrorUri(uri));
+        }
+    }
     interface ExtendedTreeItem extends vscode.TreeItem
     {
         parent?: vscode.TreeItem;
@@ -130,48 +185,47 @@ export namespace ExternalFiles
                 contextValue: `${publisher}.${applicationKey}.recentlyUsedExternalFilesRoot`,
                 resourceUri: RecentlyUsedExternalFiles.getUri(),
             };
-            this.update(undefined);
         }
         getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem>
         {
             return element;
         }
-        uriToFolderTreeItem = (uri: vscode.Uri, contextValue: string, description?: string, parent?: vscode.TreeItem): ExtendedTreeItem =>
+        uriToFolderTreeItem = (resourceUri: vscode.Uri, contextValue: string, description?: string, parent?: vscode.TreeItem): ExtendedTreeItem =>
         ({
             iconPath: Icons.folder,
-            label: File.stripDirectory(uri.fsPath),
-            resourceUri: uri,
+            label: File.stripDirectory(resourceUri.fsPath),
+            resourceUri,
             description,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
             contextValue,
             parent,
         });
-        uriToFileTreeItem = (uri: vscode.Uri, contextValue: string, description?: string, parent?: vscode.TreeItem): ExtendedTreeItem =>
+        uriToFileTreeItem = (resourceUri: vscode.Uri, contextValue: string, description?: string, parent?: vscode.TreeItem): ExtendedTreeItem =>
         ({
             iconPath: Icons.file,
-            label: File.stripDirectory(uri.fsPath),
-            resourceUri: uri,
+            label: File.stripDirectory(resourceUri.fsPath),
+            resourceUri,
             description,
             command:
             {
                 title: "show",
                 command: "vscode.open",
-                arguments:[uri]
+                arguments:[resourceUri]
             },
             contextValue,
             parent,
         });
-        uriToUnknownTreeItem = (uri: vscode.Uri, contextValue: string, description?: string, parent?: vscode.TreeItem): ExtendedTreeItem =>
+        uriToUnknownTreeItem = (resourceUri: vscode.Uri, contextValue: string, description?: string, parent?: vscode.TreeItem): ExtendedTreeItem =>
         ({
             iconPath: Icons.error,
-            label: File.stripDirectory(uri.fsPath),
-            resourceUri: uri,
+            label: File.stripDirectory(resourceUri.fsPath),
+            resourceUri,
             description,
             command:
             {
                 title: "show",
                 command: "vscode.open",
-                arguments:[uri]
+                arguments:[resourceUri]
             },
             contextValue,
             parent,
@@ -231,6 +285,8 @@ export namespace ExternalFiles
                 if ("string" === typeof parent.label && this.globalBookmark[parent.label])
                 {
                     const entries = await GlobalBookmark.instance.getEntries(parent.label);
+                    errorDecorationProvider.removeErrorUris([ ...entries.folders, ...entries.files, ]);
+                    errorDecorationProvider.addErrorUris(entries.unknowns);
                     return this.orEmptyMessage
                     ([
                         ...entries.folders.map
@@ -270,6 +326,8 @@ export namespace ExternalFiles
                 if ("string" === typeof parent.label && this.workspaceBookmark[parent.label])
                 {
                     const entries = await WorkspaceBookmark.instance.getEntries(parent.label);
+                    errorDecorationProvider.removeErrorUris([ ...entries.folders, ...entries.files, ]);
+                    errorDecorationProvider.addErrorUris(entries.unknowns);
                     return this.orEmptyMessage
                     ([
                         ...entries.folders.map
@@ -363,7 +421,14 @@ export namespace ExternalFiles
                 return [];
             }
         }
-        update = (data: vscode.TreeItem | undefined) => this.onDidChangeTreeDataEventEmitter.fire(data);
+        update = (data: vscode.TreeItem | undefined) =>
+        {
+            if (undefined === data)
+            {
+                errorDecorationProvider.clearErrorUris();
+            }
+            this.onDidChangeTreeDataEventEmitter.fire(data);
+        }
         updateMatchBookmarkByUri = (map: { [key: string]: vscode.TreeItem }, bookmark: Bookmark.LiveType, uri: vscode.Uri) =>
         {
             Object.keys(bookmark).forEach
@@ -391,7 +456,7 @@ export namespace ExternalFiles
         updateWorkspaceBookmark = async (key: string): Promise<void> =>
             this.update(this.workspaceBookmark[key]);
     }
-    let treeDataProvider: ExternalFilesProvider;
+    let errorDecorationProvider: ErrorDecorationProvider;
     class DragAndDropController implements vscode.TreeDragAndDropController<vscode.TreeItem>
     {
         public readonly dropMimeTypes = ["text/uri-list"];
@@ -799,7 +864,15 @@ export namespace ExternalFiles
                 {
                     await WorkspaceBookmark.instance.removeEntry(workspaceBookmarkKey, resourceUri);
                 }
-                treeDataProvider.update(node.parent);
+                if (errorDecorationProvider.hasErrorUri(resourceUri))
+                {
+                    errorDecorationProvider.removeErrorUri(resourceUri);
+                    treeDataProvider.update(undefined);
+                }
+                else
+                {
+                    treeDataProvider.update(node.parent);
+                }
             }
         }
     };
@@ -815,10 +888,10 @@ export namespace ExternalFiles
     export const initialize = (context: vscode.ExtensionContext): void =>
     {
         Icons.initialize(context);
+        errorDecorationProvider = new ErrorDecorationProvider();
         treeDataProvider = new ExternalFilesProvider();
         context.subscriptions.push
         (
-            //  コマンドの登録
             vscode.commands.registerCommand(`${applicationKey}.newBookmark`, newBookmark),
             vscode.commands.registerCommand(`${applicationKey}.reloadAll`, reloadAll),
             vscode.commands.registerCommand(`${applicationKey}.removeBookmark`, removeBookmark),
@@ -838,10 +911,8 @@ export namespace ExternalFiles
             vscode.commands.registerCommand(`${applicationKey}.removeFile`, removeFile),
             vscode.commands.registerCommand(`${applicationKey}.reload`, reload),
             vscode.commands.registerCommand(`${applicationKey}.removeExternalFile`, removeExternalFiles),
-            //  TreeDataProovider の登録
+            vscode.window.registerFileDecorationProvider(errorDecorationProvider),
             vscode.window.createTreeView(packageJson.contributes.views.explorer[0].id, { treeDataProvider, dragAndDropController }),
-            //vscode.window.registerTreeDataProvider(applicationKey, externalFilesProvider),
-            //  イベントリスナーの登録
             vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor),
             //vscode.workspace.onDidOpenTextDocument(a => updateExternalDocuments(a)),
             vscode.workspace.onDidChangeConfiguration
@@ -873,6 +944,7 @@ export namespace ExternalFiles
         //         4
         //     )
         // );
+        treeDataProvider.update(undefined);
         onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
     };
     const onDidChangeActiveTextEditor = (editor: vscode.TextEditor | undefined): void =>

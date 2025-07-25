@@ -31,5 +31,6 @@
     "remove.confirm.message": "本当に削除しますか？",
     "remove.button": "削除",
     "scope.global": "グローバル",
-    "scope.workspace": "ワークスペース"
+    "scope.workspace": "ワークスペース",
+    "error.access": "アクセスエラー"
 }
