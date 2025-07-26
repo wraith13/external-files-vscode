@@ -112,22 +112,22 @@
                 },
                 {
                     "command": "external-files.renameFolder",
-                    "when": "viewItem == wraith13.external-files.externalFolder",
+                    "when": "viewItem == wraith13.external-files.externalFolder || viewItem == wraith13.external-files.rootExternalFolder",
                     "group": "C@1"
                 },
                 {
                     "command": "external-files.renameFile",
-                    "when": "viewItem == wraith13.external-files.externalFile",
+                    "when": "viewItem == wraith13.external-files.externalFile || viewItem == wraith13.external-files.rootExternalFile",
                     "group": "C@2"
                 },
                 {
                     "command": "external-files.removeFolder",
-                    "when": "viewItem == wraith13.external-files.externalFolder",
+                    "when": "viewItem == wraith13.external-files.externalFolder || viewItem == wraith13.external-files.rootExternalFolder",
                     "group": "C@3"
                 },
                 {
                     "command": "external-files.removeFile",
-                    "when": "viewItem == wraith13.external-files.externalFile",
+                    "when": "viewItem == wraith13.external-files.externalFile || viewItem == wraith13.external-files.rootExternalFile",
                     "group": "C@4"
                 },
                 {

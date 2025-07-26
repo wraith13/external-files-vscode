@@ -1,22 +1,15 @@
 'use strict';
 import * as vscode from 'vscode';
-import * as vscel from '@wraith13/vscel';
+import { undefinedable } from "./undefinedable";
+import { regulateName } from "./regulate-name";
+import { Application } from './application';
 import { locale } from "./locale";
 import { File } from "./file";
 import { Bookmark } from "./bookmark";
+import { Recentlies } from "./recentlies";
 import packageJson from "../package.json";
-export const undefinedable = <ValueType, ResultType>(target: (value: ValueType) => ResultType) =>
-    (value: ValueType | undefined): ResultType | undefined =>
-        undefined === value ? undefined : target(value);
 export namespace ExternalFiles
 {
-    const publisher = packageJson.publisher;
-    const applicationKey = packageJson.name;
-    export namespace Config
-    {
-        const root = vscel.config.makeRoot(packageJson);
-        export const maxRecentlyFiles = root.makeEntry<number>("external-files.maxRecentlyFiles", "root-workspace");
-    }
     export const makeSureEndWithSlash = (path: string): string =>
         path.endsWith("/") ? path : path + "/";
     const isRegularTextEditor = (editor: vscode.TextEditor): boolean =>
@@ -25,60 +18,13 @@ export namespace ExternalFiles
         0 === (vscode.workspace.workspaceFolders ?? []).filter(i => makeSureEndWithSlash(uri.path).startsWith(makeSureEndWithSlash(i.uri.path))).length;
     const isExternalDocuments = (document: vscode.TextDocument): boolean =>
         ! document.isUntitled && isExternalFiles(document.uri);
-    export namespace GlobalBookmark
-    {
-        export const stateKey = `${publisher}.${applicationKey}.globalBookmark`;
-        export const uriPrefix = `${publisher}.${applicationKey}://global-bookmark/`;
-        export const instance = new Bookmark.Instance
-        (
-            uriPrefix,
-            () => extensionContext.globalState.get<Bookmark.JsonType>(stateKey, {}),
-            (bookmark: Bookmark.JsonType) => extensionContext.globalState.update(stateKey, bookmark)
-        );
-    }
-    export namespace WorkspaceBookmark
-    {
-        export const stateKey = `${publisher}.${applicationKey}.workspaceBookmark`;
-        export const uriPrefix = `${publisher}.${applicationKey}://workspace-bookmark/`;
-        export const instance = new Bookmark.Instance
-        (
-            uriPrefix,
-            () => extensionContext.workspaceState.get<Bookmark.JsonType>(stateKey, {}),
-            (bookmark: Bookmark.JsonType) => extensionContext.workspaceState.update(stateKey, bookmark)
-        );
-    }
-    namespace RecentlyUsedExternalFiles
-    {
-        const stateKey = `${publisher}.${applicationKey}.recentlyUsedExternalFiles`;
-        export type JsonType = string[];
-        export type LiveType = vscode.Uri[];
-        export type ItemType = vscode.Uri;
-        export const clear = (): Thenable<void> =>
-            extensionContext.workspaceState.update(stateKey, []);
-        export const get = (): LiveType =>
-            extensionContext.workspaceState.get<JsonType>(stateKey, [])
-            .map(i => vscode.Uri.parse(i));
-        export const set = (documents: LiveType): Thenable<void> =>
-            extensionContext.workspaceState.update(stateKey, documents.map(i => i.toString()));
-        const removeItem = (data: LiveType, document: ItemType): LiveType =>
-            data.filter(i => i.toString() !== document.toString());
-        const regulateData = (data: LiveType): LiveType =>
-            data.slice(0, Config.maxRecentlyFiles.get("root-workspace"));
-        export const add = (document: ItemType): Thenable<void> =>
-        {
-            let current = get();
-            current = removeItem(current, document);
-            current.unshift(document);
-            current = regulateData(current);
-            return set(current);
-        };
-        export const remove = (document: ItemType): Thenable<void> =>
-            set(removeItem(get(), document));
-        export const regulate = (): Thenable<void> =>
-            set(regulateData(get()));
-        export const getUri = (): vscode.Uri =>
-            vscode.Uri.parse(`${publisher}.${applicationKey}://recentlyUsedExternalFiles`);
-    }
+    export const onDidChangeUri = (oldUri: vscode.Uri, newUri: vscode.Uri | "removed"): boolean =>
+        [
+            Bookmark.global.onDidChangeUri(oldUri, newUri),
+            Bookmark.workspace.onDidChangeUri(oldUri, newUri),
+            Recentlies.onDidChangeUri(oldUri, newUri),
+        ]
+        .some(i => i);
     namespace Icons
     {
         export let folder: vscode.IconPath;
@@ -182,8 +128,8 @@ export namespace ExternalFiles
                 iconPath: Icons.history,
                 label: locale.map("external-files-vscode.recentlyUsedExternalFiles"),
                 collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
-                contextValue: `${publisher}.${applicationKey}.recentlyUsedExternalFilesRoot`,
-                resourceUri: RecentlyUsedExternalFiles.getUri(),
+                contextValue: Application.makeKey("recentlyUsedExternalFilesRoot"),
+                resourceUri: Recentlies.getUri(),
             };
         }
         getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem>
@@ -235,14 +181,14 @@ export namespace ExternalFiles
                 source:
                 [{
                     label: locale.map("noExternalFiles.message"),
-                    contextValue: `${publisher}.${applicationKey}.noFiles`,
+                    contextValue: Application.makeKey("noFiles"),
                 }];
         async getChildren(parent?: vscode.TreeItem | undefined): Promise<ExtendedTreeItem[]>
         {
             switch(parent?.contextValue)
             {
             case undefined:
-                this.globalBookmark = Object.entries(GlobalBookmark.instance.get()).reduce
+                this.globalBookmark = Object.entries(Bookmark.global.get()).reduce
                 (
                     (acc, [key, _value]) =>
                     ({
@@ -253,13 +199,13 @@ export namespace ExternalFiles
                             label: key,
                             description: locale.map("scope.global"),
                             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-                            contextValue: `${publisher}.${applicationKey}.globalBookmark`,
-                            resourceUri: GlobalBookmark.instance.getUri(key),
+                            contextValue: Application.makeKey("globalBookmark"),
+                            resourceUri: Bookmark.global.getUri(key),
                         }
                     }),
                     {}
                 );
-                this.workspaceBookmark = Object.entries(WorkspaceBookmark.instance.get()).reduce
+                this.workspaceBookmark = Object.entries(Bookmark.workspace.get()).reduce
                 (
                     (acc, [key, _value]) =>
                     ({
@@ -270,8 +216,8 @@ export namespace ExternalFiles
                             label: key,
                             description: locale.map("scope.workspace"),
                             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-                            contextValue: `${publisher}.${applicationKey}.workspaceBookmark`,
-                            resourceUri: WorkspaceBookmark.instance.getUri(key),
+                            contextValue: Application.makeKey("workspaceBookmark"),
+                            resourceUri: Bookmark.workspace.getUri(key),
                         }
                     }),
                     {}
@@ -281,10 +227,10 @@ export namespace ExternalFiles
                     ...Object.values(this.workspaceBookmark),
                     this.recentlyUsedExternalFilesRoot
                 ];
-            case `${publisher}.${applicationKey}.globalBookmark`:
+            case Application.makeKey("globalBookmark"):
                 if ("string" === typeof parent.label && this.globalBookmark[parent.label])
                 {
-                    const entries = await GlobalBookmark.instance.getEntries(parent.label);
+                    const entries = await Bookmark.global.getEntries(parent.label);
                     errorDecorationProvider.removeErrorUris([ ...entries.folders, ...entries.files, ]);
                     errorDecorationProvider.addErrorUris(entries.unknowns);
                     return this.orEmptyMessage
@@ -294,7 +240,7 @@ export namespace ExternalFiles
                             i => this.uriToFolderTreeItem
                             (
                                 i,
-                                `${publisher}.${applicationKey}.rootExternalFolder`,
+                                Application.makeKey("rootExternalFolder"),
                                 File.stripFileName(i.fsPath),
                                 parent
                             )
@@ -304,7 +250,7 @@ export namespace ExternalFiles
                             i => this.uriToFileTreeItem
                             (
                                 i,
-                                `${publisher}.${applicationKey}.rootExternalFile`,
+                                Application.makeKey("rootExternalFile"),
                                 File.stripFileName(i.fsPath),
                                 parent
                             )
@@ -314,7 +260,7 @@ export namespace ExternalFiles
                             i => this.uriToUnknownTreeItem
                             (
                                 i,
-                                `${publisher}.${applicationKey}.rootExternalUnknown`,
+                                Application.makeKey("rootExternalUnknown"),
                                 File.stripFileName(i.fsPath),
                                 parent
                             )
@@ -322,10 +268,10 @@ export namespace ExternalFiles
                     ]);
                 }
                 return [];
-            case `${publisher}.${applicationKey}.workspaceBookmark`:
+            case Application.makeKey("workspaceBookmark"):
                 if ("string" === typeof parent.label && this.workspaceBookmark[parent.label])
                 {
-                    const entries = await WorkspaceBookmark.instance.getEntries(parent.label);
+                    const entries = await Bookmark.workspace.getEntries(parent.label);
                     errorDecorationProvider.removeErrorUris([ ...entries.folders, ...entries.files, ]);
                     errorDecorationProvider.addErrorUris(entries.unknowns);
                     return this.orEmptyMessage
@@ -335,7 +281,7 @@ export namespace ExternalFiles
                             i => this.uriToFolderTreeItem
                             (
                                 i,
-                                `${publisher}.${applicationKey}.rootExternalFolder`,
+                                Application.makeKey("rootExternalFolder"),
                                 File.stripFileName(i.fsPath),
                                 parent
                             )
@@ -345,7 +291,7 @@ export namespace ExternalFiles
                             i => this.uriToFileTreeItem
                             (
                                 i,
-                                `${publisher}.${applicationKey}.rootExternalFile`,
+                                Application.makeKey("rootExternalFile"),
                                 File.stripFileName(i.fsPath),
                                 parent
                             )
@@ -355,7 +301,7 @@ export namespace ExternalFiles
                             i => this.uriToUnknownTreeItem
                             (
                                 i,
-                                `${publisher}.${applicationKey}.rootExternalUnknown`,
+                                Application.makeKey("rootExternalUnknown"),
                                 File.stripFileName(i.fsPath),
                                 parent
                             )
@@ -363,8 +309,8 @@ export namespace ExternalFiles
                     ]);
                 }
                 return [];
-            case `${publisher}.${applicationKey}.rootExternalFolder`:
-            case `${publisher}.${applicationKey}.externalFolder`:
+            case Application.makeKey("rootExternalFolder"):
+            case Application.makeKey("externalFolder"):
                 if (parent.resourceUri)
                 {
                     try
@@ -378,7 +324,7 @@ export namespace ExternalFiles
                                     i => this.uriToFolderTreeItem
                                     (
                                         i,
-                                        `${publisher}.${applicationKey}.externalFolder`,
+                                        Application.makeKey("externalFolder"),
                                         // File.stripFileName(i.fsPath),
                                         // element.resourceUri
                                     )
@@ -388,7 +334,7 @@ export namespace ExternalFiles
                                     i => this.uriToFileTreeItem
                                     (
                                         i,
-                                        `${publisher}.${applicationKey}.externalFile`,
+                                        Application.makeKey("externalFile"),
                                         // File.stripFileName(i.fsPath),
                                         // element.resourceUri
                                     )
@@ -402,8 +348,8 @@ export namespace ExternalFiles
                     }
                 }
                 return [];
-            case `${publisher}.${applicationKey}.recentlyUsedExternalFilesRoot`:
-                const recentlyUsedExternalDocuments = RecentlyUsedExternalFiles.get();
+            case Application.makeKey("recentlyUsedExternalFilesRoot"):
+                const recentlyUsedExternalDocuments = Recentlies.get();
                 return this.orEmptyMessage
                 (
                     recentlyUsedExternalDocuments.map
@@ -411,7 +357,7 @@ export namespace ExternalFiles
                         i => this.uriToFileTreeItem
                         (
                             i,
-                            `${publisher}.${applicationKey}.recentlyUsedExternalFile`,
+                            Application.makeKey("recentlyUsedExternalFile"),
                             File.stripFileName(i.fsPath),
                             parent
                         )
@@ -448,8 +394,8 @@ export namespace ExternalFiles
         };
         updateByUri = (uri: vscode.Uri) =>
         {
-            this.updateMatchBookmarkByUri(this.globalBookmark, GlobalBookmark.instance.get(), uri);
-            this.updateMatchBookmarkByUri(this.workspaceBookmark, WorkspaceBookmark.instance.get(), uri);
+            this.updateMatchBookmarkByUri(this.globalBookmark, Bookmark.global.get(), uri);
+            this.updateMatchBookmarkByUri(this.workspaceBookmark, Bookmark.workspace.get(), uri);
         };
         updateGlobalBookmark = async (key: string): Promise<void> =>
             this.update(this.globalBookmark[key]);
@@ -483,8 +429,8 @@ export namespace ExternalFiles
                     .map((i: string) => vscode.Uri.parse(i));
                 switch(target.contextValue)
                 {
-                case `${publisher}.${applicationKey}.globalBookmark`:
-                    const globalBookmarkKey = undefinedable(GlobalBookmark.instance.getKeyFromUri)(target.resourceUri);
+                case Application.makeKey("globalBookmark"):
+                    const globalBookmarkKey = undefinedable(Bookmark.global.getKeyFromUri)(target.resourceUri);
                     if (globalBookmarkKey)
                     {
                         await Promise.all
@@ -495,15 +441,15 @@ export namespace ExternalFiles
                                 {
                                     if (isExternalFiles(uri) && undefined !== await File.isFolderOrFile(uri))
                                     {
-                                        await GlobalBookmark.instance.addEntry(globalBookmarkKey, uri);
+                                        await Bookmark.global.addEntry(globalBookmarkKey, uri);
                                     }
                                 }
                             )
                         );
                     }
                     break;
-                case `${publisher}.${applicationKey}.workspaceBookmark`:
-                    const workspaceBookmarkKey = undefinedable(WorkspaceBookmark.instance.getKeyFromUri)(target.resourceUri);
+                case Application.makeKey("workspaceBookmark"):
+                    const workspaceBookmarkKey = undefinedable(Bookmark.workspace.getKeyFromUri)(target.resourceUri);
                     if (workspaceBookmarkKey)
                     {
                         await Promise.all
@@ -514,15 +460,15 @@ export namespace ExternalFiles
                                 {
                                     if (isExternalFiles(uri) && undefined !== await File.isFolderOrFile(uri))
                                     {
-                                        await WorkspaceBookmark.instance.addEntry(workspaceBookmarkKey, uri);
+                                        await Bookmark.workspace.addEntry(workspaceBookmarkKey, uri);
                                     }
                                 }
                             )
                         );
                     }
                     break;
-                case `${publisher}.${applicationKey}.recentlyUsedExternalFilesRoot`:
-                case `${publisher}.${applicationKey}.recentlyUsedExternalFile`:
+                case Application.makeKey("recentlyUsedExternalFilesRoot"):
+                case Application.makeKey("recentlyUsedExternalFile"):
                     await Promise.all
                     (
                         uriList.map
@@ -531,7 +477,7 @@ export namespace ExternalFiles
                             {
                                 if (isExternalFiles(uri) && await File.isFile(uri))
                                 {
-                                    await RecentlyUsedExternalFiles.add(uri);
+                                    await Recentlies.add(uri);
                                 }
                             }
                         )
@@ -573,7 +519,7 @@ export namespace ExternalFiles
             {
             case "new-global":
                 {
-                    const newKey = undefinedable(Bookmark.regulateKey)
+                    const newKey = undefinedable(regulateName)
                     (
                         await vscode.window.showInputBox
                         (
@@ -585,14 +531,14 @@ export namespace ExternalFiles
                     );
                     if (newKey)
                     {
-                        await GlobalBookmark.instance.addKey(newKey);
+                        await Bookmark.global.addKey(newKey);
                         treeDataProvider.update(undefined);
                     }
                 }
                 break;
             case "new-workspace":
                 {
-                    const newKey = undefinedable(Bookmark.regulateKey)
+                    const newKey = undefinedable(regulateName)
                     (
                         await vscode.window.showInputBox
                         (
@@ -604,7 +550,7 @@ export namespace ExternalFiles
                     );
                     if (newKey)
                     {
-                        await WorkspaceBookmark.instance.addKey(newKey);
+                        await Bookmark.workspace.addKey(newKey);
                         treeDataProvider.update(undefined);
                     }
                 }
@@ -621,22 +567,22 @@ export namespace ExternalFiles
         const resourceUri = node.resourceUri;
         if (resourceUri instanceof vscode.Uri)
         {
-            const globalBookmarkKey = GlobalBookmark.instance.getKeyFromUri(resourceUri);
+            const globalBookmarkKey = Bookmark.global.getKeyFromUri(resourceUri);
             if (globalBookmarkKey)
             {
-                await GlobalBookmark.instance.removeKey(globalBookmarkKey);
+                await Bookmark.global.removeKey(globalBookmarkKey);
             }
-            const workspaceBookmarkKey = WorkspaceBookmark.instance.getKeyFromUri(resourceUri);
+            const workspaceBookmarkKey = Bookmark.workspace.getKeyFromUri(resourceUri);
             if (workspaceBookmarkKey)
             {
-                await WorkspaceBookmark.instance.removeKey(workspaceBookmarkKey);
+                await Bookmark.workspace.removeKey(workspaceBookmarkKey);
             }
             treeDataProvider.update(undefined);
         }
     };
     export const clearHistory = async (): Promise<void> =>
     {
-        await RecentlyUsedExternalFiles.clear();
+        await Recentlies.clear();
         treeDataProvider.update(treeDataProvider.recentlyUsedExternalFilesRoot);
     };
     export const addExternalFiles = async (node: any): Promise<void> =>
@@ -654,7 +600,7 @@ export namespace ExternalFiles
         if (files)
         {
             const bookmarkUri = node.resourceUri;
-            const globalBookmarkKey = GlobalBookmark.instance.getKeyFromUri(bookmarkUri);
+            const globalBookmarkKey = Bookmark.global.getKeyFromUri(bookmarkUri);
             if (globalBookmarkKey)
             {
                 await Promise.all
@@ -662,11 +608,11 @@ export namespace ExternalFiles
                     files.map
                     (
                         async (resourceUri: vscode.Uri) =>
-                            await GlobalBookmark.instance.addEntry(globalBookmarkKey, resourceUri)
+                            await Bookmark.global.addEntry(globalBookmarkKey, resourceUri)
                     )
                 );
             }
-            const workspaceBookmarkKey = WorkspaceBookmark.instance.getKeyFromUri(bookmarkUri);
+            const workspaceBookmarkKey = Bookmark.workspace.getKeyFromUri(bookmarkUri);
             if (workspaceBookmarkKey)
             {
                 await Promise.all
@@ -674,7 +620,7 @@ export namespace ExternalFiles
                     files.map
                     (
                         async (resourceUri: vscode.Uri) =>
-                                await WorkspaceBookmark.instance.addEntry(workspaceBookmarkKey, resourceUri)
+                                await Bookmark.workspace.addEntry(workspaceBookmarkKey, resourceUri)
                     )
                 );
             }
@@ -683,8 +629,8 @@ export namespace ExternalFiles
     };
     export const registerToBookmark = async (resourceUri: vscode.Uri): Promise<void> =>
     {
-        const globalBookmarkKeys = Object.keys(GlobalBookmark.instance.get());
-        const workspaceBookmarkKeys = Object.keys(WorkspaceBookmark.instance.get());
+        const globalBookmarkKeys = Object.keys(Bookmark.global.get());
+        const workspaceBookmarkKeys = Object.keys(Bookmark.workspace.get());
         const selectedBookmark = await vscode.window.showQuickPick
         (
             [
@@ -730,16 +676,16 @@ export namespace ExternalFiles
             switch(selectedBookmark.scope)
             {
             case "global":
-                await GlobalBookmark.instance.addEntry(selectedBookmark.value, resourceUri);
+                await Bookmark.global.addEntry(selectedBookmark.value, resourceUri);
                 treeDataProvider.updateGlobalBookmark(selectedBookmark.value);
                 break;
             case "workspace":
-                await WorkspaceBookmark.instance.addEntry(selectedBookmark.value, resourceUri);
+                await Bookmark.workspace.addEntry(selectedBookmark.value, resourceUri);
                 treeDataProvider.updateWorkspaceBookmark(selectedBookmark.value);
                 break;
             case "new-global":
                 {
-                    const newKey = undefinedable(Bookmark.regulateKey)
+                    const newKey = undefinedable(regulateName)
                     (
                         await vscode.window.showInputBox
                         (
@@ -751,14 +697,14 @@ export namespace ExternalFiles
                     );
                     if (newKey)
                     {
-                        await GlobalBookmark.instance.addEntry(newKey, resourceUri);
+                        await Bookmark.global.addEntry(newKey, resourceUri);
                         treeDataProvider.update(undefined);
                     }
                 }
                 break;
             case "new-workspace":
                 {
-                    const newKey = undefinedable(Bookmark.regulateKey)
+                    const newKey = undefinedable(regulateName)
                     (
                         await vscode.window.showInputBox
                         (
@@ -770,7 +716,7 @@ export namespace ExternalFiles
                     );
                     if (newKey)
                     {
-                        await WorkspaceBookmark.instance.addEntry(newKey, resourceUri);
+                        await Bookmark.workspace.addEntry(newKey, resourceUri);
                         treeDataProvider.update(undefined);
                     }
                 }
@@ -782,32 +728,9 @@ export namespace ExternalFiles
     };
     export const newFolder = async (node: any): Promise<void> =>
     {
-        const folderPath = await File.getFolderPath(node.resourceUri);
-        if (folderPath)
+        if (await File.newFolder(node))
         {
-            const newFolderName = undefinedable(File.regulateName)
-            (
-                await vscode.window.showInputBox
-                (
-                    {
-                        placeHolder: locale.map("external-files-vscode.newFolder.title"),
-                        prompt: locale.map("external-files-vscode.newFolder.title"),
-                    }
-                )
-            );
-            if (newFolderName)
-            {
-                const newFolderUri = vscode.Uri.joinPath(node.resourceUri, newFolderName);
-                try
-                {
-                    await vscode.workspace.fs.createDirectory(newFolderUri);
-                }
-                catch(error)
-                {
-                    vscode.window.showErrorMessage(error.message);
-                }
-                treeDataProvider.updateByUri(node.resourceUri);
-            }
+            treeDataProvider.updateByUri(node.resourceUri);
         }
     };
     export const newFile = async (node: any): Promise<void> =>
@@ -832,30 +755,36 @@ export namespace ExternalFiles
     };
     export const renameFolder = async (node: any): Promise<void> =>
     {
-        if (await File.renameFolder(node))
+        const newFolderUri = await File.renameFolder(node);
+        if (newFolderUri)
         {
-            treeDataProvider.updateByUri(node.resourceUri);
+            onDidChangeUri(node.resourceUri, newFolderUri);
+            treeDataProvider.update(undefined);
         }
     };
     export const removeFolder = async (node: any): Promise<void> =>
     {
         if (await File.removeFolder(node))
         {
-            treeDataProvider.updateByUri(node.resourceUri);
+            onDidChangeUri(node.resourceUri, "removed");
+            treeDataProvider.update(undefined);
         }
     };
     export const renameFile = async (node: any): Promise<void> =>
     {
-        if (await File.renameFile(node))
+        const newFileUri = await File.renameFile(node);
+        if (newFileUri)
         {
-            treeDataProvider.updateByUri(node.resourceUri);
+            onDidChangeUri(node.resourceUri, newFileUri);
+            treeDataProvider.update(undefined);
         }
     };
     export const removeFile = async (node: any): Promise<void> =>
     {
         if (await File.removeFile(node))
         {
-            treeDataProvider.updateByUri(node.resourceUri);
+            onDidChangeUri(node.resourceUri, "removed");
+            treeDataProvider.update(undefined);
         }
     };
     export const reload = async (node: any): Promise<void> =>
@@ -868,15 +797,15 @@ export namespace ExternalFiles
             const resourceUri = node.resourceUri;
             if (resourceUri instanceof vscode.Uri)
             {
-                const globalBookmarkKey = GlobalBookmark.instance.getKeyFromUri(bookmarkUri);
+                const globalBookmarkKey = Bookmark.global.getKeyFromUri(bookmarkUri);
                 if (globalBookmarkKey)
                 {
-                    await GlobalBookmark.instance.removeEntry(globalBookmarkKey, resourceUri);
+                    await Bookmark.global.removeEntry(globalBookmarkKey, resourceUri);
                 }
-                const workspaceBookmarkKey = WorkspaceBookmark.instance.getKeyFromUri(bookmarkUri);
+                const workspaceBookmarkKey = Bookmark.workspace.getKeyFromUri(bookmarkUri);
                 if (workspaceBookmarkKey)
                 {
-                    await WorkspaceBookmark.instance.removeEntry(workspaceBookmarkKey, resourceUri);
+                    await Bookmark.workspace.removeEntry(workspaceBookmarkKey, resourceUri);
                 }
                 if (errorDecorationProvider.hasErrorUri(resourceUri))
                 {
@@ -906,25 +835,25 @@ export namespace ExternalFiles
         treeDataProvider = new ExternalFilesProvider();
         context.subscriptions.push
         (
-            vscode.commands.registerCommand(`${applicationKey}.newBookmark`, newBookmark),
-            vscode.commands.registerCommand(`${applicationKey}.reloadAll`, reloadAll),
-            vscode.commands.registerCommand(`${applicationKey}.removeBookmark`, removeBookmark),
-            vscode.commands.registerCommand(`${applicationKey}.clearHistory`, clearHistory),
-            vscode.commands.registerCommand(`${applicationKey}.addExternalFiles`, addExternalFiles),
-            vscode.commands.registerCommand(`${applicationKey}.registerToBookmark`, node => registerToBookmark(node.resourceUri)),
-            vscode.commands.registerCommand(`${applicationKey}.newFile`, newFile),
-            vscode.commands.registerCommand(`${applicationKey}.newFolder`, newFolder),
-            vscode.commands.registerCommand(`${applicationKey}.revealFileInFinder`, makeCommand("revealFileInOS")),
-            vscode.commands.registerCommand(`${applicationKey}.revealFileInExplorer`, makeCommand("revealFileInOS")),
-            vscode.commands.registerCommand(`${applicationKey}.showActiveFileInExplorer`, makeCommand("workbench.files.action.showActiveFileInExplorer", "withActivate")),
-            vscode.commands.registerCommand(`${applicationKey}.revealInTerminal`, node => revealInTerminal(node.resourceUri)),
-            vscode.commands.registerCommand(`${applicationKey}.copyFilePath`, makeCommand("copyFilePath")),
-            vscode.commands.registerCommand(`${applicationKey}.renameFolder`, renameFolder),
-            vscode.commands.registerCommand(`${applicationKey}.removeFolder`, removeFolder),
-            vscode.commands.registerCommand(`${applicationKey}.renameFile`, renameFile),
-            vscode.commands.registerCommand(`${applicationKey}.removeFile`, removeFile),
-            vscode.commands.registerCommand(`${applicationKey}.reload`, reload),
-            vscode.commands.registerCommand(`${applicationKey}.removeExternalFile`, removeExternalFiles),
+            vscode.commands.registerCommand(`${Application.key}.newBookmark`, newBookmark),
+            vscode.commands.registerCommand(`${Application.key}.reloadAll`, reloadAll),
+            vscode.commands.registerCommand(`${Application.key}.removeBookmark`, removeBookmark),
+            vscode.commands.registerCommand(`${Application.key}.clearHistory`, clearHistory),
+            vscode.commands.registerCommand(`${Application.key}.addExternalFiles`, addExternalFiles),
+            vscode.commands.registerCommand(`${Application.key}.registerToBookmark`, node => registerToBookmark(node.resourceUri)),
+            vscode.commands.registerCommand(`${Application.key}.newFile`, newFile),
+            vscode.commands.registerCommand(`${Application.key}.newFolder`, newFolder),
+            vscode.commands.registerCommand(`${Application.key}.revealFileInFinder`, makeCommand("revealFileInOS")),
+            vscode.commands.registerCommand(`${Application.key}.revealFileInExplorer`, makeCommand("revealFileInOS")),
+            vscode.commands.registerCommand(`${Application.key}.showActiveFileInExplorer`, makeCommand("workbench.files.action.showActiveFileInExplorer", "withActivate")),
+            vscode.commands.registerCommand(`${Application.key}.revealInTerminal`, node => revealInTerminal(node.resourceUri)),
+            vscode.commands.registerCommand(`${Application.key}.copyFilePath`, makeCommand("copyFilePath")),
+            vscode.commands.registerCommand(`${Application.key}.renameFolder`, renameFolder),
+            vscode.commands.registerCommand(`${Application.key}.removeFolder`, removeFolder),
+            vscode.commands.registerCommand(`${Application.key}.renameFile`, renameFile),
+            vscode.commands.registerCommand(`${Application.key}.removeFile`, removeFile),
+            vscode.commands.registerCommand(`${Application.key}.reload`, reload),
+            vscode.commands.registerCommand(`${Application.key}.removeExternalFile`, removeExternalFiles),
             vscode.window.registerFileDecorationProvider(errorDecorationProvider),
             vscode.window.createTreeView(packageJson.contributes.views.explorer[0].id, { treeDataProvider, dragAndDropController }),
             vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor),
@@ -935,15 +864,15 @@ export namespace ExternalFiles
                 {
                     if (event.affectsConfiguration("external-files"))
                     {
-                        RecentlyUsedExternalFiles.regulate();
+                        Recentlies.regulate();
                         treeDataProvider.update(treeDataProvider.recentlyUsedExternalFilesRoot);
                     }
                 }
             ),
             vscode.workspace.onDidChangeWorkspaceFolders(_ => treeDataProvider.update(undefined)),
         );
-        // GlobalBookmark.instance.clear();
-        // WorkspaceBookmark.instance.clear();
+        // Bookmark.global.clear();
+        // Bookmark.workspace.clear();
         // RecentlyUsedExternalFiles.clear();
         // vscode.window.showErrorMessage
         // (
@@ -972,7 +901,7 @@ export namespace ExternalFiles
         vscode.commands.executeCommand
         (
             "setContext",
-            `${publisher}.${applicationKey}.isRecentlyUsedExternalFile`,
+            Application.makeKey("isRecentlyUsedExternalFile"),
             isRecentlyUsedExternalFile
         );
     };
@@ -980,15 +909,14 @@ export namespace ExternalFiles
     {
         if (isExternalDocuments(document))
         {
-            await RecentlyUsedExternalFiles.add(document.uri);
+            await Recentlies.add(document.uri);
             treeDataProvider.update(treeDataProvider.recentlyUsedExternalFilesRoot);
         }
     };
 }
-let extensionContext: vscode.ExtensionContext;
 export const activate = (context: vscode.ExtensionContext) : void =>
 {
-    extensionContext = context;
+    Application.context = context;
     ExternalFiles.initialize(context);
 };
 export const deactivate = () : void =>

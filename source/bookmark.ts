@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
 import * as vscel from '@wraith13/vscel';
+import { Application } from './application';
+import { regulateName } from "./regulate-name";
 import { File } from "./file";
 export namespace Bookmark
 {
     export type JsonType = { [key: string]: string[]; };
     export type LiveType = { [key: string]: vscode.Uri[]; };
-    export const regulateKey = (key: string): string =>
-        key.trim().replace(/[\s]+/g, " ");
     export const blankEntry = (): LiveType[string] => [];
     export const jsonToLive = (json: JsonType): LiveType =>
         Object.entries(json).reduce
@@ -59,9 +59,9 @@ export namespace Bookmark
     export const regulateBookmark = (bookmark: LiveType): LiveType =>
     {
         const regulated: LiveType = {};
-        for (const [key, value] of Object.entries(bookmark).sort(vscel.comparer.make(i => regulateKey(i[0]))))
+        for (const [key, value] of Object.entries(bookmark).sort(vscel.comparer.make(i => regulateName(i[0]))))
         {
-            const regulatedKey = regulateKey(key);
+            const regulatedKey = regulateName(key);
             regulated[regulatedKey] = blankEntry();
             regulated[regulatedKey] = value
                 .filter
@@ -110,6 +110,30 @@ export namespace Bookmark
         );
         return { folders, files, unknowns };
     };
+    export const onDidChangeUri = (bookmark: LiveType, oldUri: vscode.Uri, newUri: vscode.Uri | "removed"): boolean =>
+    {
+        let result = false;
+        Object.values(bookmark).forEach
+        (
+            current =>
+            {
+                const index = current.findIndex(i => i.toString() === oldUri.toString());
+                if (0 <= index)
+                {
+                    if ("removed" === newUri)
+                    {
+                        current.splice(index, 1);
+                    }
+                    else
+                    {
+                        current[index] = newUri;
+                    }
+                    result = true;
+                }
+            }
+        );
+        return result;
+    }
     export class Instance
     {
         constructor(public uriPrefix: string, public getFromStorage: () => JsonType, public setToStorage: (bookmark: JsonType) => Thenable<void>)
@@ -137,5 +161,39 @@ export namespace Bookmark
                 undefined;
         public getEntries = async (key: string): Promise<{ folders: vscode.Uri[]; files: vscode.Uri[]; unknowns: vscode.Uri[]; }> =>
             await Bookmark.getEntries(this.get(), key);
+        public onDidChangeUri = (oldUri: vscode.Uri, newUri: vscode.Uri | "removed"): boolean =>
+        {
+            const bookmark = this.get();
+            const result = Bookmark.onDidChangeUri(bookmark, oldUri, newUri);
+            if (result)
+            {
+                this.set(bookmark);
+            }
+            return result;
+        }
     }
+    export namespace GlobalBookmark
+    {
+        export const stateKey = Application.makeKey("globalBookmark");
+        export const uriPrefix = `${Application.publisher}.${Application.key}://global-bookmark/`;
+        export const instance = new Bookmark.Instance
+        (
+            uriPrefix,
+            () => Application.context.globalState.get<Bookmark.JsonType>(stateKey, {}),
+            (bookmark: Bookmark.JsonType) => Application.context.globalState.update(stateKey, bookmark)
+        );
+    }
+    export const global = GlobalBookmark.instance;
+    export namespace WorkspaceBookmark
+    {
+        export const stateKey = Application.makeKey("workspaceBookmark");
+        export const uriPrefix = `${Application.publisher}.${Application.key}://workspace-bookmark/`;
+        export const instance = new Bookmark.Instance
+        (
+            uriPrefix,
+            () => Application.context.workspaceState.get<Bookmark.JsonType>(stateKey, {}),
+            (bookmark: Bookmark.JsonType) => Application.context.workspaceState.update(stateKey, bookmark)
+        );
+    }
+    export const workspace = WorkspaceBookmark.instance;
 }

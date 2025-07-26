@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
+import { undefinedable } from "./undefinedable";
+import { regulateName } from "./regulate-name";
 import { locale } from "./locale";
 export namespace File
 {
-    export const regulateName = (key: string): string =>
-        key.trim().replace(/[\s]+/g, " ");
     export const stripFileName = (path: string): string =>
         path.slice(0, path.length -stripDirectory(path).length);
     export const stripDirectory = (path: string): string =>
@@ -76,12 +76,15 @@ export namespace File
         const folderPath = await File.getFolderPath(node.resourceUri);
         if (folderPath)
         {
-            const newFolderName = await vscode.window.showInputBox
+            const newFolderName = undefinedable(regulateName)
             (
-                {
-                    placeHolder: locale.map("external-files-vscode.newFolder.title"),
-                    prompt: locale.map("external-files-vscode.newFolder.title"),
-                }
+                await vscode.window.showInputBox
+                (
+                    {
+                        placeHolder: locale.map("external-files-vscode.newFolder.title"),
+                        prompt: locale.map("external-files-vscode.newFolder.title"),
+                    }
+                )
             );
             if (newFolderName)
             {
@@ -104,12 +107,15 @@ export namespace File
         const folderPath = await File.getFolderPath(node.resourceUri);
         if (folderPath)
         {
-            const newFileName = await vscode.window.showInputBox
+            const newFileName = undefinedable(regulateName)
             (
-                {
-                    placeHolder: locale.map("external-files-vscode.newFile.title"),
-                    prompt: locale.map("external-files-vscode.newFile.title"),
-                }
+                await vscode.window.showInputBox
+                (
+                    {
+                        placeHolder: locale.map("external-files-vscode.newFile.title"),
+                        prompt: locale.map("external-files-vscode.newFile.title"),
+                    }
+                )
             );
             if (newFileName)
             {
@@ -128,34 +134,38 @@ export namespace File
         }
         return false;
     };
-    export const renameFolder = async (node: any): Promise<boolean> =>
+    export const renameFolder = async (node: any): Promise<vscode.Uri | undefined> =>
     {
         const folderPath = await File.getFolderPath(node.resourceUri);
         if (folderPath)
         {
-            const newFolderName = await vscode.window.showInputBox
+            const oldFolderName = stripDirectory(node.resourceUri.fsPath);
+            const newFolderName = undefinedable(regulateName)
             (
-                {
-                    placeHolder: locale.map("external-files-vscode.rename.title"),
-                    value: stripDirectory(node.resourceUri.fsPath),
-                    prompt: locale.map("external-files-vscode.rename.title"),
-                }
+                await vscode.window.showInputBox
+                (
+                    {
+                        placeHolder: locale.map("external-files-vscode.rename.title"),
+                        value: oldFolderName,
+                        prompt: locale.map("external-files-vscode.rename.title"),
+                    }
+                )
             );
-            if (newFolderName)
+            if (newFolderName && oldFolderName !== newFolderName)
             {
                 const newFolderUri = vscode.Uri.joinPath(node.resourceUri, "..", newFolderName);
                 try
                 {
                     await vscode.workspace.fs.rename(node.resourceUri, newFolderUri);
+                    return newFolderUri;
                 }
                 catch(error)
                 {
                     vscode.window.showErrorMessage(error.message);
                 }
-                return true;
             }
         }
-        return false;
+        return undefined;
     };
     export const removeFolder = async (node: any): Promise<boolean> =>
     {
@@ -180,35 +190,38 @@ export namespace File
         }
         return false;
     };
-    export const renameFile = async (node: any): Promise<boolean> =>
+    export const renameFile = async (node: any): Promise<vscode.Uri | undefined> =>
     {
         const folderPath = await File.getFolderPath(node.resourceUri);
         if (folderPath)
         {
-            const newFileName = await vscode.window.showInputBox
+            const oldFileName = stripDirectory(node.resourceUri.fsPath);
+            const newFileName = undefinedable(regulateName)
             (
-                {
-                    placeHolder: locale.map("external-files-vscode.rename.title"),
-                    value: stripDirectory(node.resourceUri.fsPath),
-                    prompt: locale.map("external-files-vscode.rename.title"),
-                }
+                await vscode.window.showInputBox
+                (
+                    {
+                        placeHolder: locale.map("external-files-vscode.rename.title"),
+                        value: oldFileName,
+                        prompt: locale.map("external-files-vscode.rename.title"),
+                    }
+                )
             );
-            if (newFileName)
+            if (newFileName && oldFileName !== newFileName)
             {
                 const newFileUri = vscode.Uri.joinPath(node.resourceUri, "..", newFileName);
                 try
                 {
                     await vscode.workspace.fs.rename(node.resourceUri, newFileUri);
-                    await vscode.window.showTextDocument(newFileUri);
+                    return newFileUri;
                 }
                 catch(error)
                 {
                     vscode.window.showErrorMessage(error.message);
                 }
-                return true;
             }
         }
-        return false;
+        return undefined;
     };
     export const removeFile = async (node: any): Promise<boolean> =>
     {
