@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { undefinedable } from "./undefinedable";
-import { regulateName } from "./regulate-name";
+import { String } from "./string";
 import { locale } from "./locale";
 export namespace File
 {
@@ -76,7 +76,7 @@ export namespace File
         const folderPath = await File.getFolderPath(node.resourceUri);
         if (folderPath)
         {
-            const newFolderName = undefinedable(regulateName)
+            const newFolderName = undefinedable(String.regulateName)
             (
                 await vscode.window.showInputBox
                 (
@@ -107,7 +107,7 @@ export namespace File
         const folderPath = await File.getFolderPath(node.resourceUri);
         if (folderPath)
         {
-            const newFileName = undefinedable(regulateName)
+            const newFileName = undefinedable(String.regulateName)
             (
                 await vscode.window.showInputBox
                 (
@@ -140,7 +140,7 @@ export namespace File
         if (folderPath)
         {
             const oldFolderName = stripDirectory(node.resourceUri.fsPath);
-            const newFolderName = undefinedable(regulateName)
+            const newFolderName = undefinedable(String.regulateName)
             (
                 await vscode.window.showInputBox
                 (
@@ -196,7 +196,7 @@ export namespace File
         if (folderPath)
         {
             const oldFileName = stripDirectory(node.resourceUri.fsPath);
-            const newFileName = undefinedable(regulateName)
+            const newFileName = undefinedable(String.regulateName)
             (
                 await vscode.window.showInputBox
                 (

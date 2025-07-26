@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as vscel from '@wraith13/vscel';
 import { Application } from './application';
-import { regulateName } from "./regulate-name";
+import { String } from "./string";
 import { File } from "./file";
 export namespace Bookmark
 {
@@ -59,9 +59,9 @@ export namespace Bookmark
     export const regulateBookmark = (bookmark: LiveType): LiveType =>
     {
         const regulated: LiveType = {};
-        for (const [key, value] of Object.entries(bookmark).sort(vscel.comparer.make(i => regulateName(i[0]))))
+        for (const [key, value] of Object.entries(bookmark).sort(vscel.comparer.make(i => String.regulateName(i[0]))))
         {
-            const regulatedKey = regulateName(key);
+            const regulatedKey = String.regulateName(key);
             regulated[regulatedKey] = blankEntry();
             regulated[regulatedKey] = value
                 .filter
