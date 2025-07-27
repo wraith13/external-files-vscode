@@ -16,6 +16,31 @@ export namespace Commands
             Recentlies.onDidChangeUri(oldUri, newUri),
         ]
         .some(i => i);
+    export const newBookmarkKey = async (bookmark: Bookmark.Instance): Promise<void> =>
+    {
+        const newKey = undefinedable(String.regulateName)
+        (
+            await vscode.window.showInputBox
+            (
+                {
+                    placeHolder: locale.map("newBookmark.placeHolder"),
+                    prompt: locale.map("external-files-vscode.addNewGlobalBookmark.title"),
+                }
+            )
+        );
+        if (String.isValid(newKey))
+        {
+            if (bookmark.hasKey(newKey))
+            {
+                vscode.window.showErrorMessage(locale.map("external-files-vscode.rename.error.duplicate"));
+            }
+            else
+            {
+                await bookmark.addKey(newKey);
+                treeDataProvider.update(undefined);
+            }
+        }
+    };
     export const newBookmark = async (): Promise<void> =>
     {
         const selectedBookmark = await vscode.window.showQuickPick
@@ -43,42 +68,10 @@ export namespace Commands
             switch(selectedBookmark.scope)
             {
             case "new-global":
-                {
-                    const newKey = undefinedable(String.regulateName)
-                    (
-                        await vscode.window.showInputBox
-                        (
-                            {
-                                placeHolder: locale.map("newBookmark.placeHolder"),
-                                prompt: locale.map("external-files-vscode.addNewGlobalBookmark.title"),
-                            }
-                        )
-                    );
-                    if (newKey)
-                    {
-                        await Bookmark.global.addKey(newKey);
-                        treeDataProvider.update(undefined);
-                    }
-                }
+                await newBookmarkKey(Bookmark.global);
                 break;
             case "new-workspace":
-                {
-                    const newKey = undefinedable(String.regulateName)
-                    (
-                        await vscode.window.showInputBox
-                        (
-                            {
-                                placeHolder: locale.map("newBookmark.placeHolder"),
-                                prompt: locale.map("external-files-vscode.addNewWorkspaceBookmark.title"),
-                            }
-                        )
-                    );
-                    if (newKey)
-                    {
-                        await Bookmark.workspace.addKey(newKey);
-                        treeDataProvider.update(undefined);
-                    }
-                }
+                await newBookmarkKey(Bookmark.workspace);
                 break;
             default:
                 break;
@@ -87,6 +80,45 @@ export namespace Commands
     };
     export const reloadAll = async (): Promise<void> =>
         treeDataProvider.update(undefined);
+    export const renameBookmarkKey = async (bookmark: Bookmark.Instance, bookmarkUri: vscode.Uri): Promise<void> =>
+    {
+        const oldBookmarkKey = bookmark.getKeyFromUri(bookmarkUri);
+        if (oldBookmarkKey)
+        {
+            const newBookmarkKey = undefinedable(String.regulateName)
+            (
+                await vscode.window.showInputBox
+                (
+                    {
+                        placeHolder: locale.map("external-files-vscode.rename.title"),
+                        value: oldBookmarkKey,
+                        prompt: locale.map("external-files-vscode.rename.title"),
+                    }
+                )
+            );
+            if (String.isValid(newBookmarkKey) && oldBookmarkKey !== newBookmarkKey)
+            {
+                if (bookmark.hasKey(newBookmarkKey))
+                {
+                    vscode.window.showErrorMessage(locale.map("external-files-vscode.rename.error.duplicate"));
+                }
+                else
+                {
+                    await bookmark.renameKey(oldBookmarkKey, newBookmarkKey);
+                    treeDataProvider.update(undefined);
+                }
+            }
+        }
+    }
+    export const renameBookmark = async (node: any): Promise<void> =>
+    {
+        const bookmarkUri = node.resourceUri;
+        if (bookmarkUri instanceof vscode.Uri)
+        {
+            await renameBookmarkKey(Bookmark.global, bookmarkUri);
+            await renameBookmarkKey(Bookmark.workspace, bookmarkUri);
+        }
+    };
     export const removeBookmark = async (node: any): Promise<void> =>
     {
         const resourceUri = node.resourceUri;

@@ -17,6 +17,7 @@
     "external-files-vscode.revealInTerminal.title": "Reveal in Integrated Terminal",
     "external-files-vscode.copyFilePath.title": "Copy Path of This File",
     "external-files-vscode.rename.title": "Rename...",
+    "external-files-vscode.rename.error.duplicate": "Bookmark with the same name already exists.",
     "external-files-vscode.remove.title": "Remove...",
     "external-files-vscode.reload.title": "Reload",
     "external-files-vscode.removeExternalFile.title": "Unregister from Bookmark",

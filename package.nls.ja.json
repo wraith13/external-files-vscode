@@ -17,6 +17,7 @@
     "external-files-vscode.revealInTerminal.title": "統合ターミナルで表示",
     "external-files-vscode.copyFilePath.title": "このファイルのパスのコピー",
     "external-files-vscode.rename.title": "名前の変更...",
+    "external-files-vscode.rename.error.duplicate": "同じ名前のブックマークが既に存在します。",
     "external-files-vscode.remove.title": "削除...",
     "external-files-vscode.reload.title": "再読み込み",
     "external-files-vscode.removeExternalFile.title": "ブックマークから登録解除",

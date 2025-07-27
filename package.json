@@ -56,14 +56,19 @@
             ],
             "view/item/context": [
                 {
+                    "command": "external-files.renameBookmark",
+                    "when": "viewItem == wraith13.external-files.globalBookmark || viewItem == wraith13.external-files.workspaceBookmark",
+                    "group": "A@1"
+                },
+                {
                     "command": "external-files.removeBookmark",
                     "when": "viewItem == wraith13.external-files.globalBookmark || viewItem == wraith13.external-files.workspaceBookmark",
-                    "group": "A@0"
+                    "group": "B@1"
                 },
                 {
                     "command": "external-files.clearHistory",
                     "when": "viewItem == wraith13.external-files.recentlyUsedExternalFilesRoot",
-                    "group": "A@0"
+                    "group": "A@1"
                 },
                 {
                     "command": "external-files.addExternalFiles",
@@ -195,6 +200,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "external-files.renameBookmark",
+                    "when": "false"
+                },
+                {
                     "command": "external-files.renameFolder",
                     "when": "false"
                 },
@@ -300,6 +309,11 @@
             {
                 "command": "external-files.copyFilePath",
                 "title": "%external-files-vscode.copyFilePath.title%",
+                "category": "file"
+            },
+            {
+                "command": "external-files.renameBookmark",
+                "title": "%external-files-vscode.rename.title%",
                 "category": "file"
             },
             {

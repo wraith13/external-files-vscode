@@ -86,7 +86,7 @@ export namespace File
                     }
                 )
             );
-            if (newFolderName)
+            if (String.isValid(newFolderName))
             {
                 const newFolderUri = vscode.Uri.joinPath(node.resourceUri, newFolderName);
                 try
@@ -117,7 +117,7 @@ export namespace File
                     }
                 )
             );
-            if (newFileName)
+            if (String.isValid(newFileName))
             {
                 const newFileUri = vscode.Uri.joinPath(node.resourceUri, newFileName);
                 try
@@ -151,7 +151,7 @@ export namespace File
                     }
                 )
             );
-            if (newFolderName && oldFolderName !== newFolderName)
+            if (String.isValid(newFolderName) && oldFolderName !== newFolderName)
             {
                 const newFolderUri = vscode.Uri.joinPath(node.resourceUri, "..", newFolderName);
                 try
@@ -207,7 +207,7 @@ export namespace File
                     }
                 )
             );
-            if (newFileName && oldFileName !== newFileName)
+            if (String.isValid(newFileName) && oldFileName !== newFileName)
             {
                 const newFileUri = vscode.Uri.joinPath(node.resourceUri, "..", newFileName);
                 try

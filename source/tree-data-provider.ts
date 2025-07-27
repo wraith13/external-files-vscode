@@ -7,7 +7,7 @@ import { File } from "./file";
 import { Bookmark } from "./bookmark";
 import { Recentlies } from "./recentlies";
 import { errorDecorationProvider } from "./file-decoration-provider";
-interface ExtendedTreeItem extends vscode.TreeItem
+export interface ExtendedTreeItem extends vscode.TreeItem
 {
     parent?: vscode.TreeItem;
 }
@@ -15,8 +15,8 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
 {
     private onDidChangeTreeDataEventEmitter = new vscode.EventEmitter<vscode.TreeItem | undefined>();
     readonly onDidChangeTreeData = this.onDidChangeTreeDataEventEmitter.event;
-    public globalBookmark: { [key: string]: vscode.TreeItem };
-    public workspaceBookmark: { [key: string]: vscode.TreeItem };
+    public globalBookmark: { [key: string]: vscode.TreeItem; };
+    public workspaceBookmark: { [key: string]: vscode.TreeItem; };
     public recentlyUsedExternalFilesRoot: vscode.TreeItem;
     constructor() { }
     getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem>
@@ -63,12 +63,13 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
         contextValue,
         parent,
     });
-    orEmptyMessage = (source: ExtendedTreeItem[]): ExtendedTreeItem[] =>
+    orEmptyMessage = (source: ExtendedTreeItem[], parent?: vscode.TreeItem): ExtendedTreeItem[] =>
         0 < source.length ?
             source:
             [{
                 label: locale.map("noExternalFiles.message"),
                 contextValue: Application.makeKey("noFiles"),
+                parent,
             }];
     async getChildren(parent?: vscode.TreeItem | undefined): Promise<ExtendedTreeItem[]>
     {
@@ -129,38 +130,41 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
                 errorDecorationProvider.removeErrorUris([ ...entries.folders, ...entries.files, ]);
                 errorDecorationProvider.addErrorUris(entries.unknowns);
                 return this.orEmptyMessage
-                ([
-                    ...entries.folders.map
-                    (
-                        i => this.uriToFolderTreeItem
+                (
+                    [
+                        ...entries.folders.map
                         (
-                            i,
-                            Application.makeKey("rootExternalFolder"),
-                            File.stripFileName(i.fsPath),
-                            parent
-                        )
-                    ),
-                    ...entries.files.map
-                    (
-                        i => this.uriToFileTreeItem
+                            i => this.uriToFolderTreeItem
+                            (
+                                i,
+                                Application.makeKey("rootExternalFolder"),
+                                File.stripFileName(i.fsPath),
+                                parent
+                            )
+                        ),
+                        ...entries.files.map
                         (
-                            i,
-                            Application.makeKey("rootExternalFile"),
-                            File.stripFileName(i.fsPath),
-                            parent
-                        )
-                    ),
-                    ...entries.unknowns.map
-                    (
-                        i => this.uriToUnknownTreeItem
+                            i => this.uriToFileTreeItem
+                            (
+                                i,
+                                Application.makeKey("rootExternalFile"),
+                                File.stripFileName(i.fsPath),
+                                parent
+                            )
+                        ),
+                        ...entries.unknowns.map
                         (
-                            i,
-                            Application.makeKey("rootExternalUnknown"),
-                            File.stripFileName(i.fsPath),
-                            parent
+                            i => this.uriToUnknownTreeItem
+                            (
+                                i,
+                                Application.makeKey("rootExternalUnknown"),
+                                File.stripFileName(i.fsPath),
+                                parent
+                            )
                         )
-                    )
-                ]);
+                    ],
+                    parent
+                );
             }
             return [];
         case Application.makeKey("workspaceBookmark"):
@@ -170,38 +174,41 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
                 errorDecorationProvider.removeErrorUris([ ...entries.folders, ...entries.files, ]);
                 errorDecorationProvider.addErrorUris(entries.unknowns);
                 return this.orEmptyMessage
-                ([
-                    ...entries.folders.map
-                    (
-                        i => this.uriToFolderTreeItem
+                (
+                        [
+                        ...entries.folders.map
                         (
-                            i,
-                            Application.makeKey("rootExternalFolder"),
-                            File.stripFileName(i.fsPath),
-                            parent
-                        )
-                    ),
-                    ...entries.files.map
-                    (
-                        i => this.uriToFileTreeItem
+                            i => this.uriToFolderTreeItem
+                            (
+                                i,
+                                Application.makeKey("rootExternalFolder"),
+                                File.stripFileName(i.fsPath),
+                                parent
+                            )
+                        ),
+                        ...entries.files.map
                         (
-                            i,
-                            Application.makeKey("rootExternalFile"),
-                            File.stripFileName(i.fsPath),
-                            parent
-                        )
-                    ),
-                    ...entries.unknowns.map
-                    (
-                        i => this.uriToUnknownTreeItem
+                            i => this.uriToFileTreeItem
+                            (
+                                i,
+                                Application.makeKey("rootExternalFile"),
+                                File.stripFileName(i.fsPath),
+                                parent
+                            )
+                        ),
+                        ...entries.unknowns.map
                         (
-                            i,
-                            Application.makeKey("rootExternalUnknown"),
-                            File.stripFileName(i.fsPath),
-                            parent
+                            i => this.uriToUnknownTreeItem
+                            (
+                                i,
+                                Application.makeKey("rootExternalUnknown"),
+                                File.stripFileName(i.fsPath),
+                                parent
+                            )
                         )
-                    )
-                ]);
+                    ],
+                    parent
+                );
             }
             return [];
         case Application.makeKey("rootExternalFolder"):
@@ -256,7 +263,8 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
                         File.stripFileName(i.fsPath),
                         parent
                     )
-                )
+                ),
+                parent
             );
         default:
             return [];

@@ -28,9 +28,18 @@ export namespace Bookmark
             }),
             {}
         );
+    export const hasKey = (bookmark: LiveType, key: string): boolean =>
+        Object.keys(bookmark).some(i => i === key);
     export const addKey = (bookmark: LiveType, key: string): LiveType =>
     {
         bookmark[key] = bookmark[key] ?? blankEntry();
+        return bookmark;
+    };
+    export const renameKey = (bookmark: LiveType, oldKey: string, newKey: string): LiveType =>
+    {
+        const value = bookmark[oldKey];
+        delete bookmark[oldKey];
+        bookmark[newKey] = value;
         return bookmark;
     };
     export const removeKey = (bookmark: LiveType, key: string): LiveType =>
@@ -139,14 +148,38 @@ export namespace Bookmark
         constructor(public uriPrefix: string, public getFromStorage: () => JsonType, public setToStorage: (bookmark: JsonType) => Thenable<void>)
         {
         }
+        cache: string; // Cache used only to detect changes made by other VS Code instances
+        public isUpdated = (): boolean =>
+            this.cache !== this.getJson();
+        public updateCache = (bookmark?: Bookmark.JsonType): void =>
+        {
+            if (bookmark)
+            {
+                this.cache = JSON.stringify(bookmark);
+            }
+            else
+            {
+                this.cache = this.getJson();
+            }
+        };
+        public getJson = (): string =>
+            JSON.stringify(this.getFromStorage());
         public get = (): Bookmark.LiveType =>
             Bookmark.jsonToLive(this.getFromStorage());
         public set = (bookmark: Bookmark.LiveType): Thenable<void> =>
-            this.setToStorage(Bookmark.liveToJson(Bookmark.regulateBookmark(bookmark)));
+        {
+            const json = Bookmark.liveToJson(Bookmark.regulateBookmark(bookmark));
+            this.updateCache(json);
+            return this.setToStorage(json);
+        };
         public clear = (): Thenable<void> =>
             this.setToStorage({});
+        public hasKey = (key: string): boolean =>
+            Bookmark.hasKey(this.get(), key);
         public addKey = (key: string): Thenable<void> =>
             this.set(Bookmark.addKey(this.get(), key));
+        public renameKey = (oldKey: string, newKey: string): Thenable<void> =>
+            this.set(Bookmark.renameKey(this.get(), oldKey, newKey));
         public removeKey = (key: string): Thenable<void> =>
             this.set(Bookmark.removeKey(this.get(), key));
         public addEntry = (key: string, document: vscode.Uri): Thenable<void> =>

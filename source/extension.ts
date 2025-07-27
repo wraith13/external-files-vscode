@@ -2,6 +2,7 @@
 import * as vscode from 'vscode';
 import { Application } from './application';
 import { Icons } from "./icon"
+import { Bookmark } from "./bookmark";
 import { Recentlies } from "./recentlies";
 import { errorDecorationProvider } from "./file-decoration-provider";
 import { treeDataProvider } from "./tree-data-provider";
@@ -16,6 +17,7 @@ export const activate = (context: vscode.ExtensionContext) : void =>
     (
         vscode.commands.registerCommand(`${Application.key}.newBookmark`, Commands.newBookmark),
         vscode.commands.registerCommand(`${Application.key}.reloadAll`, Commands.reloadAll),
+        vscode.commands.registerCommand(`${Application.key}.renameBookmark`, Commands.renameBookmark),
         vscode.commands.registerCommand(`${Application.key}.removeBookmark`, Commands.removeBookmark),
         vscode.commands.registerCommand(`${Application.key}.clearHistory`, Commands.clearHistory),
         vscode.commands.registerCommand(`${Application.key}.addExternalFiles`, Commands.addExternalFiles),
@@ -49,6 +51,20 @@ export const activate = (context: vscode.ExtensionContext) : void =>
             }
         ),
         vscode.workspace.onDidChangeWorkspaceFolders(_ => treeDataProvider.update(undefined)),
+        vscode.window.onDidChangeWindowState
+        (
+            state =>
+            {
+                if (state.focused)
+                {
+                    if (Bookmark.global.isUpdated())
+                    {
+                        Bookmark.global.updateCache();
+                        treeDataProvider.update(undefined);
+                    }
+                }
+            }
+        )
     );
     // Bookmark.global.clear();
     // Bookmark.workspace.clear();
@@ -66,6 +82,7 @@ export const activate = (context: vscode.ExtensionContext) : void =>
     //         4
     //     )
     // );
+    Bookmark.global.updateCache();
     treeDataProvider.update(undefined);
     onDidChangeActiveTextEditor(vscode.window.activeTextEditor);
 };

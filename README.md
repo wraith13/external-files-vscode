@@ -1,17 +1,16 @@
 # External Files README
 
-> [!WARNING]
-> **This extension is currently under development.**
-
 Easy access to external files for vscode.
 
 ## Features
 
 * show external files from view on explorer
+* You can organize external folders and files with named bookmarks.
+* Bookmarks have two scopes: global and workspace.
+* "Recently Used External Files" are automatically recorded for each workspace.
+* The view can be moved to various locations within VS Code via drag and drop.
 
-![screen shot: View on Explorer](./images/screenshot3.png)
-
-![screen shot: Show](./images/screenshot.png)
+![screen shot: View on Explorer](./images/screenshot.png)
 
 ## Tutorial
 
@@ -19,11 +18,19 @@ Easy access to external files for vscode.
 
 Show extension side bar within VS Code(Mac:<kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>, Windows and Linux: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>), type `external-files-vscode` and press <kbd>Enter</kbd> and click <kbd>Install</kbd>. Restart VS Code when installation is completed.
 
-### 1. ✨️ Show External Files
+### 1. ⏳ "Recently Used External Files"
 
-Click `external:*` in status bar or launch Command Palette(Mac:<kbd>F1</kbd> or <kbd>Shift</kbd>+<kbd>Command</kbd>+<kbd>P</kbd>, Windows and Linux: <kbd>F1</kbd> or <kbd>Shift</kbd>+<kbd>Ctrl</kbd>+<kbd>P</kbd>), Execute `External Files: Show` command and select a external file as you like.
+When you open a file outside the workspace in VS Code, it is automatically added to the "Recently Used External Files" history, allowing you to access it at any time.
 
-### 2. 🔧 Next step
+### 2. ✨ Creating Bookmarks
+
+Hover over the External Files view title to reveal the bookmark icon, click it, select the scope for the new bookmark (global or workspace), and enter a name.
+
+### 3. 🔖 Adding Items to Bookmarks
+
+Hover over a bookmark to reveal the plus icon, click it, and select the folder or file you want to add.
+
+### 4. 🔧 Next step
 
 You can change [settings](#extension-settings) by `settings.json`.
 
@@ -33,7 +40,7 @@ Enjoy!
 
 This extension contributes the following settings by [`settings.json`](https://code.visualstudio.com/docs/customization/userandworkspace#_creating-user-and-workspace-settings)( Mac: <kbd>Command</kbd>+<kbd>,</kbd>, Windows / Linux: <kbd>File</kbd> -> <kbd>Preferences</kbd> -> <kbd>User Settings</kbd> ):
 
-* `external-files.viewOnExplorer.enabled`: set Enable/Disable external files in view on explorer
+* `external-files.maxRecentlyFiles`: The maximum number of entries to keep in the "Recently Used External Files" history.
 
 ## Release Notes
 
