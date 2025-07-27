@@ -3,11 +3,11 @@
     "displayName": "External Files",
     "description": "Easy access to external files for vscode.",
     "icon": "images/externalhex.128.png",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "publisher": "wraith13",
     "license": "SEE LICENSE IN LICENSE_1_0.txt",
     "engines": {
-        "vscode": "^1.61.0"
+        "vscode": "^1.97.2"
     },
     "bugs": {
         "url": "https://github.com/wraith13/external-files-vscode/issues"
