@@ -2,6 +2,8 @@
 
 Easy access to external files for vscode.
 
+Support languages: English(en), Čeština(cs), Deutsch(de), Español(es), Français(fr), Magyar(hu), Italiano(it), 日本語(ja), 한국어(ko), Polski(pl), Português Brasileiro(pt-br), Русский(ru), Türkçe(tr), 简体中文(zh-cn), 繁體中文(zh-tw)
+
 ## Features
 
 * show external files from view on explorer
