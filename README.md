@@ -30,7 +30,7 @@ Hover over the External Files view title to reveal the bookmark icon, click it, 
 
 ### 3. 🔖 Adding Items to Bookmarks
 
-Hover over a bookmark to reveal the plus icon, click it, and select the folder or file you want to add.
+Display the bookmark's context menu and select "Register External Files..." or "Register External Folders..." to add files or folders to the bookmark.
 
 ### 4. 🔧 Next step
 

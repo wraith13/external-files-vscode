@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## 1.0.1 - 2025-07-??
 
+### Fixed
+
+- Separated the UI for registering external files and external folders to bookmarks. (This change was made because the file and folder selection dialogs do not work properly in the Windows version of VS Code.)
+
 ### Changed
 
 - Changed the icon design. (Added an outline to improve visibility.)

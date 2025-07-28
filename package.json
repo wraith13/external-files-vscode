@@ -56,24 +56,29 @@
             ],
             "view/item/context": [
                 {
-                    "command": "external-files.renameBookmark",
+                    "command": "external-files.addExternalFiles",
                     "when": "viewItem == wraith13.external-files.globalBookmark || viewItem == wraith13.external-files.workspaceBookmark",
                     "group": "A@1"
                 },
                 {
-                    "command": "external-files.removeBookmark",
+                    "command": "external-files.addExternalFolders",
+                    "when": "viewItem == wraith13.external-files.globalBookmark || viewItem == wraith13.external-files.workspaceBookmark",
+                    "group": "A@2"
+                },
+                {
+                    "command": "external-files.renameBookmark",
                     "when": "viewItem == wraith13.external-files.globalBookmark || viewItem == wraith13.external-files.workspaceBookmark",
                     "group": "B@1"
+                },
+                {
+                    "command": "external-files.removeBookmark",
+                    "when": "viewItem == wraith13.external-files.globalBookmark || viewItem == wraith13.external-files.workspaceBookmark",
+                    "group": "C@1"
                 },
                 {
                     "command": "external-files.clearHistory",
                     "when": "viewItem == wraith13.external-files.recentlyUsedExternalFilesRoot",
                     "group": "A@1"
-                },
-                {
-                    "command": "external-files.addExternalFiles",
-                    "when": "viewItem == wraith13.external-files.globalBookmark || viewItem == wraith13.external-files.workspaceBookmark",
-                    "group": "inline@1"
                 },
                 {
                     "command": "external-files.registerToBookmark",
@@ -259,12 +264,13 @@
                 "category": "%external-files-vscode.title%"
             },
             {
-                "icon": {
-                    "light": "images/add.1024.svg",
-                    "dark": "images/add-white.1024.svg"
-                },
                 "command": "external-files.addExternalFiles",
                 "title": "%external-files-vscode.addExternalFiles.title%",
+                "category": "%external-files-vscode.title%"
+            },
+            {
+                "command": "external-files.addExternalFolders",
+                "title": "%external-files-vscode.addExternalFolders.title%",
                 "category": "%external-files-vscode.title%"
             },
             {

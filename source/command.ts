@@ -142,16 +142,18 @@ export namespace Commands
         await Recentlies.clear();
         treeDataProvider.update(treeDataProvider.recentlyUsedExternalFilesRoot);
     };
-    export const addExternalFiles = async (node: any): Promise<void> =>
+    export const addExternalFilesOrFolders = async (foldersOrFiles: "files" | "folders", node: any): Promise<void> =>
     {
         const files = await vscode.window.showOpenDialog
         (
             {
-                canSelectFiles: true,
-                canSelectFolders: true,
+                canSelectFiles: "files" === foldersOrFiles,
+                canSelectFolders: "folders" === foldersOrFiles,
                 canSelectMany: true,
                 openLabel: locale.map("external-files-vscode.addExternalFiles.button"),
-                title: locale.map("external-files-vscode.externalFolders"),
+                title: "files" === foldersOrFiles ?
+                    locale.map("external-files-vscode.addExternalFiles.title"):
+                    locale.map("external-files-vscode.addExternalFolders.title"),
             }
         );
         if (files)
@@ -184,6 +186,10 @@ export namespace Commands
             treeDataProvider.update(node);
         }
     };
+    export const addExternalFiles = async (node: any): Promise<void> =>
+        await addExternalFilesOrFolders("files", node);
+    export const addExternalFolders = async (node: any): Promise<void> =>
+        await addExternalFilesOrFolders("folders", node);
     export const registerToBookmark = async (resourceUri: vscode.Uri): Promise<void> =>
     {
         const globalBookmarkKeys = Object.keys(Bookmark.global.get());

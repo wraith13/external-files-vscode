@@ -21,6 +21,7 @@ export const activate = (context: vscode.ExtensionContext) : void =>
         vscode.commands.registerCommand(`${Application.key}.removeBookmark`, Commands.removeBookmark),
         vscode.commands.registerCommand(`${Application.key}.clearHistory`, Commands.clearHistory),
         vscode.commands.registerCommand(`${Application.key}.addExternalFiles`, Commands.addExternalFiles),
+        vscode.commands.registerCommand(`${Application.key}.addExternalFolders`, Commands.addExternalFolders),
         vscode.commands.registerCommand(`${Application.key}.registerToBookmark`, node => Commands.registerToBookmark(node.resourceUri)),
         vscode.commands.registerCommand(`${Application.key}.newFile`, Commands.newFile),
         vscode.commands.registerCommand(`${Application.key}.newFolder`, Commands.newFolder),
