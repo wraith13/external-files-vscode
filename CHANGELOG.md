@@ -10,6 +10,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - `external-files.recentlyFilesHistoryScope` setting item.
 
+### Fixed
+
+- Fixed an issue where some multilingual displays were not working correctly.
 
 ## 1.0.1 - 2025-07-29
 
