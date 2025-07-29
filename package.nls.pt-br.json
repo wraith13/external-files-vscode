@@ -27,6 +27,7 @@
     "selectBookmark.title": "Selecionar Favorito",
     "newBookmark.placeHolder": "Novo Favorito",
     "external-files.maxRecentlyFiles.description": "Número máximo de arquivos externos recentes a manter",
+    "external-files.recentlyFilesHistoryScope.description": "Escopo do histórico de arquivos externos recentes",
     "noExternalFolders.message": "Nenhuma pasta externa",
     "noExternalFiles.message": "Nenhum arquivo externo",
     "selectExternalFiles.placeHolder": "Selecione um arquivo externo",

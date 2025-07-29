@@ -27,6 +27,7 @@
     "selectBookmark.title": "Lesezeichen auswählen",
     "newBookmark.placeHolder": "Neues Lesezeichen",
     "external-files.maxRecentlyFiles.description": "Maximale Anzahl der zuletzt verwendeten externen Dateien",
+    "external-files.recentlyFilesHistoryScope.description": "Bereich des Verlaufs der zuletzt verwendeten externen Dateien",
     "noExternalFolders.message": "Keine externen Ordner",
     "noExternalFiles.message": "Keine externen Dateien",
     "selectExternalFiles.placeHolder": "Bitte wählen Sie eine externe Datei aus.",

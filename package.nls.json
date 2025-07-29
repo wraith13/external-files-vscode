@@ -27,6 +27,7 @@
     "selectBookmark.title": "Select Bookmark",
     "newBookmark.placeHolder": "New Bookmark",
     "external-files.maxRecentlyFiles.description": "Maximum number of recently used external files to keep",
+    "external-files.recentlyFilesHistoryScope.description": "Scope of recently used external files history",
     "noExternalFolders.message": "No external folders",
     "noExternalFiles.message": "No external files",
     "selectExternalFiles.placeHolder": "Select a external file",

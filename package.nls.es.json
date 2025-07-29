@@ -27,6 +27,7 @@
     "selectBookmark.title": "Seleccionar Marcador",
     "newBookmark.placeHolder": "Nuevo Marcador",
     "external-files.maxRecentlyFiles.description": "Número máximo de archivos externos usados recientemente a mantener",
+    "external-files.recentlyFilesHistoryScope.description": "Ámbito del historial de archivos externos usados recientemente",
     "noExternalFolders.message": "No hay carpetas externas",
     "noExternalFiles.message": "No hay archivos externos",
     "selectExternalFiles.placeHolder": "Seleccione un archivo externo",

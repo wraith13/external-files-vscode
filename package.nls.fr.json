@@ -27,6 +27,7 @@
     "selectBookmark.title": "Sélectionner un signet",
     "newBookmark.placeHolder": "Nouveau signet",
     "external-files.maxRecentlyFiles.description": "Nombre maximal de fichiers externes récemment utilisés à conserver",
+    "external-files.recentlyFilesHistoryScope.description": "Portée de l'historique des fichiers externes récemment utilisés",
     "noExternalFolders.message": "Aucun dossier externe",
     "noExternalFiles.message": "Aucun fichier externe",
     "selectExternalFiles.placeHolder": "Veuillez sélectionner un fichier externe.",

@@ -43,6 +43,7 @@ Enjoy!
 This extension contributes the following settings by [`settings.json`](https://code.visualstudio.com/docs/customization/userandworkspace#_creating-user-and-workspace-settings)( Mac: <kbd>Command</kbd>+<kbd>,</kbd>, Windows / Linux: <kbd>File</kbd> -> <kbd>Preferences</kbd> -> <kbd>User Settings</kbd> ):
 
 * `external-files.maxRecentlyFiles`: The maximum number of entries to keep in the "Recently Used External Files" history.
+* `external-files.recentlyFilesHistoryScope`: Scope of recently used external files history.
 
 ## Release Notes
 

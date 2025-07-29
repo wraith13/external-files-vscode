@@ -9,12 +9,12 @@ export namespace Recentlies
     export type LiveType = vscode.Uri[];
     export type ItemType = vscode.Uri;
     export const clear = (): Thenable<void> =>
-        Application.context.workspaceState.update(stateKey, []);
+        Config.recentlyFilesHistoryScope.get()().update(stateKey, []);
     export const get = (): LiveType =>
-        Application.context.workspaceState.get<JsonType>(stateKey, [])
+        Config.recentlyFilesHistoryScope.get()().get<JsonType>(stateKey, [])
         .map(i => vscode.Uri.parse(i));
     export const set = (documents: LiveType): Thenable<void> =>
-        Application.context.workspaceState.update(stateKey, documents.map(i => i.toString()));
+        Config.recentlyFilesHistoryScope.get()().update(stateKey, documents.map(i => i.toString()));
     const removeItem = (data: LiveType, document: ItemType): LiveType =>
         data.filter(i => i.toString() !== document.toString());
     const regulateData = (data: LiveType): LiveType =>

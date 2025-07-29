@@ -27,6 +27,7 @@
     "selectBookmark.title": "Vybrat záložku",
     "newBookmark.placeHolder": "Nová záložka",
     "external-files.maxRecentlyFiles.description": "Maximální počet nedávno použitých externích souborů k uchování",
+    "external-files.recentlyFilesHistoryScope.description": "Rozsah historie nedávno použitých externích souborů",
     "noExternalFolders.message": "Žádné externí složky",
     "noExternalFiles.message": "Žádné externí soubory",
     "selectExternalFiles.placeHolder": "Vyberte externí soubor",

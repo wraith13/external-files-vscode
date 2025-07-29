@@ -27,6 +27,7 @@
     "selectBookmark.title": "Yer İmi Seç",
     "newBookmark.placeHolder": "Yeni Yer İmi",
     "external-files.maxRecentlyFiles.description": "Tutulacak en fazla son kullanılan harici dosya sayısı",
+    "external-files.recentlyFilesHistoryScope.description": "Son kullanılan harici dosyaların geçmiş kapsamı",
     "noExternalFolders.message": "Harici klasör yok",
     "noExternalFiles.message": "Harici dosya yok",
     "selectExternalFiles.placeHolder": "Bir harici dosya seçin.",

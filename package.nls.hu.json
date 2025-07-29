@@ -27,6 +27,7 @@
     "selectBookmark.title": "Könyvjelző kiválasztása",
     "newBookmark.placeHolder": "Új könyvjelző",
     "external-files.maxRecentlyFiles.description": "A megőrzendő legutóbb használt külső fájlok maximális száma",
+    "external-files.recentlyFilesHistoryScope.description": "A legutóbb használt külső fájlok előzményeinek hatóköre",
     "noExternalFolders.message": "Nincsenek külső mappák",
     "noExternalFiles.message": "Nincsenek külső fájlok",
     "selectExternalFiles.placeHolder": "Válasszon ki egy külső fájlt.",

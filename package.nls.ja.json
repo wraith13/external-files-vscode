@@ -27,6 +27,7 @@
     "selectBookmark.title": "ブックマークを選択",
     "newBookmark.placeHolder": "新しいブックマーク",
     "external-files.maxRecentlyFiles.description": "保持される最近の外部ファイルの最大数",
+    "external-files.recentlyFilesHistoryScope.description": "最近使用した外部ファイルの履歴のスコープ",
     "noExternalFolders.message": "外部ファイルがありません",
     "noExternalFiles.message": "外部ファイルがありません",
     "selectExternalFiles.placeHolder": "外部ファイルを選択してください。",

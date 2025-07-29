@@ -27,6 +27,7 @@
     "selectBookmark.title": "Seleziona Segnalibro",
     "newBookmark.placeHolder": "Nuovo Segnalibro",
     "external-files.maxRecentlyFiles.description": "Numero massimo di file esterni usati di recente da mantenere",
+    "external-files.recentlyFilesHistoryScope.description": "Ambito della cronologia dei file esterni usati di recente",
     "noExternalFolders.message": "Nessuna cartella esterna",
     "noExternalFiles.message": "Nessun file esterno",
     "selectExternalFiles.placeHolder": "Seleziona un file esterno",

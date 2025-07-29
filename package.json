@@ -364,6 +364,20 @@
                         "maximum": 100,
                         "description": "%external-files.maxRecentlyFiles.description%",
                         "scope": "window"
+                    },
+                    "external-files.recentlyFilesHistoryScope": {
+                        "type": "string",
+                        "enum": [
+                            "global",
+                            "workspace"
+                        ],
+                        "enumItemLabels": [
+                            "%scope.global%",
+                            "%scope.workspace%"
+                        ],
+                        "default": "workspace",
+                        "description": "%external-files.recentlyFilesHistoryScope.description%",
+                        "scope": "window"
                     }
                 }
             }

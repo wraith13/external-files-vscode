@@ -27,6 +27,7 @@
     "selectBookmark.title": "Wybierz zakładkę",
     "newBookmark.placeHolder": "Nowa zakładka",
     "external-files.maxRecentlyFiles.description": "Maksymalna liczba ostatnio używanych plików zewnętrznych do zachowania",
+    "external-files.recentlyFilesHistoryScope.description": "Zakres historii ostatnio używanych plików zewnętrznych",
     "noExternalFolders.message": "Brak folderów zewnętrznych",
     "noExternalFiles.message": "Brak plików zewnętrznych",
     "selectExternalFiles.placeHolder": "Wybierz plik zewnętrzny",

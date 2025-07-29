@@ -27,6 +27,7 @@
     "selectBookmark.title": "選擇書籤",
     "newBookmark.placeHolder": "新書籤",
     "external-files.maxRecentlyFiles.description": "要保留的最近使用外部檔案的最大數量",
+    "external-files.recentlyFilesHistoryScope.description": "最近使用外部檔案歷史紀錄的範圍",
     "noExternalFolders.message": "沒有外部資料夾",
     "noExternalFiles.message": "沒有外部檔案",
     "selectExternalFiles.placeHolder": "請選擇外部檔案。",
