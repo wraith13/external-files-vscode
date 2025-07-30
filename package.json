@@ -52,6 +52,11 @@
                     "command": "external-files.reloadAll",
                     "when": "view == external-files",
                     "group": "navigation@2"
+                },
+                {
+                    "command": "external-files.showSettings",
+                    "when": "view == external-files",
+                    "group": "navigation@3"
                 }
             ],
             "view/item/context": [
@@ -166,6 +171,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "external-files.showSettings",
+                    "when": "false"
+                },
+                {
                     "command": "external-files.removeBookmark",
                     "when": "false"
                 },
@@ -260,6 +269,15 @@
                 },
                 "command": "external-files.reloadAll",
                 "title": "%external-files-vscode.reloadAll.title%",
+                "category": "%external-files-vscode.title%"
+            },
+            {
+                "icon": {
+                    "light": "images/cog.1024.svg",
+                    "dark": "images/cog-white.1024.svg"
+                },
+                "command": "external-files.showSettings",
+                "title": "%external-files-vscode.showSettings.title%",
                 "category": "%external-files-vscode.title%"
             },
             {

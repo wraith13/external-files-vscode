@@ -4,6 +4,7 @@
     "external-files-vscode.recentlyUsedExternalFiles": "Zuletzt verwendete externe Dateien",
     "external-files-vscode.newBookmark.title": "Neues Lesezeichen hinzufügen...",
     "external-files-vscode.reloadAll.title": "Alle neu laden",
+    "external-files-vscode.showSettings.title": "Einstellungen",
     "external-files-vscode.removeBookmark.title": "Lesezeichen entfernen",
     "external-files-vscode.clearHistory.title": "Verlauf löschen",
     "external-files-vscode.addExternalFiles.title": "Externe Dateien registrieren...",

@@ -4,6 +4,7 @@
     "external-files-vscode.recentlyUsedExternalFiles": "最近使用した外部ファイル",
     "external-files-vscode.newBookmark.title": "新しいブックマークを追加...",
     "external-files-vscode.reloadAll.title": "全て再読み込み",
+    "external-files-vscode.showSettings.title": "設定",
     "external-files-vscode.removeBookmark.title": "ブックマークを削除",
     "external-files-vscode.clearHistory.title": "履歴をクリア",
     "external-files-vscode.addExternalFiles.title": "外部ファイルを登録...",

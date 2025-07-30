@@ -4,6 +4,7 @@
     "external-files-vscode.recentlyUsedExternalFiles": "Недавно использованные внешние файлы",
     "external-files-vscode.newBookmark.title": "Добавить новую закладку...",
     "external-files-vscode.reloadAll.title": "Перезагрузить все",
+    "external-files-vscode.showSettings.title": "Настройки",
     "external-files-vscode.removeBookmark.title": "Удалить закладку",
     "external-files-vscode.clearHistory.title": "Очистить историю",
     "external-files-vscode.addExternalFiles.title": "Зарегистрировать внешние файлы...",

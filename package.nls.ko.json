@@ -4,6 +4,7 @@
     "external-files-vscode.recentlyUsedExternalFiles": "최근 사용한 외부 파일",
     "external-files-vscode.newBookmark.title": "새 북마크 추가...",
     "external-files-vscode.reloadAll.title": "모두 다시 불러오기",
+    "external-files-vscode.showSettings.title": "설정",
     "external-files-vscode.removeBookmark.title": "북마크 제거",
     "external-files-vscode.clearHistory.title": "기록 지우기",
     "external-files-vscode.addExternalFiles.title": "외부 파일 등록...",

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { Application } from './application';
 import { Config } from './config';
 import { undefinedable } from "./undefinedable";
 import { String } from "./string";
@@ -81,6 +82,10 @@ export namespace Commands
     };
     export const reloadAll = async (): Promise<void> =>
         treeDataProvider.update(undefined);
+    export const showSettings = async (): Promise<void> =>
+    {
+        await vscode.commands.executeCommand("workbench.action.openSettings", `@ext:${Application.publisher}.${Application.key}`);
+    };
     export const renameBookmarkKey = async (bookmark: Bookmark.Instance, bookmarkUri: vscode.Uri): Promise<void> =>
     {
         const oldBookmarkKey = bookmark.getKeyFromUri(bookmarkUri);

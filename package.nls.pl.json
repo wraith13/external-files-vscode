@@ -4,6 +4,7 @@
     "external-files-vscode.recentlyUsedExternalFiles": "Ostatnio używane pliki zewnętrzne",
     "external-files-vscode.newBookmark.title": "Dodaj nową zakładkę...",
     "external-files-vscode.reloadAll.title": "Przeładuj wszystko",
+    "external-files-vscode.showSettings.title": "Ustawienia",
     "external-files-vscode.removeBookmark.title": "Usuń zakładkę",
     "external-files-vscode.clearHistory.title": "Wyczyść historię",
     "external-files-vscode.addExternalFiles.title": "Zarejestruj pliki zewnętrzne...",

@@ -4,6 +4,7 @@
     "external-files-vscode.recentlyUsedExternalFiles": "Nedávno použité externí soubory",
     "external-files-vscode.newBookmark.title": "Přidat novou záložku...",
     "external-files-vscode.reloadAll.title": "Znovu načíst vše",
+    "external-files-vscode.showSettings.title": "Nastavení",
     "external-files-vscode.removeBookmark.title": "Odebrat záložku",
     "external-files-vscode.clearHistory.title": "Vymazat historii",
     "external-files-vscode.addExternalFiles.title": "Registrovat externí soubory...",

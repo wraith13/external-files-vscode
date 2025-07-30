@@ -4,6 +4,7 @@
     "external-files-vscode.recentlyUsedExternalFiles": "Recently Used External Files",
     "external-files-vscode.newBookmark.title": "Add New Bookmark...",
     "external-files-vscode.reloadAll.title": "Reload All",
+    "external-files-vscode.showSettings.title": "Settings",
     "external-files-vscode.removeBookmark.title": "Remove Bookmark",
     "external-files-vscode.clearHistory.title": "Clear History",
     "external-files-vscode.addExternalFiles.title": "Register External Files...",

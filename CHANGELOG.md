@@ -10,6 +10,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - `external-files.recentlyFilesHistoryScope` setting item.
 - `external-files.hiddenFiles` setting item.
+- Settings icon button on the view title
 
 ### Fixed
 

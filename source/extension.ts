@@ -17,6 +17,7 @@ export const activate = (context: vscode.ExtensionContext) : void =>
     (
         vscode.commands.registerCommand(`${Application.key}.newBookmark`, Commands.newBookmark),
         vscode.commands.registerCommand(`${Application.key}.reloadAll`, Commands.reloadAll),
+        vscode.commands.registerCommand(`${Application.key}.showSettings`, Commands.showSettings),
         vscode.commands.registerCommand(`${Application.key}.renameBookmark`, Commands.renameBookmark),
         vscode.commands.registerCommand(`${Application.key}.removeBookmark`, Commands.removeBookmark),
         vscode.commands.registerCommand(`${Application.key}.clearHistory`, Commands.clearHistory),
