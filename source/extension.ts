@@ -91,18 +91,10 @@ export const activate = (context: vscode.ExtensionContext) : void =>
 };
 const onDidChangeActiveTextEditor = (editor: vscode.TextEditor | undefined): void =>
 {
-    let isRecentlyUsedExternalFile = false;
     if (editor && Application.isRegularTextEditor(editor))
     {
-        isRecentlyUsedExternalFile = Application.isExternalDocuments(editor.document);
         updateExternalDocuments(editor.document);
     }
-    vscode.commands.executeCommand
-    (
-        "setContext",
-        Application.makeKey("isRecentlyUsedExternalFile"),
-        isRecentlyUsedExternalFile
-    );
 };
 const updateExternalDocuments = async (document: vscode.TextDocument) =>
 {

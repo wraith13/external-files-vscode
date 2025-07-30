@@ -15,6 +15,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Fixed
 
 - Fixed an issue where some multilingual displays were not working correctly.
+- Fixed an issue where the order of bookmarked files and folders would become inconsistent immediately after registration and afterwards.
 
 ## 1.0.1 - 2025-07-29
 

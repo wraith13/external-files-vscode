@@ -47,12 +47,18 @@ export namespace Bookmark
         delete bookmark[key];
         return bookmark;
     };
+    export const entrySorter = vscel.comparer.make<vscode.Uri>
+    ([
+        i => File.stripFileName(i.fsPath),
+        i => File.stripFileName(i.path),
+        i => i.toString(),
+    ]);
     export const addEntry = (bookmark: LiveType, key: string, document: vscode.Uri): LiveType =>
     {
         let entry = bookmark[key] ?? blankEntry();
         entry = entry.filter(i => i.toString() !== document.toString());
         entry.unshift(document);
-        entry.sort();
+        entry.sort(entrySorter);
         bookmark[key] = entry;
         return bookmark;
     };
@@ -78,15 +84,7 @@ export namespace Bookmark
                     (i, ix, list) =>
                     list.findIndex(t => t.toString() === i.toString()) === ix
                 )
-                .sort
-                (
-                    vscel.comparer.make
-                    ([
-                        i => File.stripFileName(i.fsPath),
-                        i => File.stripFileName(i.path),
-                        i => i.toString(),
-                    ])
-                );
+                .sort(entrySorter);
         }
         return regulated;
     };
