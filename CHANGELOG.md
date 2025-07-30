@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Added
 
 - `external-files.recentlyFilesHistoryScope` setting item.
+- `external-files.hiddenFiles` setting item.
 
 ### Fixed
 

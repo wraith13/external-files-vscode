@@ -11,4 +11,5 @@ export namespace Config
         "workspace": () => Application.context.workspaceState,
     });
     export const recentlyFilesHistoryScope = root.makeMapEntry("external-files.recentlyFilesHistoryScope", "root-workspace", recentlyFilesHistoryScopeObject);
+    export const hiddenFiles = root.makeEntry<string[]>("external-files.hiddenFiles", "root-workspace");
 }

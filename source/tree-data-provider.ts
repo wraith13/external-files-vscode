@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { Application } from './application';
+import { Config } from './config';
 import { String } from "./string";
 import { locale } from "./locale";
 import { Icons } from "./icon"
@@ -217,7 +218,7 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
             {
                 try
                 {
-                    const filesAndFolders = await File.getFoldersAndFiles(parent.resourceUri);
+                    const filesAndFolders = await File.getFoldersAndFiles(parent.resourceUri, Config.hiddenFiles.get());
                     if (filesAndFolders)
                     {
                         return [

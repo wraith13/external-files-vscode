@@ -141,6 +141,11 @@
                     "group": "C@4"
                 },
                 {
+                    "command": "external-files.hideFileType",
+                    "when": "viewItem == wraith13.external-files.externalFile",
+                    "group": "D@1"
+                },
+                {
                     "command": "external-files.reload",
                     "when": "viewItem == wraith13.external-files.rootExternalFolder",
                     "group": "D@3"
@@ -222,6 +227,10 @@
                 },
                 {
                     "command": "external-files.removeFile",
+                    "when": "false"
+                },
+                {
+                    "command": "external-files.hideFileType",
                     "when": "false"
                 },
                 {
@@ -343,6 +352,11 @@
                 "category": "file"
             },
             {
+                "command": "external-files.hideFileType",
+                "title": "%external-files-vscode.hideFileType.title%",
+                "category": "%external-files-vscode.title%"
+            },
+            {
                 "command": "external-files.reload",
                 "title": "%external-files-vscode.reload.title%",
                 "category": "%external-files-vscode.title%"
@@ -377,6 +391,15 @@
                         ],
                         "default": "workspace",
                         "description": "%external-files.recentlyFilesHistoryScope.description%",
+                        "scope": "window"
+                    },
+                    "external-files.hiddenFiles": {
+                        "type": "array",
+                        "default": [],
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "%external-files.hiddenFiles.description%",
                         "scope": "window"
                     }
                 }

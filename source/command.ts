@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { Config } from './config';
 import { undefinedable } from "./undefinedable";
 import { String } from "./string";
 import { locale } from "./locale";
@@ -348,6 +349,25 @@ export namespace Commands
         {
             onDidChangeUri(node.resourceUri, "removed");
             treeDataProvider.update(undefined);
+        }
+    };
+    export const hideFileType = async (node: any): Promise<void> =>
+    {
+        const resourceUri = node.resourceUri;
+        if (resourceUri instanceof vscode.Uri)
+        {
+            const fileName = node.resourceUri.fsPath;
+            if (String.isValid(fileName))
+            {
+                const hiddenFilePattern = File.makeHiddenFilePattern(fileName);
+                const hiddenFiles = Config.hiddenFiles.get();
+                if (! hiddenFiles.includes(hiddenFilePattern))
+                {
+                    hiddenFiles.push(hiddenFilePattern);
+                    await Config.hiddenFiles.set(hiddenFiles);
+                    treeDataProvider.update(undefined);
+                }
+            }
         }
     };
     export const reload = async (node: any): Promise<void> =>

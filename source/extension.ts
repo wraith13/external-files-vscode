@@ -34,6 +34,7 @@ export const activate = (context: vscode.ExtensionContext) : void =>
         vscode.commands.registerCommand(`${Application.key}.removeFolder`, Commands.removeFolder),
         vscode.commands.registerCommand(`${Application.key}.renameFile`, Commands.renameFile),
         vscode.commands.registerCommand(`${Application.key}.removeFile`, Commands.removeFile),
+        vscode.commands.registerCommand(`${Application.key}.hideFileType`, Commands.hideFileType),
         vscode.commands.registerCommand(`${Application.key}.reload`, Commands.reload),
         vscode.commands.registerCommand(`${Application.key}.removeExternalFile`, Commands.removeExternalFiles),
         vscode.window.registerFileDecorationProvider(errorDecorationProvider),
@@ -47,7 +48,7 @@ export const activate = (context: vscode.ExtensionContext) : void =>
                 if (event.affectsConfiguration("external-files"))
                 {
                     Recentlies.regulate();
-                    treeDataProvider.update(treeDataProvider.recentlyUsedExternalFilesRoot);
+                    treeDataProvider.update(undefined);
                 }
             }
         ),

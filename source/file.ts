@@ -33,7 +33,25 @@ export namespace File
         "file" === await isFolderOrFile(uri);
     export const isFolder = async (uri: vscode.Uri): Promise<boolean> =>
         "folder" === await isFolderOrFile(uri);
-    export const getFoldersAndFiles = async (uri: vscode.Uri): Promise<undefined | { folders:vscode.Uri[]; files:vscode.Uri[]}> =>
+    export const makeHiddenFilePattern = (fileName: string): string =>
+    {
+        if (fileName.startsWith(".") || ! fileName.includes("."))
+        {
+            return fileName;
+        }
+        else
+        {
+            return `*.${fileName.split(".").reverse()[0]}`;
+        }
+    };
+    export const isMatchedFilePattern = (uri: vscode.Uri, fileName: string): boolean =>
+        fileName.startsWith("*") ?
+            uri.fsPath.endsWith(fileName.slice(1)):
+            uri.fsPath === fileName;
+    export const isHiddenFile = (uri: vscode.Uri, hiddenFiles?: string[]): boolean =>
+        ! Array.isArray(hiddenFiles) ||
+        hiddenFiles.some(i => isMatchedFilePattern(uri, i));
+    export const getFoldersAndFiles = async (uri: vscode.Uri, hiddenFiles?: string[]): Promise<undefined | { folders:vscode.Uri[]; files:vscode.Uri[]}> =>
     {
         if (await isFolder(uri))
         {
@@ -42,17 +60,20 @@ export namespace File
             const files: vscode.Uri[] = [];
             for (const entry of entries)
             {
-                switch(await isFolderOrFile(vscode.Uri.joinPath(uri, entry[0])))
+                if ( ! isHiddenFile(vscode.Uri.joinPath(uri, entry[0]), hiddenFiles))
                 {
-                case "folder":
-                    folders.push(vscode.Uri.joinPath(uri, entry[0]));
-                    break;
-                case "file":
-                    files.push(vscode.Uri.joinPath(uri, entry[0]));
-                    break;
-                default:
-                    //vscode.window.showErrorMessage(`Unknown file stat for ${entry[0]}`);
-                    break;
+                    switch(await isFolderOrFile(vscode.Uri.joinPath(uri, entry[0])))
+                    {
+                    case "folder":
+                        folders.push(vscode.Uri.joinPath(uri, entry[0]));
+                        break;
+                    case "file":
+                        files.push(vscode.Uri.joinPath(uri, entry[0]));
+                        break;
+                    default:
+                        //vscode.window.showErrorMessage(`Unknown file stat for ${entry[0]}`);
+                        break;
+                    }
                 }
             }
             return { folders, files };
