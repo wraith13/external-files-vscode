@@ -18,7 +18,7 @@ export namespace Recentlies
     const removeItem = (data: LiveType, document: ItemType): LiveType =>
         data.filter(i => i.toString() !== document.toString());
     const regulateData = (data: LiveType): LiveType =>
-        data.slice(0, Config.maxRecentlyFiles.get("root-workspace"));
+        data.slice(0, Config.maxRecentlyFiles.get());
     export const add = (document: ItemType): Thenable<void> =>
     {
         let current = get();
