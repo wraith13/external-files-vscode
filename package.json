@@ -3,7 +3,7 @@
     "displayName": "External Files",
     "description": "Easy access to external files for vscode.",
     "icon": "images/externalhex.128.png",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "publisher": "wraith13",
     "license": "SEE LICENSE IN LICENSE_1_0.txt",
     "engines": {
