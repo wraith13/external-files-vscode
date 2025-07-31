@@ -37,17 +37,17 @@ export namespace File
     {
         if (fileName.startsWith(".") || ! fileName.includes("."))
         {
-            return fileName;
+            return fileName.toLowerCase();
         }
         else
         {
-            return `*.${fileName.split(".").reverse()[0]}`;
+            return `*.${fileName.split(".").reverse()[0].toLowerCase()}`;
         }
     };
     export const isMatchedFilePattern = (uri: vscode.Uri, fileName: string): boolean =>
         fileName.startsWith("*") ?
-            uri.fsPath.endsWith(fileName.slice(1)):
-            uri.fsPath === fileName;
+            uri.fsPath.toLowerCase().endsWith(fileName.toLowerCase().slice(1)):
+            uri.fsPath.toLowerCase() === fileName.toLowerCase();
     export const isHiddenFile = (uri: vscode.Uri, hiddenFiles?: string[]): boolean =>
         ! Array.isArray(hiddenFiles) ||
         hiddenFiles.some(i => isMatchedFilePattern(uri, i));
