@@ -4,6 +4,12 @@ All notable changes to the External Files VS Code Extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 1.1.0 - 2025-08-??
+
+### Added
+
+- Displayed the scope setting ("Global" or "Workspace") for "Recently Used External Files" on the view.
+
 ## 1.0.2 - 2025-07-31
 
 ### Added

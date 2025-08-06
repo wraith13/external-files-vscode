@@ -115,6 +115,7 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
             {
                 iconPath: Icons.history,
                 label: locale.map("external-files-vscode.recentlyUsedExternalFiles"),
+                description: locale.map(`scope.${Config.recentlyFilesHistoryScope.getKey()}`),
                 collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
                 contextValue: Application.makeKey("recentlyUsedExternalFilesRoot"),
                 resourceUri: Recentlies.getUri(),
