@@ -400,10 +400,12 @@
                     "external-files.recentlyFilesHistoryScope": {
                         "type": "string",
                         "enum": [
+                            "none",
                             "global",
                             "workspace"
                         ],
                         "enumItemLabels": [
+                            "%scope.none%",
                             "%scope.global%",
                             "%scope.workspace%"
                         ],

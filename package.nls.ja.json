@@ -36,6 +36,7 @@
     "selectExternalFiles.placeHolder": "外部ファイルを選択してください。",
     "remove.confirm.message": "本当に削除しますか？",
     "remove.button": "削除",
+    "scope.none": "非表示",
     "scope.global": "グローバル",
     "scope.workspace": "ワークスペース",
     "error.access": "アクセスエラー"

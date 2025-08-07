@@ -36,6 +36,7 @@
     "selectExternalFiles.placeHolder": "Bir harici dosya seçin.",
     "remove.confirm.message": "Bunu kaldırmak istediğinizden emin misiniz?",
     "remove.button": "Kaldır",
+    "scope.none": "Gizle",
     "scope.global": "Küresel",
     "scope.workspace": "Çalışma Alanı",
     "error.access": "Erişim Hatası"

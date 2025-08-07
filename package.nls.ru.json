@@ -36,6 +36,7 @@
     "selectExternalFiles.placeHolder": "Пожалуйста, выберите внешний файл.",
     "remove.confirm.message": "Вы уверены, что хотите удалить?",
     "remove.button": "Удалить",
+    "scope.none": "Скрыть",
     "scope.global": "Глобальный",
     "scope.workspace": "Рабочее пространство",
     "error.access": "Ошибка доступа"

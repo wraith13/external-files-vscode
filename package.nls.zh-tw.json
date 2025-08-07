@@ -36,6 +36,7 @@
     "selectExternalFiles.placeHolder": "請選擇外部檔案。",
     "remove.confirm.message": "確定要刪除嗎？",
     "remove.button": "刪除",
+    "scope.none": "隱藏",
     "scope.global": "全域",
     "scope.workspace": "工作區",
     "error.access": "存取錯誤"

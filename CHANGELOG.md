@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Added
 
 - Displayed the scope setting ("Global" or "Workspace") for "Recently Used External Files" on the view.
+- Added the ability to hide "Recently Used External Files". ( Set `"external-files.recentlyFilesHistoryScope": "none"`)
 
 ## 1.0.2 - 2025-07-31
 

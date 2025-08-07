@@ -36,6 +36,7 @@
     "selectExternalFiles.placeHolder": "Vyberte externí soubor",
     "remove.confirm.message": "Opravdu chcete odebrat?",
     "remove.button": "Odebrat",
+    "scope.none": "Skrýt",
     "scope.global": "Globální",
     "scope.workspace": "Pracovní prostor",
     "error.access": "Chyba přístupu"

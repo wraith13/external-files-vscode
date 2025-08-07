@@ -36,6 +36,7 @@
     "selectExternalFiles.placeHolder": "Bitte wählen Sie eine externe Datei aus.",
     "remove.confirm.message": "Möchten Sie dies wirklich entfernen?",
     "remove.button": "Entfernen",
+    "scope.none": "Ausblenden",
     "scope.global": "Global",
     "scope.workspace": "Arbeitsbereich",
     "error.access": "Zugriffsfehler"

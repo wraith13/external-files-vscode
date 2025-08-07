@@ -36,6 +36,7 @@
     "selectExternalFiles.placeHolder": "Válasszon ki egy külső fájlt.",
     "remove.confirm.message": "Biztosan el akarja távolítani?",
     "remove.button": "Eltávolítás",
+    "scope.none": "Elrejtés",
     "scope.global": "Globális",
     "scope.workspace": "Munkaterület",
     "error.access": "Hozzáférési hiba"

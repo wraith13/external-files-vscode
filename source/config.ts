@@ -7,8 +7,21 @@ export namespace Config
     export const maxRecentlyFiles = root.makeEntry<number>("external-files.maxRecentlyFiles", "root-workspace");
     const recentlyFilesHistoryScopeObject = Object.freeze
     ({
-        "global": () => Application.context.globalState,
-        "workspace": () => Application.context.workspaceState,
+        "none":
+        {
+            isShow: false,
+            getState: () => Application.context.globalState,
+        },
+        "global":
+        {
+            isShow: true,
+            getState: () => Application.context.globalState,
+        },
+        "workspace":
+        {
+            isShow: true,
+            getState: () => Application.context.workspaceState,
+        },
     });
     export const recentlyFilesHistoryScope = root.makeMapEntry("external-files.recentlyFilesHistoryScope", "root-workspace", recentlyFilesHistoryScopeObject);
     export const hiddenFiles = root.makeEntry<string[]>("external-files.hiddenFiles", "root-workspace");

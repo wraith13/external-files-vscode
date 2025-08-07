@@ -123,7 +123,9 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
             return [
                 ...Object.values(this.globalBookmark),
                 ...Object.values(this.workspaceBookmark),
-                this.recentlyUsedExternalFilesRoot
+                ...Config.recentlyFilesHistoryScope.get().isShow ?
+                    [ this.recentlyUsedExternalFilesRoot, ]:
+                    [],
             ];
         case Application.makeKey("globalBookmark"):
             if ("string" === typeof parent.label && this.globalBookmark[parent.label])
