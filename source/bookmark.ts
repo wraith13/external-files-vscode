@@ -89,34 +89,7 @@ export namespace Bookmark
         return regulated;
     };
     export const getEntries = async (bookmark: LiveType, key: string): Promise<{ folders: vscode.Uri[]; files: vscode.Uri[]; unknowns: vscode.Uri[]; }> =>
-    {
-        const entries = bookmark[key] ?? [];
-        const folders: vscode.Uri[] = [];
-        const files: vscode.Uri[] = [];
-        const unknowns: vscode.Uri[] = [];
-        await Promise.all
-        (
-            entries.map
-            (
-                async entry =>
-                {
-                    switch(await File.isFolderOrFile(entry))
-                    {
-                    case "folder":
-                        folders.push(entry);
-                        break;
-                    case "file":
-                        files.push(entry);
-                        break;
-                    default:
-                        unknowns.push(entry);
-                        break;
-                    }
-                }
-            )
-        );
-        return { folders, files, unknowns };
-    };
+        await File.classifyUris(bookmark[key] ?? []);
     export const onDidChangeUri = (bookmark: LiveType, oldUri: vscode.Uri, newUri: vscode.Uri | "removed"): boolean =>
     {
         let result = false;
@@ -135,6 +108,7 @@ export namespace Bookmark
                     {
                         current[index] = newUri;
                     }
+                    current.sort(entrySorter);
                     result = true;
                 }
             }
@@ -201,7 +175,7 @@ export namespace Bookmark
                 this.set(bookmark);
             }
             return result;
-        }
+        };
     }
     export namespace GlobalBookmark
     {

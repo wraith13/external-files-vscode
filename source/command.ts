@@ -5,6 +5,7 @@ import { undefinedable } from "./undefinedable";
 import { String } from "./string";
 import { locale } from "./locale";
 import { File } from "./file";
+import { Favorites } from './favorites';
 import { Bookmark } from "./bookmark";
 import { Recentlies } from "./recentlies";
 import { errorDecorationProvider } from "./file-decoration-provider";
@@ -13,6 +14,7 @@ export namespace Commands
 {
     export const onDidChangeUri = (oldUri: vscode.Uri, newUri: vscode.Uri | "removed"): boolean =>
         [
+            Favorites.onDidChangeUri(oldUri, newUri),
             Bookmark.global.onDidChangeUri(oldUri, newUri),
             Bookmark.workspace.onDidChangeUri(oldUri, newUri),
             Recentlies.onDidChangeUri(oldUri, newUri),
@@ -165,31 +167,45 @@ export namespace Commands
         if (files)
         {
             const bookmarkUri = node.resourceUri;
-            const globalBookmarkKey = Bookmark.global.getKeyFromUri(bookmarkUri);
-            if (globalBookmarkKey)
+            if (bookmarkUri instanceof vscode.Uri)
             {
-                await Promise.all
-                (
-                    files.map
+                if (bookmarkUri.toString() === Favorites.getUri().toString())
+                {
+                    await Promise.all
                     (
-                        async (resourceUri: vscode.Uri) =>
-                            await Bookmark.global.addEntry(globalBookmarkKey, resourceUri)
-                    )
-                );
-            }
-            const workspaceBookmarkKey = Bookmark.workspace.getKeyFromUri(bookmarkUri);
-            if (workspaceBookmarkKey)
-            {
-                await Promise.all
-                (
-                    files.map
+                        files.map
+                        (
+                            async (resourceUri: vscode.Uri) =>
+                                await Favorites.add(resourceUri)
+                        )
+                    );
+                }
+                const globalBookmarkKey = Bookmark.global.getKeyFromUri(bookmarkUri);
+                if (globalBookmarkKey)
+                {
+                    await Promise.all
                     (
-                        async (resourceUri: vscode.Uri) =>
-                                await Bookmark.workspace.addEntry(workspaceBookmarkKey, resourceUri)
-                    )
-                );
+                        files.map
+                        (
+                            async (resourceUri: vscode.Uri) =>
+                                await Bookmark.global.addEntry(globalBookmarkKey, resourceUri)
+                        )
+                    );
+                }
+                const workspaceBookmarkKey = Bookmark.workspace.getKeyFromUri(bookmarkUri);
+                if (workspaceBookmarkKey)
+                {
+                    await Promise.all
+                    (
+                        files.map
+                        (
+                            async (resourceUri: vscode.Uri) =>
+                                    await Bookmark.workspace.addEntry(workspaceBookmarkKey, resourceUri)
+                        )
+                    );
+                }
+                treeDataProvider.update(node);
             }
-            treeDataProvider.update(node);
         }
     };
     export const addExternalFiles = async (node: any): Promise<void> =>
@@ -203,6 +219,13 @@ export namespace Commands
         const selectedBookmark = await vscode.window.showQuickPick
         (
             [
+                ...Config.favoritesScope.get().isShow ?
+                [{
+                    label: `$(star-full) ${locale.map("external-files-vscode.favorites" as any)}`,
+                    description: locale.map(`scope.${Config.favoritesScope.getKey()}` as any),
+                    value: "favorites",
+                    scope: "favorites"
+                }] : [],
                 ...globalBookmarkKeys.map
                 (
                     i =>
@@ -244,6 +267,10 @@ export namespace Commands
         {
             switch(selectedBookmark.scope)
             {
+            case "favorites":
+                await Favorites.add(resourceUri);
+                treeDataProvider.updateFavorites();
+                break;
             case "global":
                 await Bookmark.global.addEntry(selectedBookmark.value, resourceUri);
                 treeDataProvider.updateGlobalBookmark(selectedBookmark.value);
@@ -385,6 +412,10 @@ export namespace Commands
             const resourceUri = node.resourceUri;
             if (resourceUri instanceof vscode.Uri)
             {
+                if (bookmarkUri.toString() === Favorites.getUri().toString())
+                {
+                    await Favorites.remove(resourceUri);
+                }
                 const globalBookmarkKey = Bookmark.global.getKeyFromUri(bookmarkUri);
                 if (globalBookmarkKey)
                 {

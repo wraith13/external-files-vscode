@@ -4,8 +4,7 @@ import packageJson from "../package.json";
 export namespace Config
 {
     const root = vscel.config.makeRoot(packageJson);
-    export const maxRecentlyFiles = root.makeEntry<number>("external-files.maxRecentlyFiles", "root-workspace");
-    const recentlyFilesHistoryScopeObject = Object.freeze
+    const scopeObject = Object.freeze
     ({
         "none":
         {
@@ -23,6 +22,8 @@ export namespace Config
             getState: () => Application.context.workspaceState,
         },
     });
-    export const recentlyFilesHistoryScope = root.makeMapEntry("external-files.recentlyFilesHistoryScope", "root-workspace", recentlyFilesHistoryScopeObject);
+    export const favoritesScope = root.makeMapEntry("external-files.favoritesScope", "root-workspace", scopeObject);
+    export const recentlyFilesHistoryScope = root.makeMapEntry("external-files.recentlyFilesHistoryScope", "root-workspace", scopeObject);
+    export const maxRecentlyFiles = root.makeEntry<number>("external-files.maxRecentlyFiles", "root-workspace");
     export const hiddenFiles = root.makeEntry<string[]>("external-files.hiddenFiles", "root-workspace");
 }

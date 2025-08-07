@@ -1,24 +1,32 @@
 import * as vscode from "vscode";
+import * as vscel from '@wraith13/vscel';
 import { Application } from './application';
+import { File } from "./file";
 import { Config } from './config';
-export namespace Recentlies
+export namespace Favorites
 {
-    const stateKey = Application.makeKey("recentlyUsedExternalFiles");
-    export const uriPrefix = `${Application.publisher}.${Application.key}://recently-used-external-files/`;
+    const stateKey = Application.makeKey("favorites");
+    export const uriPrefix = `${Application.publisher}.${Application.key}://favorites/`;
     export type JsonType = string[];
     export type LiveType = vscode.Uri[];
     export type ItemType = vscode.Uri;
     export const clear = (): Thenable<void> =>
-        Config.recentlyFilesHistoryScope.get().getState().update(stateKey, []);
+        Config.favoritesScope.get().getState().update(stateKey, []);
     export const get = (): LiveType =>
-        Config.recentlyFilesHistoryScope.get().getState().get<JsonType>(stateKey, [])
+        Config.favoritesScope.get().getState().get<JsonType>(stateKey, [])
         .map(i => vscode.Uri.parse(i));
-    export const set = (documents: LiveType): Thenable<void> =>
-        Config.recentlyFilesHistoryScope.get().getState().update(stateKey, documents.map(i => i.toString()));
+    export const set = (data: LiveType): Thenable<void> =>
+        Config.favoritesScope.get().getState().update(stateKey, data.map(i => i.toString()));
     const removeItem = (data: LiveType, document: ItemType): LiveType =>
         data.filter(i => i.toString() !== document.toString());
+    export const sorter = vscel.comparer.make<vscode.Uri>
+    ([
+        i => File.stripFileName(i.fsPath),
+        i => File.stripFileName(i.path),
+        i => i.toString(),
+    ]);
     const regulateData = (data: LiveType): LiveType =>
-        data.slice(0, Config.maxRecentlyFiles.get());
+        data.sort(sorter);
     export const add = (document: ItemType): Thenable<void> =>
     {
         let current = get();
@@ -33,6 +41,8 @@ export namespace Recentlies
         set(regulateData(get()));
     export const getUri = (): vscode.Uri =>
         vscode.Uri.parse(uriPrefix);
+    export const getEntries = async (data: LiveType): Promise<{ folders: vscode.Uri[]; files: vscode.Uri[]; unknowns: vscode.Uri[]; }> =>
+        await File.classifyUris(data);
     export const onDidChangeUri = (oldUri: vscode.Uri, newUri: vscode.Uri | "removed"): boolean =>
     {
         const current = get();
@@ -47,7 +57,7 @@ export namespace Recentlies
             {
                 current[index] = newUri;
             }
-            set(current);
+            set(regulateData(current));
             return true;
         }
         return false;

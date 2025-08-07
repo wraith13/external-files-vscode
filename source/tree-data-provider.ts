@@ -5,6 +5,7 @@ import { String } from "./string";
 import { locale } from "./locale";
 import { Icons } from "./icon"
 import { File } from "./file";
+import { Favorites } from "./favorites";
 import { Bookmark } from "./bookmark";
 import { Recentlies } from "./recentlies";
 import { errorDecorationProvider } from "./file-decoration-provider";
@@ -16,6 +17,7 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
 {
     private onDidChangeTreeDataEventEmitter = new vscode.EventEmitter<vscode.TreeItem | undefined>();
     readonly onDidChangeTreeData = this.onDidChangeTreeDataEventEmitter.event;
+    public favoritesRoot: vscode.TreeItem;
     public globalBookmark: { [key: string]: vscode.TreeItem; };
     public workspaceBookmark: { [key: string]: vscode.TreeItem; };
     public recentlyUsedExternalFilesRoot: vscode.TreeItem;
@@ -77,6 +79,15 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
         switch(parent?.contextValue)
         {
         case undefined:
+            this.favoritesRoot =
+            {
+                iconPath: Icons.star,
+                label: locale.map("external-files-vscode.favorites" as any),
+                description: locale.map(`scope.${Config.favoritesScope.getKey()}`),
+                collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
+                contextValue: Application.makeKey("favoritesRoot"),
+                resourceUri: Recentlies.getUri(),
+            };
             this.globalBookmark = Object.entries(Bookmark.global.get()).reduce
             (
                 (acc, [key, _value]) =>
@@ -121,12 +132,53 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
                 resourceUri: Recentlies.getUri(),
             };
             return [
+                ...Config.favoritesScope.get().isShow ?
+                    [ this.favoritesRoot, ]: [],
                 ...Object.values(this.globalBookmark),
                 ...Object.values(this.workspaceBookmark),
                 ...Config.recentlyFilesHistoryScope.get().isShow ?
-                    [ this.recentlyUsedExternalFilesRoot, ]:
-                    [],
+                    [ this.recentlyUsedExternalFilesRoot, ]: [],
             ];
+        case Application.makeKey("favoritesRoot"):
+            const entries = await Favorites.getEntries(Favorites.get());
+            errorDecorationProvider.removeErrorUris([ ...entries.folders, ...entries.files, ]);
+            errorDecorationProvider.addErrorUris(entries.unknowns);
+            return this.orEmptyMessage
+            (
+                [
+                    ...entries.folders.map
+                    (
+                        i => this.uriToFolderTreeItem
+                        (
+                            i,
+                            Application.makeKey("rootExternalFolder"),
+                            File.stripFileName(i.fsPath),
+                            parent
+                        )
+                    ),
+                    ...entries.files.map
+                    (
+                        i => this.uriToFileTreeItem
+                        (
+                            i,
+                            Application.makeKey("rootExternalFile"),
+                            File.stripFileName(i.fsPath),
+                            parent
+                        )
+                    ),
+                    ...entries.unknowns.map
+                    (
+                        i => this.uriToUnknownTreeItem
+                        (
+                            i,
+                            Application.makeKey("rootExternalUnknown"),
+                            File.stripFileName(i.fsPath),
+                            parent
+                        )
+                    )
+                ],
+                parent
+            );
         case Application.makeKey("globalBookmark"):
             if ("string" === typeof parent.label && this.globalBookmark[parent.label])
             {
@@ -304,6 +356,8 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
         this.updateMatchBookmarkByUri(this.globalBookmark, Bookmark.global.get(), uri);
         this.updateMatchBookmarkByUri(this.workspaceBookmark, Bookmark.workspace.get(), uri);
     };
+    updateFavorites = async (): Promise<void> =>
+        this.update(this.favoritesRoot);
     updateGlobalBookmark = async (key: string): Promise<void> =>
         this.update(this.globalBookmark[key]);
     updateWorkspaceBookmark = async (key: string): Promise<void> =>

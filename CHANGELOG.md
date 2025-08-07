@@ -10,6 +10,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Displayed the scope setting ("Global" or "Workspace") for "Recently Used External Files" on the view.
 - Added the ability to hide "Recently Used External Files". ( Set `"external-files.recentlyFilesHistoryScope": "none"`)
+- Favorite bookmark
+- `external-files.favoritesScope` setting item.
 
 ## 1.0.2 - 2025-07-31
 

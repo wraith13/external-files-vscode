@@ -62,12 +62,12 @@
             "view/item/context": [
                 {
                     "command": "external-files.addExternalFiles",
-                    "when": "viewItem == wraith13.external-files.globalBookmark || viewItem == wraith13.external-files.workspaceBookmark",
+                    "when": "viewItem == wraith13.external-files.favoritesRoot || viewItem == wraith13.external-files.globalBookmark || viewItem == wraith13.external-files.workspaceBookmark",
                     "group": "A@1"
                 },
                 {
                     "command": "external-files.addExternalFolders",
-                    "when": "viewItem == wraith13.external-files.globalBookmark || viewItem == wraith13.external-files.workspaceBookmark",
+                    "when": "viewItem == wraith13.external-files.favoritesRoot || viewItem == wraith13.external-files.globalBookmark || viewItem == wraith13.external-files.workspaceBookmark",
                     "group": "A@2"
                 },
                 {
@@ -389,12 +389,20 @@
             {
                 "title": "%external-files-vscode.title%",
                 "properties": {
-                    "external-files.maxRecentlyFiles": {
-                        "type": "number",
-                        "default": 30,
-                        "minimum": 0,
-                        "maximum": 100,
-                        "description": "%external-files.maxRecentlyFiles.description%",
+                    "external-files.favoritesScope": {
+                        "type": "string",
+                        "enum": [
+                            "none",
+                            "global",
+                            "workspace"
+                        ],
+                        "enumItemLabels": [
+                            "%scope.none%",
+                            "%scope.global%",
+                            "%scope.workspace%"
+                        ],
+                        "default": "workspace",
+                        "description": "%external-files.favoritesScope.description%",
                         "scope": "window"
                     },
                     "external-files.recentlyFilesHistoryScope": {
@@ -411,6 +419,14 @@
                         ],
                         "default": "workspace",
                         "description": "%external-files.recentlyFilesHistoryScope.description%",
+                        "scope": "window"
+                    },
+                    "external-files.maxRecentlyFiles": {
+                        "type": "number",
+                        "default": 30,
+                        "minimum": 0,
+                        "maximum": 100,
+                        "description": "%external-files.maxRecentlyFiles.description%",
                         "scope": "window"
                     },
                     "external-files.hiddenFiles": {

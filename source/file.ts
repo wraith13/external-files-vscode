@@ -29,6 +29,34 @@ export namespace File
             return undefined;
         }
     };
+    export const classifyUris = async (uris: vscode.Uri[]): Promise<{ folders: vscode.Uri[]; files: vscode.Uri[]; unknowns: vscode.Uri[]; }> =>
+    {
+        const folders: vscode.Uri[] = [];
+        const files: vscode.Uri[] = [];
+        const unknowns: vscode.Uri[] = [];
+        await Promise.all
+        (
+            uris.map
+            (
+                async uri =>
+                {
+                    switch(await isFolderOrFile(uri))
+                    {
+                    case "folder":
+                        folders.push(uri);
+                        break;
+                    case "file":
+                        files.push(uri);
+                        break;
+                    default:
+                        unknowns.push(uri);
+                        break;
+                    }
+                }
+            )
+        );
+        return { folders, files, unknowns };
+    };
     export const isFile = async (uri: vscode.Uri): Promise<boolean> =>
         "file" === await isFolderOrFile(uri);
     export const isFolder = async (uri: vscode.Uri): Promise<boolean> =>
