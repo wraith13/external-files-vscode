@@ -221,8 +221,8 @@ export namespace Commands
             [
                 ...Config.favoritesScope.get().isShow ?
                 [{
-                    label: `$(star-full) ${locale.map("external-files-vscode.favorites" as any)}`,
-                    description: locale.map(`scope.${Config.favoritesScope.getKey()}` as any),
+                    label: `$(star-full) ${locale.map("external-files-vscode.favorites")}`,
+                    description: locale.map(`scope.${Config.favoritesScope.getKey()}`),
                     value: "favorites",
                     scope: "favorites"
                 }] : [],

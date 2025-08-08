@@ -1,6 +1,7 @@
 {
     "external-files-vscode.title": "Внешние файлы",
     "external-files-vscode.externalFolders": "Внешние папки",
+    "external-files-vscode.favorites": "Избранное",
     "external-files-vscode.recentlyUsedExternalFiles": "Недавно использованные внешние файлы",
     "external-files-vscode.newBookmark.title": "Добавить новую закладку...",
     "external-files-vscode.reloadAll.title": "Перезагрузить все",
@@ -28,8 +29,9 @@
     "external-files-vscode.addNewWorkspaceBookmark.title": "Добавить новую рабочую закладку",
     "selectBookmark.title": "Выбрать закладку",
     "newBookmark.placeHolder": "Новая закладка",
-    "external-files.maxRecentlyFiles.description": "Максимальное количество недавно использованных внешних файлов для хранения",
+    "external-files.favoritesScope.description": "Область избранных закладок",
     "external-files.recentlyFilesHistoryScope.description": "Область истории недавно использованных внешних файлов",
+    "external-files.maxRecentlyFiles.description": "Максимальное количество недавно использованных внешних файлов для хранения",
     "external-files.hiddenFiles.description": "Типы внешних файлов для скрытия",
     "noExternalFolders.message": "Нет внешних папок",
     "noExternalFiles.message": "Нет внешних файлов",

@@ -1,6 +1,7 @@
 {
     "external-files-vscode.title": "Arquivos Externos",
     "external-files-vscode.externalFolders": "Pastas Externas",
+    "external-files-vscode.favorites": "Favoritos",
     "external-files-vscode.recentlyUsedExternalFiles": "Arquivos Externos Recentemente Usados",
     "external-files-vscode.newBookmark.title": "Adicionar Novo Favorito...",
     "external-files-vscode.reloadAll.title": "Recarregar Tudo",
@@ -28,8 +29,9 @@
     "external-files-vscode.addNewWorkspaceBookmark.title": "Adicionar Novo Favorito do Workspace",
     "selectBookmark.title": "Selecionar Favorito",
     "newBookmark.placeHolder": "Novo Favorito",
-    "external-files.maxRecentlyFiles.description": "Número máximo de arquivos externos recentes a manter",
+    "external-files.favoritesScope.description": "Escopo dos favoritos",
     "external-files.recentlyFilesHistoryScope.description": "Escopo do histórico de arquivos externos recentes",
+    "external-files.maxRecentlyFiles.description": "Número máximo de arquivos externos recentes a manter",
     "external-files.hiddenFiles.description": "Tipos de arquivos externos a ocultar",
     "noExternalFolders.message": "Nenhuma pasta externa",
     "noExternalFiles.message": "Nenhum arquivo externo",

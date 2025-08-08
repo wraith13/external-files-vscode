@@ -1,6 +1,7 @@
 {
     "external-files-vscode.title": "Harici Dosyalar",
     "external-files-vscode.externalFolders": "Harici Klasörler",
+    "external-files-vscode.favorites": "Favoriler",
     "external-files-vscode.recentlyUsedExternalFiles": "Son Kullanılan Harici Dosyalar",
     "external-files-vscode.newBookmark.title": "Yeni Yer İmi Ekle...",
     "external-files-vscode.reloadAll.title": "Tümünü Yeniden Yükle",
@@ -28,8 +29,9 @@
     "external-files-vscode.addNewWorkspaceBookmark.title": "Yeni Çalışma Alanı Yer İmi Ekle",
     "selectBookmark.title": "Yer İmi Seç",
     "newBookmark.placeHolder": "Yeni Yer İmi",
-    "external-files.maxRecentlyFiles.description": "Tutulacak en fazla son kullanılan harici dosya sayısı",
+    "external-files.favoritesScope.description": "Favori yer imlerinin kapsamı",
     "external-files.recentlyFilesHistoryScope.description": "Son kullanılan harici dosyaların geçmiş kapsamı",
+    "external-files.maxRecentlyFiles.description": "Tutulacak en fazla son kullanılan harici dosya sayısı",
     "external-files.hiddenFiles.description": "Gizlenecek harici dosya türleri",
     "noExternalFolders.message": "Harici klasör yok",
     "noExternalFiles.message": "Harici dosya yok",

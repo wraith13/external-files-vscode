@@ -82,11 +82,11 @@ class ExternalFilesProvider implements vscode.TreeDataProvider<ExtendedTreeItem>
             this.favoritesRoot =
             {
                 iconPath: Icons.star,
-                label: locale.map("external-files-vscode.favorites" as any),
+                label: locale.map("external-files-vscode.favorites"),
                 description: locale.map(`scope.${Config.favoritesScope.getKey()}`),
                 collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
                 contextValue: Application.makeKey("favoritesRoot"),
-                resourceUri: Recentlies.getUri(),
+                resourceUri: Favorites.getUri(),
             };
             this.globalBookmark = Object.entries(Bookmark.global.get()).reduce
             (

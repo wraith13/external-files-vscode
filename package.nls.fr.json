@@ -1,6 +1,7 @@
 {
     "external-files-vscode.title": "Fichiers externes",
     "external-files-vscode.externalFolders": "Dossiers externes",
+    "external-files-vscode.favorites": "Favoris",
     "external-files-vscode.recentlyUsedExternalFiles": "Fichiers externes récemment utilisés",
     "external-files-vscode.newBookmark.title": "Ajouter un nouveau signet...",
     "external-files-vscode.reloadAll.title": "Tout recharger",
@@ -28,8 +29,9 @@
     "external-files-vscode.addNewWorkspaceBookmark.title": "Ajouter un nouveau signet d'espace de travail",
     "selectBookmark.title": "Sélectionner un signet",
     "newBookmark.placeHolder": "Nouveau signet",
-    "external-files.maxRecentlyFiles.description": "Nombre maximal de fichiers externes récemment utilisés à conserver",
+    "external-files.favoritesScope.description": "Portée des signets favoris",
     "external-files.recentlyFilesHistoryScope.description": "Portée de l'historique des fichiers externes récemment utilisés",
+    "external-files.maxRecentlyFiles.description": "Nombre maximal de fichiers externes récemment utilisés à conserver",
     "external-files.hiddenFiles.description": "Types de fichiers externes à masquer",
     "noExternalFolders.message": "Aucun dossier externe",
     "noExternalFiles.message": "Aucun fichier externe",

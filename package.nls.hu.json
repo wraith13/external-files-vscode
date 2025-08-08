@@ -1,6 +1,7 @@
 {
     "external-files-vscode.title": "Külső fájlok",
     "external-files-vscode.externalFolders": "Külső mappák",
+    "external-files-vscode.favorites": "Kedvencek",
     "external-files-vscode.recentlyUsedExternalFiles": "Legutóbb használt külső fájlok",
     "external-files-vscode.newBookmark.title": "Új könyvjelző hozzáadása...",
     "external-files-vscode.reloadAll.title": "Összes újratöltése",
@@ -28,8 +29,9 @@
     "external-files-vscode.addNewWorkspaceBookmark.title": "Új munkaterületi könyvjelző hozzáadása",
     "selectBookmark.title": "Könyvjelző kiválasztása",
     "newBookmark.placeHolder": "Új könyvjelző",
-    "external-files.maxRecentlyFiles.description": "A megőrzendő legutóbb használt külső fájlok maximális száma",
+    "external-files.favoritesScope.description": "Kedvenc könyvjelzők hatóköre",
     "external-files.recentlyFilesHistoryScope.description": "A legutóbb használt külső fájlok előzményeinek hatóköre",
+    "external-files.maxRecentlyFiles.description": "A megőrzendő legutóbb használt külső fájlok maximális száma",
     "external-files.hiddenFiles.description": "Elrejtendő külső fájltípusok",
     "noExternalFolders.message": "Nincsenek külső mappák",
     "noExternalFiles.message": "Nincsenek külső fájlok",

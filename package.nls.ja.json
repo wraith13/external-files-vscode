@@ -1,6 +1,7 @@
 {
     "external-files-vscode.title": "外部ファイル",
     "external-files-vscode.externalFolders": "外部フォルダー",
+    "external-files-vscode.favorites": "お気に入り",
     "external-files-vscode.recentlyUsedExternalFiles": "最近使用した外部ファイル",
     "external-files-vscode.newBookmark.title": "新しいブックマークを追加...",
     "external-files-vscode.reloadAll.title": "全て再読み込み",
@@ -28,8 +29,9 @@
     "external-files-vscode.addNewWorkspaceBookmark.title": "新しいワークスペースブックマークを追加",
     "selectBookmark.title": "ブックマークを選択",
     "newBookmark.placeHolder": "新しいブックマーク",
-    "external-files.maxRecentlyFiles.description": "保持される最近の外部ファイルの最大数",
+    "external-files.favoritesScope.description": "お気に入りブックマークのスコープ",
     "external-files.recentlyFilesHistoryScope.description": "最近使用した外部ファイルの履歴のスコープ",
+    "external-files.maxRecentlyFiles.description": "保持される最近の外部ファイルの最大数",
     "external-files.hiddenFiles.description": "非表示にする外部ファイルの種類",
     "noExternalFolders.message": "外部ファイルがありません",
     "noExternalFiles.message": "外部ファイルがありません",

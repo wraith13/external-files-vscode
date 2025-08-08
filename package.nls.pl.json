@@ -1,6 +1,7 @@
 {
     "external-files-vscode.title": "Pliki zewnętrzne",
     "external-files-vscode.externalFolders": "Foldery zewnętrzne",
+    "external-files-vscode.favorites": "Ulubione",
     "external-files-vscode.recentlyUsedExternalFiles": "Ostatnio używane pliki zewnętrzne",
     "external-files-vscode.newBookmark.title": "Dodaj nową zakładkę...",
     "external-files-vscode.reloadAll.title": "Przeładuj wszystko",
@@ -28,8 +29,9 @@
     "external-files-vscode.addNewWorkspaceBookmark.title": "Dodaj nową zakładkę przestrzeni roboczej",
     "selectBookmark.title": "Wybierz zakładkę",
     "newBookmark.placeHolder": "Nowa zakładka",
-    "external-files.maxRecentlyFiles.description": "Maksymalna liczba ostatnio używanych plików zewnętrznych do zachowania",
+    "external-files.favoritesScope.description": "Zakres ulubionych zakładek",
     "external-files.recentlyFilesHistoryScope.description": "Zakres historii ostatnio używanych plików zewnętrznych",
+    "external-files.maxRecentlyFiles.description": "Maksymalna liczba ostatnio używanych plików zewnętrznych do zachowania",
     "external-files.hiddenFiles.description": "Typy plików zewnętrznych do ukrycia",
     "noExternalFolders.message": "Brak folderów zewnętrznych",
     "noExternalFiles.message": "Brak plików zewnętrznych",

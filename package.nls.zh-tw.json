@@ -1,6 +1,7 @@
 {
     "external-files-vscode.title": "外部檔案",
     "external-files-vscode.externalFolders": "外部資料夾",
+    "external-files-vscode.favorites": "收藏夾",
     "external-files-vscode.recentlyUsedExternalFiles": "最近使用的外部檔案",
     "external-files-vscode.newBookmark.title": "新增書籤...",
     "external-files-vscode.reloadAll.title": "全部重新載入",
@@ -28,8 +29,9 @@
     "external-files-vscode.addNewWorkspaceBookmark.title": "新增工作區書籤",
     "selectBookmark.title": "選擇書籤",
     "newBookmark.placeHolder": "新書籤",
-    "external-files.maxRecentlyFiles.description": "要保留的最近使用外部檔案的最大數量",
+    "external-files.favoritesScope.description": "收藏夾書籤的範圍",
     "external-files.recentlyFilesHistoryScope.description": "最近使用外部檔案歷史紀錄的範圍",
+    "external-files.maxRecentlyFiles.description": "要保留的最近使用外部檔案的最大數量",
     "external-files.hiddenFiles.description": "要隱藏的外部檔案類型",
     "noExternalFolders.message": "沒有外部資料夾",
     "noExternalFiles.message": "沒有外部檔案",

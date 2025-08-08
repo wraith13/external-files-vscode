@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { Application } from './application';
 import { undefinedable } from "./undefinedable";
 import { File } from "./file";
+import { Config } from './config';
+import { Favorites } from './favorites';
 import { Bookmark } from "./bookmark";
 import { Recentlies } from "./recentlies";
 import { ExtendedTreeItem, treeDataProvider } from "./tree-data-provider";
@@ -24,6 +26,24 @@ export class DragAndDropController implements vscode.TreeDragAndDropController<v
     {
         switch(target.contextValue)
         {
+        case Application.makeKey("favoritesRoot"):
+            if (Config.favoritesScope.get().isShow)
+            {
+                await Promise.all
+                (
+                    uriList.map
+                    (
+                        async (uri: vscode.Uri) =>
+                        {
+                            if (Application.isExternalFiles(uri) && undefined !== await File.isFolderOrFile(uri))
+                            {
+                                await Favorites.add(uri);
+                            }
+                        }
+                    )
+                );
+            }
+            break;
         case Application.makeKey("globalBookmark"):
             const globalBookmarkKey = undefinedable(Bookmark.global.getKeyFromUri)(target.resourceUri);
             if (globalBookmarkKey)

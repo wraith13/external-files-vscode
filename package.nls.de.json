@@ -1,6 +1,7 @@
 {
     "external-files-vscode.title": "Externe Dateien",
     "external-files-vscode.externalFolders": "Externe Ordner",
+    "external-files-vscode.favorites": "Favoriten",
     "external-files-vscode.recentlyUsedExternalFiles": "Zuletzt verwendete externe Dateien",
     "external-files-vscode.newBookmark.title": "Neues Lesezeichen hinzufügen...",
     "external-files-vscode.reloadAll.title": "Alle neu laden",
@@ -28,8 +29,9 @@
     "external-files-vscode.addNewWorkspaceBookmark.title": "Neues Arbeitsbereich-Lesezeichen hinzufügen",
     "selectBookmark.title": "Lesezeichen auswählen",
     "newBookmark.placeHolder": "Neues Lesezeichen",
-    "external-files.maxRecentlyFiles.description": "Maximale Anzahl der zuletzt verwendeten externen Dateien",
+    "external-files.favoritesScope.description": "Bereich der Favoriten-Lesezeichen",
     "external-files.recentlyFilesHistoryScope.description": "Bereich des Verlaufs der zuletzt verwendeten externen Dateien",
+    "external-files.maxRecentlyFiles.description": "Maximale Anzahl der zuletzt verwendeten externen Dateien",
     "external-files.hiddenFiles.description": "Zu versteckende Typen externer Dateien",
     "noExternalFolders.message": "Keine externen Ordner",
     "noExternalFiles.message": "Keine externen Dateien",
